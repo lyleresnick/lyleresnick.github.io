@@ -23,7 +23,7 @@ twitter_username: jekyllrb
 github_username:  lyleresnick
 
 # Build settings
-theme: jekyll-theme-cayman
+theme: jekyll-theme-midnight
 name: Lyle Resnick
 markdown: kramdown
 permalink: /blog/:year/:month/:day/:title
