@@ -56,19 +56,19 @@ Here are screen shots of what the display should look like. Here is the top:
 
 {: .phone-image}
 
-![ReportTableDemoTop]({{ site.url }}/Assets/ReportTableDemoTop.png)
+![ReportTableDemoTop]({{ site.url }}/assets/ReportTableDemoTop.png)
 
 Here is the middle :
 
 {: .phone-image}
 
-![ReportTableDemoMiddle]({{ site.url }}/Assets/ReportTableDemoMiddle.png)
+![ReportTableDemoMiddle]({{ site.url }}/assets/ReportTableDemoMiddle.png)
 
 And here is the bottom:
 
 {: .phone-image}
 
-![ReportTableDemoBottom]({{ site.url }}/Assets/ReportTableDemoBottom.png)
+![ReportTableDemoBottom]({{ site.url }}/assets/ReportTableDemoBottom.png)
 
 You can see that the output has repetitions of Transaction Type Groups and each of those has repetitions of Date groups.  You cannot map the original data set, by index, with the data to be displayed by the tableView. There are more rows in the display than in the original data streams. 
 
@@ -136,7 +136,7 @@ I have specified a cell for each type of row  that is required to be displayed. 
 
 Here is a snapshot of the cell layouts in IB: 
 
-![IBLayout]({{ site.url }}/Assets/IBLayout.png)
+![IBLayout]({{ site.url }}/assets/IBLayout.png)
 
 The purpose of each cell type is should be obvious with respect to the screen shots above. 
 
