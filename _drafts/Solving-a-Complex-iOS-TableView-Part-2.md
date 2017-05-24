@@ -125,5 +125,7 @@ class TransactionListTwoSourceTransformer {
 
 Besides encapsulating the code responsible for the transformation, `TransactionListTwoSourcesTransformer` has a few other significant changes:
 
-- the data is passed into the class at initialization. This is done so that it is easier to setup tests for the transformer.
-- the type of the group has been encapsulated by the Group class 
+- the data is passed into the class at initialization. This was done to make it easier to setup tests for the transformer.
+- the type of the group has been encapsulated by the Group class. 
+- the responsibility for conversion of input data has been moved to the `TransactionModel`class. 
+- the iterator on the array of transactions has been formalized. 
