@@ -178,7 +178,7 @@ Each method in the protocol represents a row type of the output. The protocol's 
 The transformer, called from `viewDidLoad` is a follows: 
 
 ```swift
-private func transformFromTwoStreams() {
+private func transformFromTwoSources() {
 
     appendSection(transactions: authorizedData, title: "Authorized")
     appendSection(transactions: postedData, title: "Posted")
@@ -186,7 +186,7 @@ private func transformFromTwoStreams() {
 }
 ```
 
-`appendSection` looks like this: 
+`appendSection` is implemented as follows: 
 
 ```swift
 private func appendSection(transactions: [TransactionModel]?, title: String) {
