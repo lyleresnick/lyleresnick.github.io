@@ -20,7 +20,7 @@ In part 2, I want to improve the Complex iOS TableView solution to simplify the 
 
 The main responsibility of a viewController is to configure the layout and content of its associated views  and respond  to user interaction with those views. Pretty straightforward.
 
-In reality, the view controller normally ends up being a repository of all of the code that the view controller is dependent on, including aspects such as:
+In reality, most view controllers end up being a repository of all of the code that the view controller is dependent on, including aspects such as:
 
 - data access, local or remote
 
@@ -30,7 +30,7 @@ In reality, the view controller normally ends up being a repository of all of th
 
 ## Introducing the Transformer Class
 
-In part 1, the viewController has a function named`transformFromTwoSources`. I have moved the implementation of the function to a class, `TransactionListTwoSourceTransformer`,  in its own file.
+In part 1, the viewController has a function named`transformFromTwoSources`. I have moved the implementation of this function to a class, `TransactionListTwoSourceTransformer`.
 
 The viewController now looks like this: 
 
@@ -55,12 +55,58 @@ class TransactionListViewController: UIViewController {
         transformer.transform( output: adapter )
     }
 }
-
 ```
 
 You may have noticed that the viewController just got really small! It is only responsible for its views.
 
- Lets look at the `TransactionListTwoSourcesTransformer`:
+Before we take a look at the `TransactionListTwoSourceTransformer`, lets look at the `TransactionModel` class.
+
+```swift
+struct TransactionModel {
+    
+    var group: TransactionGroup
+    var date: Date
+    var description: String
+    var amount: Double
+    
+    private static let inboundDateFormatter = DateFormatter.dateFormatter( format:"yyyy'-'MM'-'dd")
+    
+    init( group: String, date: String, description: String, amount: String, debit: String ) {
+        
+        guard let group = TransactionGroup(rawValue: group) else {
+            fatalError("Format of Group is incorrect")
+        }
+        self.group = group
+        
+        guard let date = TransactionModel.inboundDateFormatter.date( from: date )
+            else {
+                fatalError("Format of Transaction Date is incorrect")
+        }
+        self.date = date
+        
+        self.description = description
+        
+        var sign: String!
+        switch debit
+        {
+        case "D":
+            sign = ""
+        case "C":
+            sign = "-"
+        default:
+            fatalError("Format of Transaction Sign is incorrect")
+        }
+        
+        guard let amount = Double(sign + amount)
+            else {
+                fatalError("Format of Transaction Amount is incorrect")
+        }
+        self.amount = amount
+    }
+}
+```
+
+Now lets look at the `TransactionListTwoSourceTransformer` class:
 
 ```swift
 import UIKit
@@ -126,6 +172,11 @@ class TransactionListTwoSourceTransformer {
 Besides encapsulating the code responsible for the transformation, `TransactionListTwoSourcesTransformer` has a few other significant changes:
 
 - the data is passed into the class at initialization. This was done to make it easier to setup tests for the transformer.
-- the type of the group has been encapsulated by the Group class. 
+
+- the group types have been encapsulated by the Group class. 
+
 - the responsibility for conversion of input data has been moved to the `TransactionModel`class. 
-- the iterator on the array of transactions has been formalized. 
+
+- the iterator on the array of transactions has been formalized, by using an `IndexingIterator`.
+
+  ​
