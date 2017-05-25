@@ -59,7 +59,33 @@ class TransactionListViewController: UIViewController {
 
 You may have noticed that the viewController just got really small! It is only responsible for its views.
 
-Before we take a look at the `TransactionListTwoSourceTransformer`, lets look at the `TransactionModel` class.
+Before we take a look at the `TransactionListTwoSourceTransformer`, lets look at the `TransactionModel` and TransactionGroup classes.
+
+## The Models
+
+First the `TransactionGroup`: 
+
+```swift
+enum TransactionGroup: String {
+    case Authorized = "A"
+    case Posted = "P"
+    case All = "0"
+
+    func toString() -> String {
+        switch self {
+        case .Authorized:
+            return "Authorized"
+        case .Posted:
+            return "Posted"
+        case .All:
+            return "All"
+        }
+    }
+}
+```
+
+Next, the `TransactionListTwoSourceTransformer`: 
+
 
 ```swift
 struct TransactionModel {
