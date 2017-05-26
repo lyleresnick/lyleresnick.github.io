@@ -63,28 +63,38 @@ Before we take a look at the `TransactionListTwoSourceTransformer`, lets look at
 
 ## The Models
 
-First the `TransactionGroup`: 
+The `TransactionGroup` enum demonstrates an idiom for representing with data whose values are part of a set. You can use `TransactionGroup(rawValue:)` to convert an external value to an internal one, so it is really convenient to convert the values and use them directly as enums. This is a great paradigm for converting externally stored state values to internal ones. The initializer is failable, so invalid data can be dealt with at conversion.
 
 ```swift
 enum TransactionGroup: String {
-    case Authorized = "A"
-    case Posted = "P"
-    case All = "0"
+    case authorized = "A"
+    case posted = "P"
+    case all = "0"
 
     func toString() -> String {
         switch self {
-        case .Authorized:
+        case .authorized:
             return "Authorized"
-        case .Posted:
+        case .posted:
             return "Posted"
-        case .All:
+        case .all:
             return "All"
         }
     }
 }
 ```
 
-Next, the `TransactionListTwoSourceTransformer`: 
+The `TransactionModel` class has been changed to represent the data in the form to be used in calculations.  The class is given the responsibility to perform any necessary conversions which are required to convert the raw form to the new internal form. Previously, this was the responsibility of the transformation function. 
+
+You can see that the transaction model converts:
+
+- a group string into a group value
+- a date string into a date value
+- a debit indicator and an amount string into double value
+
+Here a conversion error results in fatal error, but alternatively, you might make the init fail or get more specific by throwing an error.
+
+Another `init` for this class could take json and pass the parsed elements to this `init`. 
 
 
 ```swift
