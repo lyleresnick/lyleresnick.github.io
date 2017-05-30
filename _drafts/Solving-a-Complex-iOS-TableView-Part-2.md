@@ -215,7 +215,7 @@ Besides encapsulating the code responsible for the transformation, `TransactionL
 
 - the data is passed into the class at initialization. This was done to make it easier to setup tests for the transformer .
 - the group types have been encapsulated by the Group class. 
-- the responsibility for conversion of input data has been moved to the `TransactionModel`class. 
+- the responsibility for conversion of input data has been moved to the `TransactionModel` class. 
 - the responsibility for conversion of output data has been moved to the implementor of the `TransactionListTransformerOutput` class. 
 - the iterator on the array of transactions has been formalized, by using an `IndexingIterator`.
 
