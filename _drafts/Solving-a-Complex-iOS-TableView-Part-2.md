@@ -148,8 +148,6 @@ Now lets look at the `TransactionListTwoSourceTransformer` class:
 
 ## The Transformer
 
-
-
 ```swift
 import UIKit
 
@@ -211,14 +209,22 @@ class TransactionListTwoSourceTransformer {
 }
 ```
 
+Previously, the data transformation was implemented as a viewController method. It has now been implemented as a *method object*. 
+
 Besides encapsulating the code responsible for the transformation, `TransactionListTwoSourcesTransformer` has a few other significant changes:
 
-- the data is passed into the class at initialization. This was done to make it easier to setup tests for the transformer.
-
+- the data is passed into the class at initialization. This was done to make it easier to setup tests for the transformer .
 - the group types have been encapsulated by the Group class. 
-
 - the responsibility for conversion of input data has been moved to the `TransactionModel`class. 
-
+- the responsibility for conversion of output data has been moved to the implementor of the `TransactionListTransformerOutput` class. 
 - the iterator on the array of transactions has been formalized, by using an `IndexingIterator`.
 
-  ​
+
+These changes leave the `TransactionListTwoSourceTransformer` with one responsibility: convert the primitive data input to the primitive output that is necessary to fulfill the requirement of the transformation
+
+. 
+
+
+
+
+
