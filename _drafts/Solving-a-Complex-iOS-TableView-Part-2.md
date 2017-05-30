@@ -65,13 +65,13 @@ Before we take a look at the `TransactionListTwoSourceTransformer`, lets look at
 
 The `TransactionGroup` enum demonstrates an idiom for representing data whose values are part of a set. An `enum` can be based on an integer or string type. Every enum based on a raw type automatically generates an `init?(rawValue:)` initializer to convert a raw value to an internal value. 
 
-Using the enum rawValue initializer is great a way to check the validity of externally stored data that actually represents an enumerated type such as a set of state names, a set of configuration values, or as in in our case, and encoding for a sign. The initializer is fail-able, so invalid data can be dealt with at conversion, instead of at a later stage of processing. In particular, the swift compiler will check that  `switch` statements that switch on enumerated types are exhaustive, so if a new external type is added in the future, the code will not compile if the new case is not added to the `switch`.  
+Using the enum rawValue initializer is great a way to check the validity of externally stored data which actually represents an enumerated type such as a set of state names, a set of configuration values, or as in in our case, and encoding for a sign. The initializer is fail-able, so invalid data can be dealt with at conversion, instead of at a later stage of processing. In particular, the swift compiler will check that  `switch` statements that switch on enumerated types are exhaustive, so if a new external type is added in the future, the code will not compile if the new case is not added to the `switch`.  
 
 ```swift
 enum TransactionGroup: String {
+    
     case authorized = "A"
     case posted = "P"
-    case all = "0"
 
     func toString() -> String {
         switch self {
@@ -79,24 +79,24 @@ enum TransactionGroup: String {
             return "Authorized"
         case .posted:
             return "Posted"
-        case .all:
-            return "All"
         }
     }
 }
 ```
 
-In the original `TransactionModel` , the data was stored as strings. Strings have to be converted to do calculations. The data representation has been changed to primitive types, so that it does not have to be converted in the transformer, before it is used in calculations.  The `TransactionModel` class now has the responsibility to perform any necessary conversions which are required to convert the raw form to the new internal form. Previously, this was the responsibility of the transformation function. 
+In the original `TransactionModel` , each data value was stored as a string. Unless a value is supposed to be a string, you have to be convert a string to its primitive type to do a calculation. 
 
-You can see that the transaction model converts:
+In the new `TransactionModel`, the data is stored as its primitive type. The Data is not converted in the transformer, before it is used in calculations.  The `TransactionModel` class now has the responsibility to perform any necessary conversions which are required to convert the external representation to the new internal representation. Previously, this was the responsibility of the transformation function. 
+
+You can see that the `TransactionModel.init` converts:
 
 - a group string into a group value
 - a date string into a date value
 - a debit indicator and an amount string into double value
 
-Here a conversion error results in fatal error, but alternatively, you might make the init fail or get more specific by throwing an error.
+Here a conversion error results in fatal error, but alternatively, you might make the init fail-able or you get more specific by throwing an error.
 
-Another `init` for this class could take json and pass the parsed elements to this `init`. 
+It is easy to see that another `convenience init` for this class could take json as an argument and pass the parsed elements to this `init`. 
 
 
 ```swift
@@ -145,6 +145,10 @@ struct TransactionModel {
 ```
 
 Now lets look at the `TransactionListTwoSourceTransformer` class:
+
+## The Transformer
+
+
 
 ```swift
 import UIKit
