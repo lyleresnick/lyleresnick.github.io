@@ -144,9 +144,19 @@ struct TransactionModel {
 }
 ```
 
-Now lets look at the `TransactionListTwoSourceTransformer` class:
-
 ## The Transformer
+
+Previously, the data transformation was implemented as a viewController method. It has now been implemented as a *method object*. 
+
+Besides encapsulating the code responsible for the transformation, `TransactionListTwoSourcesTransformer` has a few other significant changes:
+
+- the data is passed into the class at initialization. This was done to make it easier to setup tests for the transformer .
+- the group types have been encapsulated by the Group class. 
+- the responsibility for conversion of input data has been moved to the `TransactionModel` class. 
+- the responsibility for conversion of output data has been moved to the `TransactionListAdapter`. 
+- the iterator on the array of transactions has been replaced with an `IndexingIterator`.​
+
+These changes leave the `TransactionListTwoSourceTransformer` with one responsibility: convert the primitive data input to primitive output by recognizing the date groupings and exceptions, as well as calculating a total and grand total. This is pretty simple. Actually, not quite: in a future post I let you in on how the code structure was designed!
 
 ```swift
 import UIKit
@@ -209,18 +219,99 @@ class TransactionListTwoSourceTransformer {
 }
 ```
 
-Previously, the data transformation was implemented as a viewController method. It has now been implemented as a *method object*. 
-
-Besides encapsulating the code responsible for the transformation, `TransactionListTwoSourcesTransformer` has a few other significant changes:
-
-- the data is passed into the class at initialization. This was done to make it easier to setup tests for the transformer .
-- the group types have been encapsulated by the Group class. 
-- the responsibility for conversion of input data has been moved to the `TransactionModel` class. 
-- the responsibility for conversion of output data has been moved to the implementor of the `TransactionListTransformerOutput` class. 
-- the iterator on the array of transactions has been formalized, by using an `IndexingIterator`.
 
 
-These changes leave the `TransactionListTwoSourceTransformer` with one responsibility: convert the primitive data input to the primitive output that is necessary to fulfill the requirement of the transformation
+## The Adapter
+
+The Adapter implements a significant change from the previous version. Previously, the Adapter Rows were implemented using structs - it now uses enums instead.
+
+```swift
+enum TransactionListRow {
+
+    case header( title: String )
+    case subheader( title: String, odd: Bool )
+    case detail( description: String, amount: String, odd: Bool )
+    case subfooter( odd : Bool )
+    case footer( total: String, odd: Bool )
+    case grandfooter(total: String )
+    case message( message: String )
+}
+```
+
+As you will see, this change s
+
+You may be wondering where the `cellId` and `height` information has gone. Since each is constant related to a given case, they have been implemented as a readonly vars of the `TransactionListRow`.  Normally you would see them implemented with the enum. Here they have been moved to a private extension in the Adapter file, because the adapter is the only  class that needs the information. The move also allows the `CellId` cases to continue to be private.
+
+Notice that, here, `cellId` returns a `String`. In the previous version, it returned a `CellId`. The implementation of the cellId is now completely encapsulated.
+
+```swift
+// in file TransactionListAdapter:
+
+private extension TransactionListRow {
+
+    var cellId: String {
+        return {
+            () -> CellId in
+            switch self {
+            case .header:
+                return .header
+            case .subheader:
+                return .subheader
+            case  .detail:
+                return .detail
+            case .message:
+                return .message
+            case .footer:
+                return .footer
+            case .grandfooter:
+                return .grandfooter
+            case .subfooter:
+                return .subfooter
+            }
+        } ().rawValue
+    }
+
+    private enum CellId: String {
+
+        case header
+        case subheader
+        case detail
+        case subfooter
+        case footer
+        case grandfooter
+        case message
+    }
+
+    var height: CGFloat {
+        get {
+            switch self {
+            case .header:
+                return 60.0
+            case .subheader:
+                return 34.0
+            case .detail:
+                return 18.0
+            case .subfooter:
+                return 18.0
+            case .footer:
+                return 44.0
+            case .grandfooter:
+                return 60.0
+            case .message:
+                return 100.0
+            }
+        }
+    }
+}
+```
+
+You can see that the Adapter is no longer responsible for converting input data, such as the inboundDate, to primitive types. 
+
+
+
+
+
+
 
 . 
 
