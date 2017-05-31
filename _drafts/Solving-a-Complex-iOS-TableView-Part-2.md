@@ -238,11 +238,11 @@ enum TransactionListRow {
 }
 ```
 
-As you will see, this change s
+I find the enum notation more compact than structs.  I really like the that the enum *namespaces* the cases. When you use this method to make tables,  there can be a lot of structs around with really long names. You need to have long names just to keep them unique and make it obvious to which ViewController stack they belong to.
 
-You may be wondering where the `cellId` and `height` information has gone. Since each is constant related to a given case, they have been implemented as a readonly vars of the `TransactionListRow`.  Normally you would see them implemented with the enum. Here they have been moved to a private extension in the Adapter file, because the adapter is the only  class that needs the information. The move also allows the `CellId` cases to continue to be private.
+You may be wondering where the `cellId` and `height` information has gone. Since each is a constant related to a given case, they have been implemented as a read only vars of the `TransactionListRow`.  Normally you would see them implemented with the enum. Here they have been moved to a private extension in the Adapter file, because the adapter is the only  class that needs the information. The move also allows the `CellId` cases to continue to be private.
 
-Notice that, here, `cellId` returns a `String`. In the previous version, it returned a `CellId`. The implementation of the cellId is now completely encapsulated. It returns a function w
+Notice that, here, `cellId` returns a `String`. In the previous version, it returned a `CellId`. The implementation of `cellId` is now completely private. It returns a closure which selects a `CellId` which is then converted to a string.
 
 ```swift
 // in file TransactionListAdapter:
@@ -305,9 +305,12 @@ private extension TransactionListRow {
 }
 ```
 
-Notice that the Adapter is no longer responsible for converting input data, such as the inboundDate, to primitive types. 
+Except for the conversion to enums, the changes to the adapter are fairly insignificant. 
 
-
+- The `append` methods still do the final conversion of the data to a form which is convenient to display. 
+- The Adapter is no longer responsible for converting input data, such as the inboundDate, to primitive types, since that responsibility has been moved to the Transaction initializer. 
+- The extension on `Double` formalizes the conversion to string. 
+- the `UITableViewDataSource` implementation has hardly changed at all, save the `cellId` conversion
 
 ```swift
 class TransactionListAdapter: NSObject {
@@ -410,7 +413,9 @@ extension TransactionListAdapter: UITableViewDelegate {
 
 
 
-. 
+## Summary
+
+
 
 
 
