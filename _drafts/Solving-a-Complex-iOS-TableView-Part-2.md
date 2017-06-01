@@ -8,12 +8,13 @@ date: 2017-05-13
 
 In part 1, I introduced a solution to solve A Complex tableView.
 
-In part 2, I want to improve the Complex iOS TableView solution to simplify the code in three ways:
+In part 2, I want to improve the Complex iOS TableView solution to refactor the code in three ways:
 
-- remove more responsibilities from the ViewController,
+- remove more responsibilities from the ViewController and distribute them into new or existing classes
 - take advantage of a few key Swift features, and
 - redistribute the conversion of both the input and output data.
 
+The complete app which demonstrates this refactoring can can be found at [**ReportTableDemo**](https://github.com/lyleresnick/ReportTableDemo).
 
 
 ## Responsibilities of the ViewController 
