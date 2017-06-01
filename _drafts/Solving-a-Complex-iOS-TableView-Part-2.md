@@ -238,7 +238,7 @@ enum TransactionListRow {
 }
 ```
 
-I find the enum notation more compact than structs.  I really like the that the enum *namespaces* the cases. When you use this method to make tables,  there can be a lot of structs around with really long names. You need to have long names just to keep them unique and make it obvious to which ViewController stack they belong to.
+I find the enum notation more compact than structs. They preserve the comparable property that I wanted from the structs. I really like the that the enum *namespaces* the cases. When you use this method to make tables,  there can be a lot of structs around with really long names. You need to have long names just to keep them unique and make it obvious to which ViewController stack they belong to.
 
 You may be wondering where the `cellId` and `height` information has gone. Since each is a constant related to a given case, they have been implemented as a read only vars of the `TransactionListRow`.  Normally you would see them implemented with the enum. Here they have been moved to a private extension in the Adapter file, because the adapter is the only  class that needs the information. The move also allows the `CellId` cases to continue to be private.
 
