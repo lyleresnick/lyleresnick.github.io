@@ -415,7 +415,9 @@ extension TransactionListAdapter: UITableViewDelegate {
 
 ## Summary
 
+In this version, the size of the ViewController has been reduced to minimal size. It only contains code to call the transformer.
 
+The data is converted to its most useful primitive type at instantiation.
 
 
 
