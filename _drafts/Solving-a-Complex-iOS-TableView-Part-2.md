@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Solving a Complex iOS TableView Part 2"
-date: 2017-06-02
+date: 2017-06-01
 ---
 
 ## Introduction
