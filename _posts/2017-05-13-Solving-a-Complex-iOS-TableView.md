@@ -10,9 +10,9 @@ In this article I want to present a technique for solving a complex iOS TableVie
 
 ## Dynamic Display
 
-Often we have a requirement to create a table view that displays more than one kind of row. Maybe the rows are alternately coloured and there is a refresh button or a total at the end of the list. Maybe in one state, a cell has a particular arrangement of views, but in another state, it has another arrangement.
+We often get requirements to create tableViews that display more than one kind of row. Maybe the rows are alternately coloured and there is a refresh button or a total at the end of the table. Maybe in one state, a cell has a particular arrangement of views, but in another state, it has another arrangement.
 
-This kind of requirement can normally be solved by using the cell index, as given via `cellForRowAt` , to access an item at the same index in the input data set. At the time that `cellForRowAt` is called, you can determine: 
+Usually, this kind of requirement can be solved by using the cell index, as given via `cellForRowAt` , to access the item at the same index in the input data set. At the time that `cellForRowAt` is called, you can determine: 
 
 - the cell colour from the index position, 
 - when to display the refresh button cell or total cell, instead of a regular cell, based on the size of the dataset,
@@ -20,11 +20,13 @@ This kind of requirement can normally be solved by using the cell index, as give
 - the total from the all items in the dataset, 
 - the data to display for the current row.
 
-The first three items are concerned with configuration and the rest are concerned with assignment of data to the views. These are the two general responsibilities of `cellForRowAt`
+The first three items are concerned with configuration and the others are concerned with assignment of data to the views. These are the two general responsibilities of `cellForRowAt`
 
-A `cellForRowAt` method that implements all of this *dynamically* is going to be very long and full of `if`s, `switch`es, `&&`s and nested `if`s, all of which are required to determine what amounts to a type. Once the cell type is known, it is easy to make the assignments - but this code is embedded in the code responsible for determination of type. These types are hidden classes begging to be found.
+A `cellForRowAt` method which implements all of the above *dynamically* will be very long and full of `if`s, `switch`es, `&&`s and nested `if`s, most of which are required just to determine the type of the cell. Once the cell type is known, it is easy to make the assignments. 
 
-Besides being hard to write correctly, this code is hard to read and will be hard to change.  Over time, new requirements will present themselves. Unless this code is refactored so it is extensible and understandable, changes made by various developers will further obscure its intent.
+When the assignment code is entangled in the code responsible for determination of type, it becomes very hard to understand and change. Whenever I begin to write code like this, I repeatedly feel like the code is asking "why am I here" and I just know there are  hidden classes begging to be found.
+
+Over time, new requirements will present themselves. Unless this code is refactored so it is extensible and understandable, changes made by various developers will further obscure its intent.
 
 I refer to the activity in `cellForRowAt` as *dynamic*, because the class of the cell has to be determined over and over, each time that `cellForRowAt` is called. This is to be compared to a *static* technique, in which all of the cell types are predetermined, once, before `cellForRowAt` is ever called.
 
