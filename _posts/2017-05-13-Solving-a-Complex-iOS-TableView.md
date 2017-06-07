@@ -287,7 +287,7 @@ class TransactionListAdapter: NSObject {
 
 ### The TransformerOutput Implementation
 
-The `TransactionListTransformerOutput` protocol describes the output of the Transformer, bit it is also the input to the Adapter. The naming scheme suggests that the rows will be appended to the output. The response to each message of the protocol is to append a row to the `rowList`. 
+The `TransactionListTransformerOutput` protocol describes the output of the Transformer, but it is also the input to the Adapter. The naming scheme suggests that the rows will be appended to the output. The response to each message of the protocol is to append a row to the `rowList`. 
 
 ```swift
 extension TransactionListAdapter: TransactionListTransformerOutput {
