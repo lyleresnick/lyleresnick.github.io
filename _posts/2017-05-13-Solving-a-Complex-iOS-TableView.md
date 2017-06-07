@@ -339,7 +339,7 @@ The band colour has been captured by the *odd* property of the row. I could have
 
 ### Storage of the Rows
 
-The Rows are implemented  as `structs`. I had to write less code to implement the Rows using structs over classes, mostly because I did not have to specify a constructor.  In the future I also want to be able to compare the rows and Swift directly supports equality comparison of structs (of scalars).  
+The Rows are implemented  as `structs`. I had to write less code to implement the Rows using structs instead of classes, mostly because I did not have to specify a constructor. In the future, I also want to compare the rows and Swift directly supports equality comparison of structs (of scalars).  
 
 Each row type implements the `Row`  protocol.  
 
@@ -350,7 +350,7 @@ private protocol Row {
 }
 ```
 
-The cellId property and associated enum are used to generate the identifier used by `dequeueReusableCell(withIdentifier:)`. The height property is the height of the cell to be returned by `tableView(_:heightForRowAt:)`.
+The `cellId` property and associated enum are used to generate the identifier used by `dequeueReusableCell(withIdentifier:)`. The `height` property is the height of the cell to be returned by `tableView(_:heightForRowAt:)`.
 
 ```
 private enum CellId: String {
@@ -422,7 +422,7 @@ private struct MessageRow: Row {
 }
 ```
 
-As you can see, the Rows are pretty simple. The rows contain precisely the data needed for display; no further conversions are necessary. The result is that the Rows are pure ViewModels, having no behaviour. 
+The Rows are pretty simple. They contain precisely the data needed for display; no further conversions are necessary. The result is that the Rows are pure ViewModels, having no behaviour. 
 
 The choice of where to put data conversion is interesting because there are many choices of where to place it: in the cell binding function, in the initializer for the ViewModel, in the transformer output function (the appender), or in the transformer itself. For now I've put most of the conversions in either the transformer or in the transformer output, but I think there is a better placement strategy. I will discuss this choice again in a future article. 
 
