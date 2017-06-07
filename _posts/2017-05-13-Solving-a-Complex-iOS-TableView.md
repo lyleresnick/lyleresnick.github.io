@@ -150,7 +150,7 @@ Part of my solution strategy is to avoid computation wherever possible. Even tho
 - The grandfooter cell background is always blue. 
 - The static title text is different  
 
-By separating out the behaviour by type, it will be easy to change either of the two row styles, without affecting the other, whenever the design changes are required.
+By separating out the behaviour by type, it will be easy to change either of the two row styles, without affecting the other, if a design change is required.
 
 In the same way, I could have designed the *detail* cell so that it would change its height dynamically, depending on whether it was the last row in a group, I chose not to. I would have to introduce a boolean to record the actual type that the cell should be. I decided to introduce a subfooter cell just to take up the space below the last detail.  It is highlighted in the screen shot above.
 
