@@ -273,7 +273,7 @@ I want to point out that both the viewController and the Adapter have other resp
 
 ### Three Protocols
 
-The adapter implements three protocols:  `UITableViewDataSource`, `UITableViewDelegate` and `TransactionListTransformerOutput` . Each protocol has been implemented as an extension. This is a great practice because it reduces the scope of where the reader will find the protocol implementations and allows the compiler to place messages about missing implementations in the same scope.
+The adapter implements three protocols:  `UITableViewDataSource`, `UITableViewDelegate` and `TransactionListTransformerOutput` . Each protocol has been implemented as an extension. This is a great practice because it reduces the scope of the protocol implementations and allows the compiler to more accurately place messages about missing implementations .
 
 The only thing that the extensions do not implement is the data and this is left to the class.
 
