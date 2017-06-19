@@ -108,7 +108,17 @@ We do not want the ViewController to know anything about the Interactor. The Int
 
 The Connector is created and executed by the ViewController by overriding `awakeFromNib()`, which occurs after all outlets are created.
 
+### The Transformer
 
+The Transformer is not formally part of VIPER. I have found it useful to create one transformer for each event forwarded to the UseCase . As we will see, this makes is very easy to test the Transformer and separates out the UseCase's responsibilities.
+
+
+
+## The Complete picture
+
+**TODO: FIXME**: Another way to look at the processing stages is that the events with their arguments are combined with the state of the system, the system may be updated by the uses case and the results of the event are then given to the presenter, which localizes and formats the results for display by the viewController 
+
+**TODO: DIAGRAM:** of VIPER classes in big picture.
 
 ## The App
 
