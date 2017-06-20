@@ -48,7 +48,7 @@ The Interactor uses the EntityGateway to obtain access to EntityManagers.  Entit
 
 Since VIPER is an implementation of the Clean Architecture, there a few rules to follow: 
 
-1. dependencies can only be explicit in one direction - towards the centre. This means that messages flowing out of the centre must be sent to an interface (a.k.a. a Swift protocol)
+1. dependencies can only be explicit in one direction - towards the centre. This means that messages flowing out of the centre must be sent to an interface (a.k.a. a Swift protocol). Classes in layers closer to the center cannot know the names of classes in Layers closer to the outside.
 2. data must be copied from layer to layer. This means that we can't pass a Swift class from one layer to the next
 
 
@@ -113,7 +113,7 @@ The Transformer is not formally part of VIPER. I have found it useful to create 
 
 
 
-## The Complete picture
+### The Complete picture
 
 **TODO: FIXME**: Another way to look at the processing stages is that the events with their arguments are combined with the state of the system, the system may be updated by the uses case and the results of the event are then given to the presenter, which localizes and formats the results for display by the viewController 
 
@@ -124,6 +124,38 @@ Here is a diagarm showing the event and information flow between the View Contro
 ![Diagram of VIPER classes]({{ site.url }}/assets/VIPER UseCase Sequence.png)
 
 ## The App
+
+You will see that to implement the solution as a VIPER module one must simply refactor what we have done so far.
+
+### The ViewController
+
+As you can see the amount of code in the ViewController is very small. There is one call to the presenter. This call represents the event that the view is ready to receive output. It does not intimate what the presenter is supposed to do, only that the event occurred. This is an example of forwarding, or a.k.a. *delegation* or *passing the buck*.
+
+I have made three additions: 
+
+- overidden `awakeFromNib()` , 
+- added a property called `presenter`, and
+- added a method called `showReport`, which I will discuss later.
+
+As I mentioned previously, the VIPER stack must be configured, or more specifically, connected. The question comes up about who will do this configuration. I have allocated that responsibility to a class I call the Connector.
+
+Storyboards are a very important part of my workflow because of their visual layout capabilities and documentative qualities. Even though I'm implementing VIPER, I definately want to continue to store the ViewController specifications in a storyboard.
+
+`awakeFromNib()` is called immediately after the ViewController is constructed and the outlets are set. This is the perfect place to call the Connector to configure the remainder of the VIPER stack. 
+
+You might have noticed that the presenter property is not set. This is because it will be set by the Connector.
+
+### The Connector
+
+You mighr be wondering why the the VIPER strack has to be setup by a third party. It becomes more obvious when you see the code. Part of the requirement of the clean architecture is that it must be testable. 
+
+Certainly, you could arrange for theViewController to directly allocate the Presenter and then have the ViewController set the presenter's viewController as a delegate. This is pretty normal stuff. In the same way the Presenter could directly allocate the UseCase and then have the Presenter set the UseCase's presenter as a delegate. 
+
+But what about the EntityGateway? Should we directly allocate this as well? Nope.  
+
+
+
+
 
 
 
