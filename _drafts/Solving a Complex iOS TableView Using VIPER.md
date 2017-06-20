@@ -131,6 +131,34 @@ You will see that to implement the solution as a VIPER module one must simply re
 
 As you can see the amount of code in the ViewController is very small. There is one call to the presenter. This call represents the event that the view is ready to receive output. It does not intimate what the presenter is supposed to do, only that the event occurred. This is an example of forwarding, or a.k.a. *delegation* or *passing the buck*.
 
+```swift
+class TransactionListViewController: UIViewController {
+
+    var presenter: TransactionListPresenter!
+    @IBOutlet fileprivate weak var tableView: UITableView!
+    @IBOutlet private weak var adapter: TransactionListAdapter!
+
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        
+        TransactionListConnector(viewController: self, adapter: adapter).configure()
+    }
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        presenter.viewReady()
+    }
+}
+
+extension TransactionListViewController: TransactionListPresenterOutput {
+    
+    func showReport() {
+        tableView.reloadData()
+    }
+}
+```
+
 I have made three additions: 
 
 - overidden `awakeFromNib()` , 
@@ -151,7 +179,43 @@ You mighr be wondering why the the VIPER strack has to be setup by a third party
 
 Certainly, you could arrange for theViewController to directly allocate the Presenter and then have the ViewController set the presenter's viewController as a delegate. This is pretty normal stuff. In the same way the Presenter could directly allocate the UseCase and then have the Presenter set the UseCase's presenter as a delegate. 
 
-But what about the EntityGateway? Should we directly allocate this as well? Nope.  
+But what about the EntityGateway? Should we directly allocate this as well? Directly allocating the EntityGateway would violate the rule that states: names of classes in the outer layer should not be known by classes of the inner layers. The only way to make this happen is to inject the EntityGateway into the centre, which in this case is the UseCase. The next question is who should perform the injection. If the presenter does the intjection, the rule is still violated. 
+
+This is why the Connector does the injection .
+
+```swift
+class TransactionListConnector {
+    
+    private let viewController: TransactionListViewController
+    private let adapter: TransactionListAdapter
+    private let presenter: TransactionListPresenter
+    private var useCase: TransactionListUseCase
+    
+    init(viewController: TransactionListViewController, adapter: TransactionListAdapter, useCase: TransactionListUseCase, presenter: TransactionListPresenter) {
+        
+        self.viewController = viewController
+        self.adapter = adapter
+        self.useCase = useCase
+        self.presenter = presenter
+    }
+    
+    convenience init(viewController: TransactionListViewController, adapter: TransactionListAdapter, entityGateway: EntityGateway = EntityGatewayImpl()) {
+        
+        let useCase = TransactionListUseCase(entityGateway: entityGateway)
+        let presenter = TransactionListPresenter(useCase: useCase)
+        
+        self.init(viewController: viewController, adapter: adapter, useCase: useCase, presenter: presenter)
+    }
+    
+    func configure() {
+        viewController.presenter = presenter
+        adapter.presenter = presenter
+
+        useCase.presenter = presenter
+        presenter.viewController = viewController
+    }
+}
+```
 
 
 
