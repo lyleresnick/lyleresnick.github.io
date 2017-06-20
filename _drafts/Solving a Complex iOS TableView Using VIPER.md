@@ -8,22 +8,21 @@ date: 2017-06-09
 
 VIPER is a micro-architecture - a set of classes that work together to structure a solution.  
 
-VIPER is an implementation of [Bob Martin's Clean Architecture](). I'm going to demonstrate that viper can be very simple to implement and its benefits can be realized very quickly.   
+VIPER is an implementation of [Bob Martin's Clean Architecture](https://8thlight.com/blog/uncle-bob/2012/08/13/the-clean-architecture.html). I'm going to demonstrate that VIPER can be very simple to implement and its benefits can be realized very quickly.   
 
-I'm going to use the requirement and solution to the Complex TableView from the last [post]() as the basis of this example.
+I'll use the requirement and solution to the Complex TableView from the last [post]() as the basis of this example.
 
 ## VIPER Explained
 
-The purpose of the VIPER pattern is to reduce the amount of code in the ViewController(**V**) class by distributing it into other classes that have specific responsibilities.
+The purpose of the VIPER pattern is to reduce the amount of code in the ViewController(**V**) class by distributing it into other classes that have specific responsibilities. To understand VIPER you need to understand abit about the the clean architecture.
 
-**TODO: DIAGRAM:** of the clean architecture
+![Bob Martin's Clean Architecture](https://8thlight.com/blog/assets/posts/2012-08-13-the-clean-architecture/CleanArchitecture-5c6d7ec787d447a81b708b73abba1680.jpg)
 
 The diagram shows that
 
-- the user is outside the system
-- the User Interface layer is the outermost layer of the  system 
-- the entities are pure data structures at the centre of the system
-- business logic layer surrounds the entities
+- the User Interface is in the outermost layer of the  system 
+- the Entities are at the centre of the system
+- the Business Rules exist in the layer which surrounds the entities
 - the data store which provides the entities is outside the system
 - the presentation conversion layer is placed in the middle between the user interface and business logic  layers
 
@@ -33,13 +32,13 @@ In VIPER,
 
 
 - the Presenter(**P**) represents the presentation conversion layer
-- the Interactor(**I**), a.k.a the UseCase, represents the business logic layer
+- the Interactor(**I**), a.k.a the UseCase, represents the business rulelayer
 - the Router(**R**), which has not been explained and 
 - the EntityGateway(**E**) provides access to Entities and managers to operate on them
 
-Here is the relationship of the VIPER classes in a diagram
+Here is a diagran showing the relationship of the VIPER classes.
 
-**TODO: DIAGRAM:** of VIPER classes.
+![Diagram of VIPER classes]({{ site.url }}/assets/VIPER Class Diagram.png)
 
 The ViewController owns a Presenter, which in turn owns an Interactor.  The ViewController sends messages to the Presenter, which in turn sends messages to the Interactor. 
 
@@ -118,7 +117,11 @@ The Transformer is not formally part of VIPER. I have found it useful to create 
 
 **TODO: FIXME**: Another way to look at the processing stages is that the events with their arguments are combined with the state of the system, the system may be updated by the uses case and the results of the event are then given to the presenter, which localizes and formats the results for display by the viewController 
 
-**TODO: DIAGRAM:** of VIPER classes in big picture.
+
+
+Here is a diagarm showing the event and information flow between the View Controller and the Entity Gateway
+
+![Diagram of VIPER classes]({{ site.url }}/assets/VIPER UseCase Sequence.png)
 
 ## The App
 
