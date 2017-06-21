@@ -175,7 +175,7 @@ You might have noticed that the presenter property has not been set. This is bec
 
 ### The Connector
 
-You might be wondering why the VIPER stack has to be setup by a third party. It will become more obvious when you see the code. Remember that part of the requirement of the clean architecture is that it must be testable. 
+You might be wondering why the VIPER stack has to be configured by a third party. It will become obvious when you look at the code. Remember that part of the requirement of the clean architecture is that it must be testable. 
 
 Certainly, you could arrange for the ViewController to directly allocate the Presenter and then have the ViewController set the presenter's viewController as a delegate. This is pretty normal stuff. In the same way the Presenter could directly allocate the UseCase and then have the Presenter set the UseCase's presenter as a delegate. 
 
@@ -183,7 +183,7 @@ But what about the EntityGateway? Should we directly allocate this as well? Havi
 
 The next question is: who should perform the injection? If the presenter does it, the rule is still violated. In fact none of the classes in the stack can perform the injection without violating the rule.
 
-This is why the Connector does the injection.
+This is why the Connector has to do the injection of the EntityGateway into the UseCase.
 
 ```swift
 class TransactionListConnector {
@@ -218,6 +218,14 @@ class TransactionListConnector {
     }
 }
 ```
+
+With a eye to future testablility, I have decided that to inject the useCase into the Presenter, as well. Because the adapter is part of the mechanics of the view, it also needs a reference to the presenter.  
+
+### The Adapter
+
+The size of the adapter is now as small as possible. 
+
+
 
 
 
