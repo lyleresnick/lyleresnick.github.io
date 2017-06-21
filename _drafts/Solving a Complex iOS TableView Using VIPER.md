@@ -159,29 +159,31 @@ extension TransactionListViewController: TransactionListPresenterOutput {
 }
 ```
 
-I have made three additions: 
+I have made three additions. 
 
-- overidden `awakeFromNib()` , 
-- added a property called `presenter`, and
-- added a method called `showReport`, which I will discuss later.
+- I overrode `awakeFromNib()` , 
+- i added a property called `presenter`, and
+- i added a method called `showReport`, which I will discuss later.
 
-As I mentioned previously, the VIPER stack must be configured, or more specifically, connected. The question comes up about who will do this configuration. I have allocated that responsibility to a class I call the Connector.
+As I mentioned previously, the VIPER stack must be configured, or more specifically, connected. I have allocated the configuration responsibility to a class I call the Connector.
 
-Storyboards are a very important part of my workflow because of their visual layout capabilities and documentative qualities. Even though I'm implementing VIPER, I definately want to continue to store the ViewController specifications in a storyboard.
+Storyboards are a very important part of my workflow because of their visual layout capabilities and documentative qualities. Even though I'm implementing VIPER, I definitely want to continue using storyboards to define ViewController layouts.
 
 `awakeFromNib()` is called immediately after the ViewController is constructed and the outlets are set. This is the perfect place to call the Connector to configure the remainder of the VIPER stack. 
 
-You might have noticed that the presenter property is not set. This is because it will be set by the Connector.
+You might have noticed that the presenter property has not been set. This is because it will be set by the Connector.
 
 ### The Connector
 
-You mighr be wondering why the the VIPER strack has to be setup by a third party. It becomes more obvious when you see the code. Part of the requirement of the clean architecture is that it must be testable. 
+You might be wondering why the VIPER stack has to be setup by a third party. It will become more obvious when you see the code. Remember that part of the requirement of the clean architecture is that it must be testable. 
 
-Certainly, you could arrange for theViewController to directly allocate the Presenter and then have the ViewController set the presenter's viewController as a delegate. This is pretty normal stuff. In the same way the Presenter could directly allocate the UseCase and then have the Presenter set the UseCase's presenter as a delegate. 
+Certainly, you could arrange for the ViewController to directly allocate the Presenter and then have the ViewController set the presenter's viewController as a delegate. This is pretty normal stuff. In the same way the Presenter could directly allocate the UseCase and then have the Presenter set the UseCase's presenter as a delegate. 
 
-But what about the EntityGateway? Should we directly allocate this as well? Directly allocating the EntityGateway would violate the rule that states: names of classes in the outer layer should not be known by classes of the inner layers. The only way to make this happen is to inject the EntityGateway into the centre, which in this case is the UseCase. The next question is who should perform the injection. If the presenter does the intjection, the rule is still violated. 
+But what about the EntityGateway? Should we directly allocate this as well? Having the UseCase directly allocatie the EntityGateway violates the rule that states: names of classes in the outer layer should not be known by classes of the inner layers. The only way to make this happen is to inject the EntityGateway into the UseCase. 
 
-This is why the Connector does the injection .
+The next question is: who should perform the injection? If the presenter does it, the rule is still violated. In fact none of the classes in the stack can perform the injection without violating the rule.
+
+This is why the Connector does the injection.
 
 ```swift
 class TransactionListConnector {
