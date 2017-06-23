@@ -219,13 +219,206 @@ class TransactionListConnector {
 }
 ```
 
-With a eye to future testablility, I have decided that to inject the useCase into the Presenter, as well. Because the adapter is part of the mechanics of the view, it also needs a reference to the presenter.  
+With a eye toward testability, I have decided to inject the UseCase into the Presenter, as well. Because the adapter is part of the view, it also needs a reference to the presenter.  
+
+### The Presenter
+
+Previously the adapter had two responsibilities: react to the tableView by delivering data and format the output data. The latter responsibility has been moved to the Presenter.
+
+
+
+
+
+```swift
+class TransactionListPresenter {
+    
+    weak var viewController: TransactionListPresenterOutput!
+    
+    fileprivate static let outboundDateFormatter = DateFormatter.dateFormatter( format: "MMM' 'dd', 'yyyy" )
+
+    fileprivate var rows = [TransactionListViewModel]()
+    fileprivate var odd = false
+    
+    fileprivate let useCase: TransactionListUseCase
+    
+    init(useCase: TransactionListUseCase) {
+        self.useCase = useCase
+    }
+
+    func viewReady() {
+        useCase.beginOneSource()
+    }
+    
+    func cellId(at index: Int) -> String {
+        return rows[ index ].cellId
+    }
+    
+    func cellHeight(at index: Int) -> CGFloat {
+        return rows[ index ].height
+    }
+    
+    var rowCount: Int { return rows.count }
+    
+    func row(at index: Int) -> TransactionListViewModel { return rows[ index ] }
+}
+
+extension TransactionListPresenter: TransactionListUseCaseOutput {
+    
+    func presentInit() {
+        rows.removeAll()
+    }
+
+     func presentReport() {
+        viewController.showReport()
+    }
+
+    func presentHeader(group: TransactionGroup) {
+        
+        rows.append(.header(title: group.toString() + " Transactions"));
+    }
+    
+    func presentSubheader(date: Date) {
+        
+        odd = !odd;
+        rows.append(.subheader(title: formatDate(date: date), odd: odd))
+    }
+    
+    fileprivate func formatDate(date: Date) -> String {
+        return TransactionListPresenter.outboundDateFormatter.string(from: date)
+    }
+    
+    func presentDetail(description: String, amount: Double) {
+        
+        rows.append(.detail(description: description, amount: amount.asString, odd: odd));
+    }
+    
+    func presentSubfooter() {
+        
+        rows.append(.subfooter(odd: odd));
+    }
+    
+    func presentFooter(total: Double) {
+        
+        odd = !odd;
+        rows.append(.footer(total: total.asString, odd: odd));
+    }
+    
+    func presentGrandFooter(grandTotal: Double) {
+        
+        rows.append(.grandfooter(total: grandTotal.asString));
+    }
+    
+    func presentNotFoundMessage(group: TransactionGroup) {
+    
+        rows.append(.message(message: "\(group.toString()) Transactions are not currently available."))
+    }
+    
+    func presentNoTransactionsMessage(group: TransactionGroup) {
+        
+        rows.append(.message(message: "There are no \(group.toString()) Transactions in this period" ));
+    }
+    
+    func presentNotFoundMessage() {
+        
+        rows.append(.header(title: "All"))
+        rows.append(.message(message: "Transactions are not currently available."))
+    }
+}
+
+extension Double {
+    var asString: String {
+        return String(format: "%0.2f", self)
+    }
+}
+
+private extension TransactionListViewModel {
+    
+    var cellId: String {
+        return {
+            () -> CellId in
+            switch self {
+            case .header:
+                return .header
+            case .subheader:
+                return .subheader
+            case  .detail:
+                return .detail
+            case .message:
+                return .message
+            case .footer:
+                return .footer
+            case .grandfooter:
+                return .grandfooter
+            case .subfooter:
+                return .subfooter
+            }
+        } ().rawValue
+    }
+
+    private enum CellId: String {
+        case header
+        case subheader
+        case detail
+        case subfooter
+        case footer
+        case grandfooter
+        case message
+    }
+
+    var height: CGFloat {
+        get {
+            switch self {
+            case .header:
+                return 60.0
+            case .subheader:
+                return 34.0
+            case .detail:
+                return 18.0
+            case .subfooter:
+                return 18.0
+            case .footer:
+                return 44.0
+            case .grandfooter:
+                return 60.0
+            case .message:
+                return 100.0
+            }
+        }
+    }
+}
+```
 
 ### The Adapter
 
-The size of the adapter is now as small as possible. 
+The size of the Adapter is now as small as possible. It's only responsibility is to react to the tableView by delegating to the presenter. It is now truly an *adapter*. The responsibility of output formatting has been moved the Presenter.  
 
+```swift
+class TransactionListAdapter: NSObject {
+    
+    var presenter: TransactionListPresenter!
+}
 
+extension TransactionListAdapter: UITableViewDataSource  {
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return presenter.rowCount
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        
+        let cell = tableView.dequeueReusableCell(withIdentifier: presenter.cellId(at: indexPath.row), for: indexPath)
+        (cell as! TransactionListCell).show(row: presenter.row(at: indexPath.row))
+        return cell
+    }
+}
+
+extension TransactionListAdapter: UITableViewDelegate {
+    
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return presenter.cellHeight(at: indexPath.row)
+    }
+}
+```
 
 
 
