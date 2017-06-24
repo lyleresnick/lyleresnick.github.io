@@ -50,8 +50,8 @@ class TransactionListViewController: UIViewController {
     func transformFromTwoSources() {
         
         let transformer = TransactionListTwoSourceTransformer(
-                                            authorizedData: TransactionModel.authorizedData,
-                                            postedData: TransactionModel.postedData)
+            authorizedTransactions: TransactionModel.authorizedTransactions,
+            postedTransactions: TransactionModel.postedTransactions)
         transformer.transform( output: adapter )
     }
 }
@@ -163,27 +163,24 @@ Besides encapsulating the code responsible for the transformation, `TransactionL
 These changes leave the `TransactionListTwoSourceTransformer` with one responsibility: convert the primitive data input to primitive output by recognizing the date groupings and exceptions, as well as calculating a total and grand total. This is pretty simple. Actually, not quite: in a future post I let you in on how the code structure was designed!
 
 ```swift
-import UIKit
-
 class TransactionListTwoSourceTransformer {
 
-    private let authorizedData: [TransactionModel]?
-    private let postedData: [TransactionModel]?
+    private let authorizedTransactions: [TransactionModel]?
+    private let postedTransactions: [TransactionModel]?
 
-    init( authorizedData: [TransactionModel]?, postedData: [TransactionModel]?) {
-        self.authorizedData = authorizedData
-        self.postedData = postedData
+    init( authorizedTransactions: [TransactionModel]?, postedTransactions: [TransactionModel]?) {
+        self.authorizedTransactions = authorizedTransactions
+        self.postedTransactions = postedTransactions
     }
 
     func transform(output: TransactionListTransformerOutput) {
 
         var grandTotal = 0.0
-        grandTotal += transform( transactions: authorizedData, group: .Authorized, output: output)
-        grandTotal += transform( transactions: postedData, group: .Posted, output: output )
+        grandTotal += transform( transactions: authorizedTransactions, group: .authorized, output: output)
+        grandTotal += transform( transactions: postedTransactions, group: .posted, output: output )
         output.appendGrandFooter(grandTotal: grandTotal)
     }
 
-    
     private func transform(transactions: [TransactionModel]?, group: TransactionGroup, output: TransactionListTransformerOutput ) -> Double {
         
         var total = 0.0
@@ -203,11 +200,11 @@ class TransactionListTwoSourceTransformer {
                     let currentDate = localTransaction.date
                     output.appendSubheader(date: currentDate)
                     
-                    while let localTransaction = transaction, localTransaction.date == currentDate {
+                    while let localTransaction = transaction,
+                        localTransaction.date == currentDate {
                         
-                        let amount = localTransaction.amount
-                        total += amount
-                        output.appendDetail(description: localTransaction.description, amount: amount)
+                        total += localTransaction.amount
+                        output.appendDetail(description: localTransaction.description, amount: localTransaction.amount)
                         transaction = transactionStream.next()
                     }
                     output.appendSubfooter()
