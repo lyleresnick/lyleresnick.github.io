@@ -6,10 +6,10 @@ date: 2017-06-01
 
 ## Introduction
 
-In [part 1]({{site.url}}/blog/2017/05/13/Solving-a-Complex-iOS-TableView.html), I introduced a solution to solving a complex tableView. In part 2, I want to improve the solution by refactoring the code in three ways. I want to:
+In [part 1]({{site.url}}/blog/2017/05/13/Solving-a-Complex-iOS-TableView.html), I introduced a solution for solving a complex tableView. In this article, I want to improve the solution by refactoring the code in three ways:
 
 - remove even more responsibilities from the ViewController and distribute them into new or existing classes
-- take advantage of a few key Swift features, namely failable enum initializers, enums with associated values, and extensions
+- take advantage of a few key Swift features, namely failable enum initializers, enums with associated values, and extensions and
 - redistribute the code which converts the input and output data.
 
 The complete app which demonstrates this refactoring can be found at [**ReportTableDemo**](https://github.com/lyleresnick/ReportTableDemo).
@@ -17,19 +17,19 @@ The complete app which demonstrates this refactoring can be found at [**ReportTa
 
 ## Responsibilities of the ViewController 
 
-The main responsibility of a viewController is to configure the layout and content of its associated views and respond  to user interaction with those views. Pretty straightforward.
+The main responsibility of a viewController is to configure the layout of its associated views and respond  to user interaction with those views. Pretty straightforward.
 
-In reality, most view controllers end up being a repository of all of the code that the view controller implementation is dependent on, including aspects such as:
+In reality, most view controllers end up being a monolithic repository of every bit of code that the view controller depends on, including aspects such as:
 
 - data access, local or remote
-
 - data conversion, from source or to display
-
 - data transformation, such as grouping, summarizing or other more complex tasks
+
+As you may have heard before, this is not known as the Massive ViewController problem.
 
 ## Introducing the Transformer Class
 
-In part 1, the viewController implemented a function named `transformFromTwoSources`. I have moved the implementation of this function to a class, `TransactionListTwoSourceTransformer`.
+In part 1, the [viewController](https://github.com/lyleresnick/ReportTableDemo/blob/master/ReportTableDemo/Scene/TransactionListViewController.swift) implemented a function named `transformFromTwoSources`. I have moved the implementation of this function to a class, `TransactionListTwoSourceTransformer`.
 
 The viewController now looks like this: 
 
@@ -57,9 +57,9 @@ class TransactionListViewController: UIViewController {
 }
 ```
 
-You may have noticed that the viewController just got really small! It is now responsible only for its views and those are set up by Interface Builder.
+You may have noticed that the viewController just got really small! It is now only responsible for its views and those are set up by Interface Builder.
 
-I want to take a look at the `TransactionListTwoSourceTransformer`, but first, lets look at the `TransactionModel` and `TransactionGroup` classes.
+We will look at the `TransactionListTwoSourceTransformer`, but first, lets take a look at the `TransactionModel` and `TransactionGroup` classes.
 
 ## The Models
 
