@@ -6,7 +6,7 @@ date: 2017-06-01
 
 ## Introduction
 
-In part 1, I introduced a solution to solving a complex tableView. In part 2, I want to improve the solution by refactoring the code in three ways. I want to:
+In [part 1]({{site.url}}/blog/2017/05/13/Solving-a-Complex-iOS-TableView.html), I introduced a solution to solving a complex tableView. In part 2, I want to improve the solution by refactoring the code in three ways. I want to:
 
 - remove even more responsibilities from the ViewController and distribute them into new or existing classes
 - take advantage of a few key Swift features, namely failable enum initializers, enums with associated values, and extensions
