@@ -12,6 +12,8 @@ VIPER is an implementation of [Bob Martin's Clean Architecture](https://8thlight
 
 I'll use the requirement and solution to the Complex TableView from the last [post]({{site.url}}/blog/2017/05/13/Solving-a-Complex-iOS-TableView-Part-2.html) as the basis of this example.
 
+The complete app which demonstrates this refactoring can be found at [**CleanReportTableDemo**](https://github.com/lyleresnick/CleanReportTableDemo).
+
 ## VIPER Explained
 
 The purpose of the VIPER pattern is to reduce the amount of code in the ViewController(**V**) class by distributing it into other classes that have specific responsibilities. To understand VIPER you need to understand abit about the the clean architecture.
