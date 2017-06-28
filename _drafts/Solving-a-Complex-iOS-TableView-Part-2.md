@@ -29,7 +29,7 @@ As you may have heard before, this is not known as the Massive ViewController pr
 
 ## Introducing the Transformer Class
 
-In part 1, the [ViewController](https://github.com/lyleresnick/ReportTableDemo/blob/master/ReportTableDemo/Scene/TransactionListViewController.swift) implemented a function named `transformFromTwoSources`. I have moved the implementation of this function to a class, `TransactionListTwoSourceTransformer`.
+In part 1, the [`TransactionListViewController`](https://github.com/lyleresnick/ReportTableDemo/blob/master/ReportTableDemo/Scene/TransactionListViewController.swift) implemented a function named `transformFromTwoSources`. I have moved the implementation of this function to a class, `TransactionListTwoSourceTransformer`.
 
 The viewController now looks like this: 
 
@@ -88,19 +88,19 @@ enum TransactionGroup: String {
 }
 ```
 
-In the original [`TransactionModel`](https://github.com/lyleresnick/ReportTableAdapterDemo/blob/master/ReportTableAdapterDemo/TransactionModel.swift) , each data value was stored as a string. Generally, unless a value can be processed as a string, you will have to be convert it to its primitive type. By primitive, I mean in a form that I can be naturally processed, like a date, a decimal, or a URL.
+In the original [`TransactionModel`](https://github.com/lyleresnick/ReportTableAdapterDemo/blob/master/ReportTableAdapterDemo/TransactionModel.swift), each data value was stored as a string. Generally, unless a value can be processed as a string, you will have to be convert it to its primitive type. By primitive, I mean in a form that I can be naturally processed, like a date, a decimal, or a URL.
 
 In the new `TransactionModel`, the data is stored in its primitive form. Unlike in the  previous transformation function, the data is not converted in the transformer.  The `TransactionModel` class has been given the responsibility to perform any necessary conversions that are required to change the external representation to the new internal representation. 
 
-You can see that the `TransactionModel.init` converts:
+The `TransactionModel.init` process all of the input strings to primitive types. It converts:
 
-- a group string into a group value
-- a date string into a date value
-- a debit indicator and an amount string into double value
+- a group string to a group value
+- a date string to a date value
+- a debit indicator and an amount string to double values
 
-Here a conversion error results in fatal error, but alternatively, you might make the init failable or you get more specific by throwing an error.
+Here a conversion error results in fatal error, but alternatively, you might make the init failable or you can get more specific by throwing an error.
 
-It is not hard to imagine that a  `convenience init` for this class could be built to take a JSON dictionary as an argument and pass the parsed elements to this `init`. 
+It is not hard to imagine that a  `convenience init` for this class could be created to take a JSON dictionary as an argument and pass the parsed elements to this `init`. 
 
 
 ```swift
