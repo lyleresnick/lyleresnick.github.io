@@ -29,7 +29,7 @@ As you may have heard before, this is not known as the Massive ViewController pr
 
 ## Introducing the Transformer Class
 
-In part 1, the [viewController](https://github.com/lyleresnick/ReportTableDemo/blob/master/ReportTableDemo/Scene/TransactionListViewController.swift) implemented a function named `transformFromTwoSources`. I have moved the implementation of this function to a class, `TransactionListTwoSourceTransformer`.
+In part 1, the [ViewController](https://github.com/lyleresnick/ReportTableDemo/blob/master/ReportTableDemo/Scene/TransactionListViewController.swift) implemented a function named `transformFromTwoSources`. I have moved the implementation of this function to a class, `TransactionListTwoSourceTransformer`.
 
 The viewController now looks like this: 
 
@@ -57,7 +57,7 @@ class TransactionListViewController: UIViewController {
 }
 ```
 
-You may have noticed that the viewController just got really small! It is now only responsible for its views and those are set up by Interface Builder.
+You may have noticed that the ViewController just got really small! It is now only responsible for its views and those are set up by Interface Builder. Actually, that is not completely correct - it knows where the data for the Transformer is coming from - that is actually a responsibility.
 
 We will look at the `TransactionListTwoSourceTransformer`, but first, lets take a look at the `TransactionModel` and `TransactionGroup` classes.
 
@@ -65,11 +65,11 @@ We will look at the `TransactionListTwoSourceTransformer`, but first, lets take 
 
 The `TransactionGroup` enum demonstrates an idiom for representing data whose values are part of a set. An `enum` can be based on an integer or string type. Every enum based on a raw type automatically generates an `init?(rawValue:)` initializer to convert a raw value to an internal value. 
 
-Using the enum rawValue initializer is great a way to check for the validity of externally stored data that actually represents an enumerated type such as a set of state names, a set of configuration values, or as in our case, an encoding for a sign. 
+The enum rawValue initializer is great a way to check for the validity of externally stored data that actually represents an exclusive set of values such as a set of application states, a set of configuration values, or, as in our case, an encoding for a sign. 
 
-The initializer is *failable*, so invalid data can be detected early by simply converting it using the initializer. This removes the need to convert data at a later stage of processing, where you would prefer not to be dealing  with possible exceptions. 
+The initializer is *failable*, so invalid data can be detected early simply by converting it using the initializer. This removes the need to convert data at a later stage of processing, where one would prefer not to be dealing  with possible exceptions. 
 
-As a bonus, the swift compiler will check that  `switch` statements that switch on enumerated types are exhaustive, so when a new external type is added in the future, the code will not compile if the new case is not added to the `switch`.  
+As a bonus, when `switch` cases are an enumerated type, the swift compiler will check that the cases are exhaustive. When a new case is added in the future, the code will not compile if the new case is not added to the `switch`.  
 
 ```swift
 enum TransactionGroup: String {
@@ -88,9 +88,9 @@ enum TransactionGroup: String {
 }
 ```
 
-In the original `TransactionModel` , each data value was stored as a string. Unless a value can be processed as a string, you will have to be convert it to its primitive type in order to do a calculation. 
+In the original [`TransactionModel`](https://github.com/lyleresnick/ReportTableAdapterDemo/blob/master/ReportTableAdapterDemo/TransactionModel.swift) , each data value was stored as a string. Generally, unless a value can be processed as a string, you will have to be convert it to its primitive type. By primitive, I mean in a form that I can be naturally processed, like a date, a decimal, or a URL.
 
-In the new `TransactionModel`, the data is stored in its primitive form. By primitive, I mean in a form that I can be naturally processed, like a date, a decimal, or a URL. Unlike in the  previous transformation function, the data is not converted in the transformer.  The `TransactionModel` class has been given the responsibility to perform any necessary conversions that are required to change the external representation to the new internal representation. 
+In the new `TransactionModel`, the data is stored in its primitive form. Unlike in the  previous transformation function, the data is not converted in the transformer.  The `TransactionModel` class has been given the responsibility to perform any necessary conversions that are required to change the external representation to the new internal representation. 
 
 You can see that the `TransactionModel.init` converts:
 
