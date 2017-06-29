@@ -25,7 +25,7 @@ In reality, most view controllers end up being a monolithic repository containin
 - data conversion, from source or to display
 - data transformation, such as grouping, summarizing or other more complex tasks
 
-As you may have heard before, this is kind of viewController is now known as a *Massive ViewController*.
+As you may have heard before, this is kind of viewController is known as a *Massive ViewController*.
 
 ## Introducing the Transformer Class
 
@@ -160,7 +160,7 @@ Besides encapsulating the code responsible for the transformation, `TransactionL
 - the responsibility for conversion of output data has been moved to the `TransactionListAdapter`. 
 - the iterator on the array of transactions has been replaced with an `IndexingIterator`.​
 
-These changes leave the `TransactionListTwoSourceTransformer` with one responsibility: convert the primitive data input to primitive output by recognizing the date groupings and exceptions, as well as calculating a total and grand total. This is pretty simple. Actually, not quite: in a future post I elaborate on how the structure of code was designed!
+These changes leave the `TransactionListTwoSourceTransformer` with one responsibility: convert the primitive data input to primitive output by recognizing the date groupings and exceptions, as well as calculating a total and grand total. This is pretty simple. In a future post I elaborate on how the structure of code was designed.
 
 ```swift
 class TransactionListTwoSourceTransformer {
@@ -224,7 +224,7 @@ class TransactionListTwoSourceTransformer {
 
 ## The Adapter
 
-The Adapter implements a significant change from the [previous version](https://github.com/lyleresnick/ReportTableAdapterDemo/blob/master/ReportTableAdapterDemo/TransactionListAdapter.swift). Previously, the Adapter's Rows were implemented using structs - it now uses enums instead.
+The Adapter implements a significant change from the [previous version](https://github.com/lyleresnick/ReportTableAdapterDemo/blob/master/ReportTableAdapterDemo/TransactionListAdapter.swift). Previously, the Adapter's Rows were implemented using structs - they are now implemented as enums.
 
 ```swift
 enum TransactionListRow {
@@ -308,9 +308,9 @@ private extension TransactionListRow {
 }
 ```
 
-Except for the changing structs to enums, the other changes to the adapter are fairly insignificant. 
+Besides changing the structs to enums, all of the other changes I made to the adapter are fairly insignificant. 
 
-The `UITableViewDataSource` implementation has hardly changed at all, except for the conversion of the `cellId` 
+Except for the conversion of the `cellId`, the `UITableViewDataSource` implementation has not changed at all.
 
 ```swift
 class TransactionListAdapter: NSObject {
@@ -341,10 +341,10 @@ extension TransactionListAdapter: UITableViewDelegate {
 }
 ```
 
-The method extension on `Double` formalizes the conversion to string. It could have been implemented as a private method, but I prefer this syntactic sugar - it makes it easier read at its usage. 
+The method extension on `Double` formalizes the conversion to string. It could have been implemented as a method, but I prefer this syntactic sugar - it makes it easier code and read. 
 
 ```swift
-extension Double {
+private extension Double {
     var asString: String {
         return String(format: "%0.2f", self)
     }
