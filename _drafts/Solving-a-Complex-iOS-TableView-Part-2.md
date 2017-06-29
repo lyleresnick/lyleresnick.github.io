@@ -12,14 +12,14 @@ In [part 1]({{site.url}}/blog/2017/05/13/Solving-a-Complex-iOS-TableView.html) o
 - take advantage of a few key Swift features, namely failable enum initializers, enums with associated values, and extensions and
 - redistribute the code which converts the input and output data.
 
-The complete app which demonstrates this refactoring can be found at [**ReportTableDemo**](https://github.com/lyleresnick/ReportTableDemo).
+The complete app which demonstrates this refactoring can be found at [**ReportTableDemo**](https://github.com/lyleresnick/ReportTableDemo). The app which I will be refactoring can be found at [**ReportTableAdapterDemo**](https://github.com/lyleresnick/ReportTableAdapterDemo).
 
 
 ## Responsibilities of the ViewController 
 
 The main responsibility of a viewController is to configure the layout of its associated views and respond  to user interaction with those views. Pretty straightforward.
 
-In reality, most view controllers end up being a monolithic repository containing all of the code that the view controller depends on. This would include aspects such as:
+In reality, most view controllers end up being a monolithic repository containing all of the code that the view controller depends on. This includes concerns such as:
 
 - data access, local or remote
 - data conversion, from source or to display
@@ -67,9 +67,9 @@ The `TransactionGroup` enum demonstrates an idiom for representing data whose va
 
 The enum rawValue initializer is great a way to check for the validity of externally stored data that actually represents an exclusive set of values such as a set of application states, a set of configuration values, or, as in our case, an encoding for a sign. 
 
-The initializer is *failable*, so invalid data can be detected early simply by converting it using the initializer. This removes the need to convert data at a later stage of processing, where one would prefer not to be dealing  with possible exceptions. 
+The initializer is *failable*, so invalid data can be detected early simply by converting it using the initializer. This removes the need to convert data at a later stage of processing, where one would prefer not to be dealing  with exceptions. 
 
-As a bonus, when `switch` cases are an enumerated type, the swift compiler will check that the cases are exhaustive. When a new case is added in the future, the code will not compile if the new case is not added to the `switch`.  
+As a bonus, when `switch` cases are an enumerated type, the Swift compiler will check that the cases are exhaustive. When a new case is added in the future, the code will not compile if the new case is not added to the `switch`.  
 
 ```swift
 enum TransactionGroup: String {
@@ -88,11 +88,11 @@ enum TransactionGroup: String {
 }
 ```
 
-In the original [`TransactionModel`](https://github.com/lyleresnick/ReportTableAdapterDemo/blob/master/ReportTableAdapterDemo/TransactionModel.swift), each data value was stored as a string. Generally, unless a value can be processed as a string, you will have to be convert it to its primitive type. By primitive, I mean in a form that I can be naturally processed, like a date, a decimal, or a URL.
+In the original [`TransactionModel`](https://github.com/lyleresnick/ReportTableAdapterDemo/blob/master/ReportTableAdapterDemo/TransactionModel.swift), each data value was stored as a string. Generally, unless a value can be processed as a string, you will have to be convert it to its primitive type. By primitive, I mean in a form that I can be naturally processed, like a date, a number, a URL, or an enum.
 
-In the new `TransactionModel`, the data is stored in its primitive form. Unlike in the  previous transformation function, the data is not converted in the transformer.  The `TransactionModel` class has been given the responsibility to perform any necessary conversions that are required to change the external representation to the new internal representation. 
+In the new `TransactionModel`, the data is stored in its primitive form. Unlike in the  previous transformation function, the data is not converted in the transformer.  The `TransactionModel` class has been given the responsibility to perform all conversions that are required to change the external representation to the new internal representation. 
 
-The `TransactionModel.init` process all of the input strings to primitive types. It converts:
+The `TransactionModel.init` processes all of the input strings to primitive types. It converts:
 
 - a group string to a group value
 - a date string to a date value
@@ -154,13 +154,13 @@ Previously, the data transformation was implemented as a method of the viewContr
 
 Besides encapsulating the code responsible for the transformation, `TransactionListTwoSourcesTransformer` has a few other significant changes:
 
-- the data is passed into the class at initialization, instead of being accessed directly. This was done to make it easier to set up tests for the transformer.
+- instead of being accessed directly, the data is passed into the class at initialization. This makes it easier to set up tests for the transformer.
 - the group types have been encapsulated by the `TransactionGroup` class. 
-- the responsibility for conversion of input data has been moved to the `TransactionModel` class. 
-- the responsibility for conversion of output data has been moved to the `TransactionListAdapter`. 
-- the iterator on the array of transactions has been replaced with an `IndexingIterator`.​
+- responsibility of converting input data to internal format has been moved to the `TransactionModel` class. 
+- responsibility of converting data to output format has been moved to the `TransactionListAdapter`. 
+- the iterator on the array of transactions has been replaced with an `IndexingIterator`.
 
-These changes leave the `TransactionListTwoSourceTransformer` with one responsibility: convert the primitive data input to primitive output by recognizing the date groupings and exceptions, as well as calculating a total and grand total. This is pretty simple. In a future post I elaborate on how the structure of code was designed.
+These changes leave the `TransactionListTwoSourceTransformer` with one responsibility: convert the primitive data input to primitive output by recognizing the date groupings and exceptions, as well as calculating a total and grand total. This is pretty simple. In a future post I will elaborate on how the structure of code was designed.
 
 ```swift
 class TransactionListTwoSourceTransformer {
@@ -239,11 +239,11 @@ enum TransactionListRow {
 }
 ```
 
-I like the enum notation, because it's more compact than a struct. They preserve the comparable property that I previously wanted from the structs. I really like the that the enum *namespaces* the cases. When you implement this kind of solution to drive a TableView, you end up with a lot of structs that have really long names. You need to have long names keep them unique and to make it obvious which VIPER stack they belong to.
+I like the enum notation, because it's more compact than a struct. They preserve the comparable property that I previously wanted from the structs. I really like the that the enum *namespaces* the cases. When you implement this kind of solution to drive a TableView, you end up with a lot of structs that have really long names. You need to have long names keep them unique and to make it obvious which scene they belong to.
 
-You may be wondering where the `cellId` and `height` information have gone. Since each is a constant related to a given case, they have been implemented as a read only variables of the `TransactionListRow`.  
+You may be wondering where the `cellId` and `height` information have gone. Since both are constants related to a given row type, they have been implemented as a read only variables of the `TransactionListRow`.  
 
-Normally you would see the variables implemented within the enum. Here they have been moved to a private extension in the Adapter file, because the adapter is the only class that needs the information. The move also allows the `CellId` cases to continue to be private.
+Normally you would see the variables implemented within the enum. Here they have been moved to a private extension in the Adapter file, because the adapter is the only class that needs the information.
 
 Notice that, here, `cellId` returns a `String`. In the previous version, it returned a `CellId`. The implementation of `cellId` is now completely private. It returns a closure which selects a `CellId` which is then converted to a string.
 
@@ -308,9 +308,7 @@ private extension TransactionListRow {
 }
 ```
 
-Besides changing the structs to enums, all of the other changes I made to the adapter are fairly insignificant. 
-
-Except for the conversion of the `cellId`, the `UITableViewDataSource` implementation has not changed at all.
+Besides changing the structs to enums, all of the other changes I made to the adapter are fairly insignificant. Except for the conversion of the `cellId`, the `UITableViewDataSource` implementation has not changed at all.
 
 ```swift
 class TransactionListAdapter: NSObject {
@@ -416,9 +414,8 @@ The Adapter is no longer responsible for converting input data, such as the inbo
 
 ## Summary
 
-In this demo, the size of the ViewController was reduced to its bare minimum. It  contains only the code needed to call the Transformer. The Transformer is easy to test because the data is passed as a parameter at instantiation.
+In this rendering of a complex tableView, the size of the ViewController was reduced to its bare minimum. It  contains only the code needed to call the Transformer. The Transformer is easy to test because the data is passed as a parameter at instantiation.
 
-The input data was converted from `Strings` to its most useful primitive type and validated at instantiation of the TransactionModel. This was done so that it can be conveniently used in calculations. When the calculations are finished, the data is then converted into the form which is easiest to display in a view. The viewable data is finally placed in ViewModels implemented as enums, which can be directly displayed by the Adapter. 
+Each item of input data was validated and converted from a `String` to its primitive type at instantiation of the TransactionModel. This was done so that it can be conveniently used in calculations. When the calculations were finished, the data was then converted into the form which was easiest to display in a view. The viewable data was finally placed in ViewModels implemented as enums, which can be directly displayed by the Adapter. 
 
-The adapter has changed little from the previous version, even though the implementation of the rows has been changed from `struct` to `enum`.
-
+The adapter has changed little from the previous version, even though the implementation of the rows has been changed from `struct` to `enum`. In the next post, I will refactor this version to use a VIPER architecture.
