@@ -418,4 +418,6 @@ In this rendering of a complex tableView, the size of the ViewController was red
 
 Each item of input data was validated and converted from a `String` to its primitive type at instantiation of the TransactionModel. This was done so that the data was ready to be used in calculations. When the Transformer completed a calculation, the result was converted by the Adapter, into a form which was easiest to display in a view. The viewable data was finally placed in ViewModels implemented as enums, which can be directly displayed by the Adapter. 
 
-The adapter has changed little from the previous version, even though the implementation of the rows has been changed from `struct` to `enum`. In the next post, I will refactor this version to use a VIPER architecture.
+The adapter has changed little from the previous version, even though the implementation of the rows has been changed from `struct` to `enum`. 
+
+In the next post, I will refactor this version to use a VIPER architecture.
