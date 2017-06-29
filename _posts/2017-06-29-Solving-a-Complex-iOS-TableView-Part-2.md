@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Solving a Complex iOS TableView Part 2"
-date: 2017-06-01
+date: 2017-06-29
 ---
 
 ## Introduction
@@ -416,6 +416,6 @@ The Adapter is no longer responsible for converting input data, such as the inbo
 
 In this rendering of a complex tableView, the size of the ViewController was reduced to its bare minimum. It  contains only the code needed to call the Transformer. The Transformer is easy to test because the data is passed as a parameter at instantiation.
 
-Each item of input data was validated and converted from a `String` to its primitive type at instantiation of the TransactionModel. This was done so that it can be conveniently used in calculations. When the calculations were finished, the data was then converted into the form which was easiest to display in a view. The viewable data was finally placed in ViewModels implemented as enums, which can be directly displayed by the Adapter. 
+Each item of input data was validated and converted from a `String` to its primitive type at instantiation of the TransactionModel. This was done so that the data was ready to be used in calculations. When the Transformer completed a calculation, the result was converted by the Adapter, into a form which was easiest to display in a view. The viewable data was finally placed in ViewModels implemented as enums, which can be directly displayed by the Adapter. 
 
 The adapter has changed little from the previous version, even though the implementation of the rows has been changed from `struct` to `enum`. In the next post, I will refactor this version to use a VIPER architecture.
