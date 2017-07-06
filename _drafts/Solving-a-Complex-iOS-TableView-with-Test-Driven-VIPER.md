@@ -10,17 +10,27 @@ In [part 3]({{site.url}}/blog/2017/05/13/Solving-a-Complex-iOS-TableView-with-Te
 
 The complete app which demonstrates this refactoring can be found at [**CleanTDDReportTableDemo**](https://github.com/lyleresnick/CleanTDDReportTableDemo). The app which I will be refactoring can be found at [**CleanReportTableDemo**](https://github.com/lyleresnick/CleanReportTableDemo).
 
-## Benefits of TDD
+Some of the benefits of TDD are 
 
-Some benefits of TDD are 
+- a focus on classes which conform to the SRP make it easier to change the code in the future
+- bugs are uncovered very early in the process so the code just works
+- code is complete because there is no bias to testing only the golden path
+- for code driven by events from sensors, you do not have to rely on actual data from the sensors
 
-- better classes which conform to the SRP, making it easier to change the code in the future
-- code that works
-- code that is complete - especially when it concerns non-golden paths.
+I want to show you how VIPER helps you apply TDD. 
 
-In want to show you how VIPER helps you apply TDD. 
+TDD employs unit testing to get the job done. In general, the hardest part of TDD is determining the size of a unit. With respect to iOS, the hardest part of unit testing is determining how to break a ViewController into testable units.  
 
-TDD employs unit testing to get the job done. In general, the hardest part of TDD is determining the size of a unit. With respect to iOS, the hardest part of unit testing is determining how to break apart a ViewController into units.  Unit testing also uses the idea of a System Under Test (SUT) - you can also call it a Class Under Test. The units to test are the public methods of the SUT.
+Unit testing employs the idea of a System Under Test (SUT). You could also refer to it as a Class Under Test. A unit is a public method of a SUT. 
 
-When using VIPER, as you saw in part 3, the structure of each View is predetermined: the ViewController, the Presenter, the UseCase, the EntityGateway and the additional Transformer. Each one is an class with a very specific role. These Classes comprise most of the SUTs we need to get the job done.
+Breaking a ViewController into many coordinated classes is a practice which yields many *seam*s. A seam is a place in the code where one class sends a message to another class.
 
+As you saw in part 3, by using the VIPER architecture, the structure of each View is already broken up in to many classes: the ViewController, the Presenter, the UseCase, the EntityGateway, the Router and the additional Transformer. Each one is an class with a very specific role. These classes comprise most of the SUTs we need to get the job done. It also presents a plethora of predetermined seams - just what we need.
+
+The one thing that you need to know about TDD is that even though you write the tests first, you need to have an overall plan - VIPER starts you off with a macro-plan in which you can fit your own plan. Its kind of  like TDD and VIPER were made for one another.
+
+## So Lets Get Started
+
+The usual question is where do I start.  Once you get used to the TDD process you can start pretty much wherever you like. 
+
+I suggest that you start with the simplest tests you can do
