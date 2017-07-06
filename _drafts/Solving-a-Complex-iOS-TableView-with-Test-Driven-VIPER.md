@@ -14,7 +14,8 @@ Some of the benefits of TDD are
 
 - a focus on classes which conform to the SRP make it easier to change the code in the future
 - bugs are uncovered very early in the process so the code just works
-- code is complete because there is no bias to testing only the golden path
+- refactoring is safe because passing tests ensure that refactoring is done correctly 
+- code is complete because there is no bias towards testing only the golden path
 - for code driven by events from sensors, you do not have to rely on actual data from the sensors
 
 I want to show you how VIPER helps you apply TDD. 
@@ -33,4 +34,7 @@ The one thing that you need to know about TDD is that even though you write the 
 
 The usual question is where do I start.  Once you get used to the TDD process you can start pretty much wherever you like. 
 
-I suggest that you start with the simplest tests you can do
+I suggest that you start with the simplest tests you can do.
+
+The first thing Im going to do is create the major  
+
