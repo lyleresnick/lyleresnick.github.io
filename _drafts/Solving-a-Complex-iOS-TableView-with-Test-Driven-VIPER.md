@@ -28,13 +28,40 @@ Breaking a ViewController into many coordinated classes is a practice which yiel
 
 As you saw in part 3, by using the VIPER architecture, the structure of each View is already broken up in to many classes: the ViewController, the Presenter, the UseCase, the EntityGateway, the Router and the additional Transformer. Each one is an class with a very specific role. These classes comprise most of the SUTs we need to get the job done. It also presents a plethora of predetermined seams - just what we need.
 
-The one thing that you need to know about TDD is that even though you write the tests first, you need to have an overall plan - VIPER starts you off with a macro-plan in which you can fit your own plan. Its kind of  like TDD and VIPER were made for one another.
+The one thing that you need to know about TDD is that even though you write the tests first, you need to have an overall plan - VIPER starts you off with a macro-plan in which you can fit your own plan. Its kind of  like TDD and VIPER were made for one another. TDD drives your plan, it does not do the coding for you. 
 
 ## So Lets Get Started
 
-The usual question is where do I start.  Once you get used to the TDD process you can start pretty much wherever you like. 
+The usual question is where do I start.  I find it interesting that once you get used to the TDD process you can start pretty much wherever you like - just find a seam. 
+
+**TODO: add output images here** 
+
+I want to remind you of what the major seams are that VIPER provides
+
+**TODO: add interacton diagram here ** 
+
+As the diagram shows VIPER provides seams between: 
+
+- the ViewController and the Presenter
+- the Presenter and the UseCase 
+- the UseCase and the EntityGateway
+- the UseCase and the Presenter 
+- the Presenter and the ViewController 
+
+Thats alot of seams that magically opened up - but there are more. I get one more seam when I decompose the UseCase to introduce the Transformer. The seams are now found between: 
+
+- the UseCase and the Transformer
+- the Transformer and the EntityGateway 
+- the Transformer and the Presenter 
+
+In situations where the ViewController contains a table, I can get one more seam when I further decompose the ViewController to introduce the Adapter. They seams are now found between: 
+
+- the ViewController and the Adapter
+- the Adapter and the Presenter 
+
+For this demonstration I am going to work from the output because that is what defines the requirement. 
 
 I suggest that you start with the simplest tests you can do.
 
-The first thing Im going to do is create the major  
+The first thing I'm going to do is create the major VIPER Classes
 
