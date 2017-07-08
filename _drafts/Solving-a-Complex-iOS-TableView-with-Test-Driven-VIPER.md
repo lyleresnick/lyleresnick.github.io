@@ -44,24 +44,23 @@ As the diagram shows VIPER provides seams between:
 
 - the ViewController and the Presenter
 - the Presenter and the UseCase 
-- the UseCase and the EntityGateway
-- the UseCase and the Presenter 
-- the Presenter and the ViewController 
-
-Thats alot of seams that magically opened up - but there are more. I get one more seam when I decompose the UseCase to introduce the Transformer. The seams are now found between: 
-
 - the UseCase and the Transformer
 - the Transformer and the EntityGateway 
 - the Transformer and the Presenter 
 
-In situations where the ViewController contains a table, I can get one more seam when I further decompose the ViewController to introduce the Adapter. They seams are now found between: 
+That's alot of seams that have magically made themselves obvious - but there is one more that I want to mention. In situations where the ViewController contains a table, I can get one more seam when I further decompose the ViewController to introduce the Adapter. The new seams are found between: 
 
 - the ViewController and the Adapter
 - the Adapter and the Presenter 
 
-For this demonstration I am going to work from the output because that is what defines the requirement. 
+For this demonstration I am going to work from the output because that is what defines the requirement in this case. 
 
-I suggest that you start with the simplest tests you can do.
+I generally suggest that you start with the simplest tests you can do.
 
-The first thing I'm going to do is create the major VIPER Classes
 
+
+## TransactionListConnectorTests
+
+The first thing I'm going to do is create the major VIPER Classes and then make sure that I can connect them together.
+
+Im 
