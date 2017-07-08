@@ -41,7 +41,6 @@ I want to remind you of what the major seams are that VIPER provides
 **TODO: add interacton diagram here ** 
 
 As the diagram shows VIPER provides seams between: 
-
 - the ViewController and the Presenter
 - the Presenter and the UseCase 
 - the UseCase and the Transformer
@@ -49,7 +48,6 @@ As the diagram shows VIPER provides seams between:
 - the Transformer and the Presenter 
 
 That's alot of seams that have magically made themselves obvious - but there is one more that I want to mention. In situations where the ViewController contains a table, I can get one more seam when I further decompose the ViewController to introduce the Adapter. The new seams are found between: 
-
 - the ViewController and the Adapter
 - the Adapter and the Presenter 
 
@@ -61,6 +59,231 @@ I generally suggest that you start with the simplest tests you can do.
 
 ## TransactionListConnectorTests
 
-The first thing I'm going to do is create the major VIPER Classes and then make sure that I can connect them together.
+In order to get the test rolling I'm going to create the major VIPER Classes and then make sure that I can connect them together.
 
-Im 
+**TODO: this should go into the non test version**
+
+Whenever possible, I prefer to inject dependencies via the constructor as opposed to via a property, so that I am assured that the dependencies are set.  This is how I designed the Presenter and the UseCase. I could not design the ViewController and the Adapter this way because they are constructed by IB. I could have created the Adapter in code, but all other alternatives still require parameter injection of the presenter, due to timing of construction vs attachment to the table.
+
+**TODO: ——-**
+
+
+
+My first SUT is the `TransactionListConnector`. I try to create one in the test setup, but of course it will not compile because it does not exist. Since the purpose of the connector is to connect the ViewController, Adapter, Presenter and UseCase, I have to let the connector know about them and I choose to do this by  injection.
+
+```swift
+class TransactionListConnectorTests: XCTestCase {
+    
+    private var sut: TransactionListConnector!
+    private var adapter: TransactionListAdapter!
+    private var controller: TransactionListViewController!
+    private var useCase: TransactionListUseCase!
+    private var presenter: TransactionListPresenter!
+    
+    override func setUp() {
+        super.setUp()
+        
+        controller = TransactionListViewController()
+        adapter = TransactionListAdapter()
+        useCase = TransactionListUseCase(entityGateway: FakeNilEntityGateway())
+        presenter = TransactionListPresenter(useCase: useCase)
+        
+        sut = TransactionListConnector(viewController: controller, adapter: adapter, useCase: useCase, presenter: presenter)
+    }
+}
+```
+
+Knowing that I want to set the Connector's viewController to a ViewController, I  write the test the following test, which of course fails because there is no code. 
+
+```swift
+func test_Init_SetsSUTsViewController() {
+      XCTAssertTrue(sut.viewController === controller)
+}
+```
+
+I add the code to create a bare bones ViewController and pass it as a parameter to the SUT. I also add code to set the viewController property. I run the test and it passes. 
+
+```swift
+class TransactionListViewController: UIViewController {}
+```
+I then do the same thing with the Adapter, UseCase and Presenter.
+```swift
+    func test_Init_SetsAdapter() {
+        XCTAssertTrue(sut.adapter === adapter)
+    }
+    
+    func test_Init_SetsPresenter() {
+        XCTAssertTrue(sut.presenter === presenter)
+    }
+    
+    func test_Init_SetsUseCase() {
+        XCTAssertTrue(sut.useCase === useCase)
+    }
+```
+
+```swift
+class TransactionListPresenter {
+    private let useCase: TransactionListUseCase
+    
+    init(useCase: TransactionListUseCase) {
+        self.useCase = useCase
+    }
+}
+```
+
+```swift
+class TransactionListAdapter: NSObject {}
+```
+
+```swift
+class TransactionListUseCase {
+    private let entityGateway: EntityGateway
+    
+    init(entityGateway: EntityGateway) {
+        self.entityGateway = entityGateway
+    }
+}
+```
+Since the EntityGateway is injected into the UseCase, I have to create a fake EntityGateway with fake data managers. This is will facilitate testing without having to rely on real data sources.
+
+```swift
+class FakeNilEntityGateway: EntityGateway {
+    var twoSourceManager: TwoSourceManager = NilTwoSourceManagerImpl()
+}
+
+class NilTwoSourceManagerImpl: TwoSourceManager {
+    
+    func fetchAuthorizedTransactions() -> [TransactionEntity]? { return nil }
+    func fetchPostedTransactions() -> [TransactionEntity]? { return nil }
+}
+```
+
+I now have completed the init for the Connector and created all of the VIPER classes that I will be using.
+
+```swift
+class TransactionListConnector {
+    
+    let viewController: TransactionListViewController
+    let adapter: TransactionListAdapter
+    let presenter: TransactionListPresenter
+    let useCase: TransactionListUseCase
+    
+    init(viewController: TransactionListViewController, adapter: TransactionListAdapter, useCase: TransactionListUseCase, presenter: TransactionListPresenter) {
+        
+        self.viewController = viewController
+        self.adapter = adapter
+        self.presenter = presenter
+        self.useCase = useCase
+    }
+}
+```
+
+Note that the properties are not marked `private`. This is due to the fact that swift properties are not key-value coding compliant unless they are inherited from `NSObject`. Tests win over encapsulation.
+
+Knowing that I want to set the ViewController's presenter to a Presenter, I write the following test, which of course cannot compile because there is no code.  
+
+```swift
+    func test_Configure_SetsControllersPresenter() {
+        XCTAssertTrue(controller.presenter === presenter)
+    }
+```
+
+In order to make the test pass, I create a method on the SUT called `configure`, whose job will be to set all of the VIPER connections that cannot be connected via each class's `init`.  
+
+```swift
+    func configure() {
+        viewController.presenter = presenter
+    }
+```
+
+I call this method at the end of the `setUp` method.
+
+```swift
+        sut.configure()
+```
+
+I also have to add the property to ViewController property.
+
+```swift
+class TransactionListViewController: UIViewController {
+
+    var presenter: TransactionListPresenter! 
+}
+```
+
+The test passes.
+
+I create 3 more tests, all of which cannot compile.
+
+```swift
+    func test_Configure_SetsAdaptersPresenter() {
+        XCTAssertTrue(adapter.presenter === presenter)
+    }
+    
+    func test_Configure_SetsUseCasesOutput() {
+        XCTAssertTrue(useCase.output === presenter)
+    }
+    
+    func test_Configure_SetsPresentersOutput() {
+        XCTAssertTrue(presenter.output === controller)
+    }
+```
+
+One by one, in tandem with the tests, I add the required properties to the classes and the tests all pass.
+
+
+```swift
+class TransactionListPresenter {
+    
+    weak var output: TransactionListPresenterOutput!
+    private let useCase: TransactionListUseCase
+    
+    init(useCase: TransactionListUseCase) {
+        self.useCase = useCase
+    }
+}
+
+class TransactionListAdapter: NSObject {
+    
+    var presenter: TransactionListPresenter!
+}
+
+class TransactionListUseCase {
+
+    weak var output: TransactionListUseCaseOutput!
+    private let entityGateway: EntityGateway
+    
+    init(entityGateway: EntityGateway) {
+        self.entityGateway = entityGateway
+    }
+}
+```
+
+Here is the competed configuration method:
+
+```swift
+// in Connector
+  func configure() {
+        viewController.presenter = presenter
+        adapter.presenter = presenter
+        presenter.output = viewController
+        useCase.output = presenter
+    }
+```
+
+At this point I want to mention that one usually only writes tests on the SUT, but in this case the SUT is configuring other classes and it is this very behaviour that we want to test.
+
+I also want to mention that I understand how tedious this seems, since you would have to do it for every VIPER stack that you want to create. I think a better idea is to generate the stack from a template! 
+
+Now that we have a place to put all of the code that we are going to write, lets move on to the output of the ViewController.
+
+## Construction of The ViewController
+
+Since the requirement is mostly about the output i think ill start by drawing the output in IB: 
+
+![IBLayout]({{ site.url }}/assets/IBLayout.png)
+
+I covered off the technique to produce this report in  [part 1]({{site.url}}/blog/2017/06/29/Solving-a-Complex-iOS-TableView.html). There, you can also see the finished output.
+
+What I am interested in are the tests.
+
