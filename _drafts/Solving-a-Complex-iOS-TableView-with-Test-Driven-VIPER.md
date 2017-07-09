@@ -279,11 +279,252 @@ Now that we have a place to put all of the code that we are going to write, lets
 
 ## Construction of The ViewController
 
-Since the requirement is mostly about the output i think ill start by drawing the output in IB: 
+Since the requirement is mostly about the output I start by drawing the output in IB: 
 
 ![IBLayout]({{ site.url }}/assets/IBLayout.png)
 
-I covered off the technique to produce this report in  [part 1]({{site.url}}/blog/2017/06/29/Solving-a-Complex-iOS-TableView.html). There, you can also see the finished output.
+I covered the technique to produce this report in  [part 1]({{site.url}}/blog/2017/05/13/Solving-a-Complex-iOS-TableView.html). There, you can also see the final [output]({{site.url}}/blog/2017/05/13/Solving-a-Complex-iOS-TableView.html#a-complex-requirement).
 
-What I am interested in are the tests.
+Here I want to demonstrate how to build out the app using tests.
+
+### TransactionListViewControllerIBInjectionTests
+
+I want to create a tableView, so the first test I write is:
+
+```swift
+ func test_IB_InjectsAllSutOutlets() {
+      tableView = sut.value(forKey: "tableView") as! UITableView
+      XCTAssertNotNil(tableView)
+ }
+```
+
+ Of course this test cannot compile, so i add the code in setup to create the SUT.
+
+```swift
+    override func setUp() {
+        super.setUp()
+
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        sut = storyboard.instantiateViewController(withIdentifier: 
+        	String(describing: TransactionListViewController.self) ) 
+        		as! TransactionListViewController
+        
+        _ = sut.view
+    }
+```
+
+This pulls the viewController (the SUT) out of the storyboard. Accessing the view causes the viewControllers `viewDidLoad()` to be called. Although the test  will compile, it crashes because there is no such storyboard. I create the storyboard, add a viewController of type `TransactionListViewController`,  add a tableView to it and create an outlet in the viewController.
+
+```swift
+    @IBOutlet fileprivate weak var tableView: UITableView!
+```
+
+I run the test and it passes. 
+
+Notice I used key-value coding to access the outlet. This technique allows me to access the property value while still declaring the property private.
+
+I want IB to allocate the adapter so I add a failing assertion to the existing test.
+
+```swift
+        XCTAssertNotNil(sut.value(forKey: "adapter"))
+```
+
+I add an object of type `TransactionListAdapter` to the tableView and  I create another outlet.
+
+```swift
+    @IBOutlet fileprivate weak var adapter: TransactionListAdapter!
+```
+
+I run the test and it passes. 
+
+I want IB to attach the adapter to the table so I add two failing assertions to the existing test.
+
+```swift
+        XCTAssertNotNil(tableView.value(forKey: "dataSource"))
+        XCTAssertNotNil(tableView.value(forKey: "delegate"))
+```
+
+I attach the two outlets of the tableView to the Adapter. The test fails because the Adapter does not yet implement the `UITableViewDataSource` and `UITableViewDelegate`. I implement as follows, returning dummy values where neccessary.
+
+```swift
+extension TransactionListAdapter: UITableViewDataSource  {
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return 1
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        return UITableViewCell()
+    }
+}
+
+extension TransactionListAdapter: UITableViewDelegate {
+    
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 60
+    }
+}
+```
+
+I run the test and it passes. The final test method looks like this:
+
+```swift
+func test_IB_InjectsAllSutOutlets() {
+
+    tableView = sut.value(forKey: "tableView") as! UITableView
+    XCTAssertNotNil(tableView)
+    XCTAssertNotNil(sut.value(forKey: "adapter"))
+    XCTAssertNotNil(tableView.value(forKey: "dataSource"))
+    XCTAssertNotNil(tableView.value(forKey: "delegate"))
+}
+```
+
+The ViewController now looks like this:
+
+```swift
+class TransactionListViewController: UIViewController {
+
+    var presenter: TransactionListPresenter! 
+    @IBOutlet fileprivate weak var tableView: UITableView!
+    @IBOutlet fileprivate weak var adapter: TransactionListAdapter!
+}
+```
+
+Next, I refactor the assignment to  `tableView`  up to `setUp()` and I create a failing test to dequeue the cells.
+
+```swift
+func test_tableView_CanDequeueAllCellIds() {
+        
+    for cellId in ["header", "subheader", "detail", "subfooter", "footer", "grandfooter", "message"] {
+
+        let cell = tableView.dequeueReusableCell(withIdentifier: cellId)
+        XCTAssertNotNil(cell, "Can't dequeue cellId: \(cellId)" )
+    }
+}
+```
+
+For each of the 7 required cells, I create a cell class for each row, draw each cell in IB and set its class and row identifier. Here is an example for the header cell:
+
+```swift
+class TransactionListHeaderCell: UITableViewCell {}
+```
+
+ I run the test and it passes. Next, I create a failing test to check the injection of the outlets of each cell class. Here is an example for the header cell:
+
+```swift
+    func test_IB_InjectsOutletsOfHeaderCell() {
+        
+        let cell = tableView.dequeueReusableCell(withIdentifier: "header") as! TransactionListHeaderCell
+        let titleLabel = cell.value(forKey: "titleLabel")
+        XCTAssertNotNil(titleLabel)
+    }
+
+```
+
+Next I layout the required views into each cell and create and connect the respective outlets.
+
+```
+class TransactionListHeaderCell: UITableViewCell {
+    
+    @IBOutlet private var titleLabel: UILabel!
+}
+```
+
+ I run the tests and they pass. 
+
+
+
+### TransactionListViewControllerCellTests
+
+The next thing on the list of things to do is populate the cells with data. Even though each cell class can be considered an SUT, I decided put all of the cell tests into one file with a null setup.
+
+I already know from my experience with VIPER that each cell will need a method to bind the data from a row to a cell. I'm going to call this method `show(row:)`. So … I write failing test.
+
+```swift
+func test_HeaderCell_show_SetsCorrectly() {
+
+    let cell = TransactionListHeaderCell()
+    cell.setValue(UILabel(), forKey: "titleLabel")
+
+    cell.show(row: .header(title: testString))
+
+    let titleLabel = cell.value(forKey: "titleLabel") as! UILabel
+    XCTAssertTrue(titleLabel.text == testString)
+}
+```
+
+This test will not compile because the cell does not have a method named `show` and neither is there an enum called  `.header`. 
+
+First I introduce a protocol: 
+
+```swift
+protocol TransactionListCell {
+    func show( row: TransactionListViewModel )
+}
+```
+
+and a ViewModel: 
+
+```swift
+enum TransactionListViewModel {
+    case header(title: String)
+}
+```
+
+I then complete the cell implementation
+
+```swift
+class TransactionListHeaderCell: UITableViewCell, TransactionListCell {
+    
+    @IBOutlet private var titleLabel: UILabel!
+    
+    func show(row: TransactionListViewModel) {
+        
+        guard case let .header(title) = row else { fatalError("Expected: header") }
+        titleLabel.text = title
+    }
+}
+```
+
+I run the test and it passes.  Now I write the next failing test, add the enum to the ViewModel, and complete the cell implementation. Remember that Each assert must pass before code is written to pass the next assert.
+
+```swift
+ func test_SubheaderCell_show_SetsCorrectly() {
+        
+        let cell = TransactionListSubheaderCell()
+        cell.setValue(UILabel(), forKey: "titleLabel")
+        
+        cell.show(row: .subheader(title: testString, odd: true))
+        
+        let titleLabel = cell.value(forKey: "titleLabel") as! UILabel
+        XCTAssertTrue(titleLabel.text == testString)
+        XCTAssertTrue(cell.backgroundColor == 
+        	UIColor(rgb: TransactionListSubheaderCell.oddBackgroundRGB))
+    }
+```
+
+```swift
+enum TransactionListViewModel {
+    case header(title: String)
+    case subheader(title: String, odd: Bool)
+}
+```
+
+
+
+
+
+```swift
+class TransactionListSubheaderCell: UITableViewCell, TransactionListCell {
+    
+    @IBOutlet private var titleLabel: UILabel!
+    
+    func show(row: TransactionListViewModel) {
+        
+        guard case let .subheader( title, odd ) = row else { fatalError("Expected: subheader") }
+        titleLabel.text = title
+        setBackgroundColour(odd: odd)
+    }
+}
+```
 
