@@ -554,7 +554,66 @@ enum TransactionListViewModel {
 
 ### TransactionListViewModelTests
 
-Now that we've populated the cells with data, it time to populate the ViewModels with Data.
+Now that we've populated the cells with data from the ViewModels, the next step is to populate the ViewModels with data from the TransactionListUseCaseOutput. The TransactionListUseCaseOutput is the output of the transformation that converts the input stream into the output stream.
+
+ The presenter retains the ViewModels for consumption by the TableView.
+
+We write a failing test: 
+
+```swift
+    private var sut: TransactionListPresenter!
+    
+    override func setUp() {
+        super.setUp()
+        
+        let useCase = TransactionListUseCase(entityGateway: FakeNilEntityGateway())
+        sut = TransactionListPresenter(useCase: useCase)
+        sut.presentInit()
+    }
+    
+    func test_presentInit_ClearsAllRows() {
+        XCTAssertTrue(sut.rowCount == 0)
+        XCTAssertFalse(sut.odd)
+    }
+```
+
+None of the `rowCount` or `odd` properties or the `presentInit()` method exist so I add them to the Presenter.
+
+```swift
+    fileprivate var rows = [TransactionListViewModel]()
+    fileprivate(set) var odd = false
+    
+    func presentInit() {
+        odd = false
+        rows.removeAll()
+    }
+```
+
+I run the test and it passes. I do the same for the `presentHeader()` method:
+
+```swift
+    func test_presentHeader_AppendsHeader() { presentHeader(group: 
+        
+        sut.presentHeader(group: .authorized)
+        let row = sut.row(at: 0)
+        guard case .header(let title ) = row  else { XCTAssertTrue(false); return }
+        
+        XCTAssertTrue(title == "Authorized Transactions")
+    }
+```
+
+There is no `presentHeader(group:)`  or `row(at: )` method, so i add them to the presenter.
+
+```swift
+    func row(at index: Int) -> TransactionListViewModel { return rows[ index ] }
+
+    func presentHeader(group: TransactionGroup) {
+        rows.append(.header(title: group.toString() + " Transactions"));
+    }
+
+```
+
+
 
 
 
