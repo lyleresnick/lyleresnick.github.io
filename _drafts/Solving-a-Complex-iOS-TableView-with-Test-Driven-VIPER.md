@@ -602,7 +602,7 @@ I run the test and it passes. I do the same for the `presentHeader()` method:
     }
 ```
 
-There is no `presentHeader(group:)`  or `row(at: )` method, so i add them to the presenter.
+The test checks to see if a given title was generated and stored at the first position. There is no `presentHeader(group:)`  or `row(at: )` method, so I add them to the presenter.
 
 ```swift
     func row(at index: Int) -> TransactionListViewModel { return rows[ index ] }
@@ -613,7 +613,7 @@ There is no `presentHeader(group:)`  or `row(at: )` method, so i add them to the
 
 ```
 
-
+I run the test and it passes. I do the same for all of the other `presentX()` methods, one at a time.
 
 
 
