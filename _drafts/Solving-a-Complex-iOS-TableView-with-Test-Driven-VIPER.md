@@ -313,7 +313,7 @@ I want to create a tableView, so the first test I write is:
     }
 ```
 
-This pulls the viewController (the SUT) out of the storyboard. Accessing the view causes the viewControllers `viewDidLoad()` to be called. Although the test  will compile, it crashes because there is no such storyboard. I create the storyboard, add a viewController of type `TransactionListViewController`,  add a tableView to it and create an outlet in the viewController.
+This code pulls the viewController (the SUT) out of the storyboard. Accessing the view causes the viewControllers `viewDidLoad()` to be called. Although the test  will compile, it crashes because there is no such storyboard. I create the storyboard, add a viewController of type `TransactionListViewController`,  add a tableView to it and create an outlet in the viewController.
 
 ```swift
     @IBOutlet fileprivate weak var tableView: UITableView!
@@ -484,7 +484,7 @@ class TransactionListHeaderCell: UITableViewCell, TransactionListCell {
 }
 ```
 
-I run the test and it passes.  Now I write the next failing test, add the enum to the ViewModel, and complete the cell implementation. Remember that Each assert must pass before code is written to pass the next assert.
+I run the test and it passes.  Now I write the next failing test, add the enum to the ViewModel, and complete the cell implementation. Remember that each assert must pass before the next assert is written.
 
 ```swift
  func test_SubheaderCell_show_SetsCorrectly() {
@@ -522,7 +522,7 @@ class TransactionListSubheaderCell: UITableViewCell, TransactionListCell {
 }
 ```
 
-The background colour setting will be used by almost all of the cells, so i added the method to the protocol: 
+The background colour setting will be used by almost all of the cells, so I added the method to the protocol: 
 
 ```swift
 extension TransactionListCell where Self: UITableViewCell {
@@ -538,7 +538,7 @@ extension TransactionListCell where Self: UITableViewCell {
 } 
 ```
 
-I continued in the same manner for the rest of the 7 cells. You can view their implementations [here](https://github.com/lyleresnick/CleanTDDReportTableDemo/tree/master/CleanTDDReportTableDemo/Scenes/AccountDetailsTransactionList/View/Cells). Here is the final version of the ViewModel:
+I continued in the same manner for the rest of the 7 cells. You can view the cell implementations [here](https://github.com/lyleresnick/CleanTDDReportTableDemo/tree/master/CleanTDDReportTableDemo/Scenes/AccountDetailsTransactionList/View/Cells) and the tests [here](https://github.com/lyleresnick/CleanTDDReportTableDemo/blob/master/CleanTDDReportTableDemo/Scenes/AccountDetailsTransactionList/View/TransactionListCellTests.swift). Here is the final version of the ViewModel:
 
 ```swift
 enum TransactionListViewModel {
@@ -552,98 +552,9 @@ enum TransactionListViewModel {
 }
 ```
 
-Here is the final set of cell tests:
+### TransactionListViewModelTests
 
-```swift
-class TransactionListCellTests: XCTestCase {
-    
-    override func setUp() {
-        super.setUp()
-    }
-    
-    let testString = "TestString"
-    let testString2 = "TestString2"
-    
-    func test_HeaderCell_show_SetsCorrectly() {
-        
-        let cell = TransactionListHeaderCell()
-        cell.setValue(UILabel(), forKey: "titleLabel")
-        
-        cell.show(row: .header(title: testString))
-        
-        let titleLabel = cell.value(forKey: "titleLabel") as! UILabel
-        XCTAssertTrue(titleLabel.text == testString)
-    }
-    
-    func test_SubheaderCell_show_SetsCorrectly() {
-        
-        let cell = TransactionListSubheaderCell()
-        cell.setValue(UILabel(), forKey: "titleLabel")
-        
-        cell.show(row: .subheader(title: testString, odd: true))
-        
-        let titleLabel = cell.value(forKey: "titleLabel") as! UILabel
-        XCTAssertTrue(titleLabel.text == testString)
-        XCTAssertTrue(cell.backgroundColor == 
-        	UIColor(rgb: TransactionListSubheaderCell.oddBackgroundRGB))
-    }
-    
-    func test_DetailCell_show_SetsCorrectly() {
-        
-        let cell = TransactionListDetailCell()
-        cell.setValue(UILabel(), forKey: "descriptionLabel")
-        cell.setValue(UILabel(), forKey: "amountLabel")
-        
-        cell.show(row: .detail(description: testString, amount: testString2, odd: true))
-        
-        let descriptionLabel = cell.value(forKey: "descriptionLabel") as! UILabel
-        XCTAssertTrue(descriptionLabel.text == testString)
-        
-        let amountLabel = cell.value(forKey: "amountLabel") as! UILabel
-        XCTAssertTrue(amountLabel.text == testString2)
-        
-        XCTAssertTrue(cell.backgroundColor == 
-        	UIColor(rgb: TransactionListDetailCell.oddBackgroundRGB))
-    }
-    
-    func test_FooterCell_show_SetsCorrectly() {
-        
-        let cell = TransactionListFooterCell()
-        cell.setValue(UILabel(), forKey: "totalLabel")
-        
-        cell.show(row: .footer(total: testString, odd: false))
-        
-        let totalLabel = cell.value(forKey: "totalLabel") as! UILabel
-        XCTAssertTrue(totalLabel.text == testString)
-        XCTAssertTrue(cell.backgroundColor == 
-        	UIColor(rgb: TransactionListFooterCell.evenBackgroundRGB))
-    }
-    
-    func test_GrandFooterCell_show_SetsCorrectly() {
-        
-        let cell = TransactionListGrandFooterCell()
-        cell.setValue(UILabel(), forKey: "totalLabel")
-        
-        cell.show(row: .grandfooter(total: testString))
-        
-        let totalLabel = cell.value(forKey: "totalLabel") as! UILabel
-        XCTAssertTrue(totalLabel.text == testString)
-    }
-    
-    func test_MessageCell_show_SetsCorrectly() {
-        
-        let cell = TransactionListMessageCell()
-        cell.setValue(UILabel(), forKey: "messageLabel")
-        
-        cell.show(row: .message(message: testString))
-        
-        let totalLabel = cell.value(forKey: "messageLabel") as! UILabel
-        XCTAssertTrue(totalLabel.text == testString)
-    }
-}
-```
-
-
+Now that we've populated the cells with data, it time to populate the ViewModels with Data.
 
 
 
