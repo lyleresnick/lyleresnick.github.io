@@ -180,7 +180,7 @@ class TransactionListConnector {
 
 Note that the properties are not marked `private`. This is due to the fact that swift properties are not key-value coding compliant unless they are inherited from `NSObject`. Tests win over encapsulation.
 
-Knowing that I want to set the ViewController's presenter to a Presenter, I write the following test, which of course cannot compile because there is no code.  
+Knowing that I want to set the ViewController's `presenter` to a Presenter, I write the following test, which of course will not compile because there is no code.  
 
 ```swift
     func test_Configure_SetsControllersPresenter() {
@@ -432,9 +432,7 @@ class TransactionListHeaderCell: UITableViewCell {
 
  I run the tests and they pass. 
 
-
-
-### TransactionListViewControllerCellTests
+### TransactionListCellTests
 
 The next thing on the list of things to do is populate the cells with data. Even though each cell class can be considered an SUT, I decided put all of the cell tests into one file with a null setup.
 
@@ -510,10 +508,6 @@ enum TransactionListViewModel {
 }
 ```
 
-
-
-
-
 ```swift
 class TransactionListSubheaderCell: UITableViewCell, TransactionListCell {
     
@@ -528,3 +522,135 @@ class TransactionListSubheaderCell: UITableViewCell, TransactionListCell {
 }
 ```
 
+The background colour setting will be used by almost all of the cells, so i added the method to the protocol: 
+
+```swift
+extension TransactionListCell where Self: UITableViewCell {
+    
+    static var oddBackgroundRGB: Int { return 0xF7F8FC }
+    static var evenBackgroundRGB: Int { return 0xDDDDDD }
+
+    func setBackgroundColour(odd: Bool ) {
+        
+        let backgroundRgb = odd ? Self.oddBackgroundRGB : Self.evenBackgroundRGB
+        backgroundColor = UIColor( rgb: backgroundRgb )
+    }
+} 
+```
+
+I continued in the same manner for the rest of the 7 cells. You can view their implementations [here](https://github.com/lyleresnick/CleanTDDReportTableDemo/tree/master/CleanTDDReportTableDemo/Scenes/AccountDetailsTransactionList/View/Cells). Here is the final version of the ViewModel:
+
+```swift
+enum TransactionListViewModel {
+    case header(title: String)
+    case subheader(title: String, odd: Bool)
+    case detail(description: String, amount: String, odd: Bool)
+    case subfooter(odd : Bool)
+    case footer(total: String, odd: Bool)
+    case grandfooter(total: String)
+    case message(message: String)
+}
+```
+
+Here is the final set of cell tests:
+
+```swift
+class TransactionListCellTests: XCTestCase {
+    
+    override func setUp() {
+        super.setUp()
+    }
+    
+    let testString = "TestString"
+    let testString2 = "TestString2"
+    
+    func test_HeaderCell_show_SetsCorrectly() {
+        
+        let cell = TransactionListHeaderCell()
+        cell.setValue(UILabel(), forKey: "titleLabel")
+        
+        cell.show(row: .header(title: testString))
+        
+        let titleLabel = cell.value(forKey: "titleLabel") as! UILabel
+        XCTAssertTrue(titleLabel.text == testString)
+    }
+    
+    func test_SubheaderCell_show_SetsCorrectly() {
+        
+        let cell = TransactionListSubheaderCell()
+        cell.setValue(UILabel(), forKey: "titleLabel")
+        
+        cell.show(row: .subheader(title: testString, odd: true))
+        
+        let titleLabel = cell.value(forKey: "titleLabel") as! UILabel
+        XCTAssertTrue(titleLabel.text == testString)
+        XCTAssertTrue(cell.backgroundColor == 
+        	UIColor(rgb: TransactionListSubheaderCell.oddBackgroundRGB))
+    }
+    
+    func test_DetailCell_show_SetsCorrectly() {
+        
+        let cell = TransactionListDetailCell()
+        cell.setValue(UILabel(), forKey: "descriptionLabel")
+        cell.setValue(UILabel(), forKey: "amountLabel")
+        
+        cell.show(row: .detail(description: testString, amount: testString2, odd: true))
+        
+        let descriptionLabel = cell.value(forKey: "descriptionLabel") as! UILabel
+        XCTAssertTrue(descriptionLabel.text == testString)
+        
+        let amountLabel = cell.value(forKey: "amountLabel") as! UILabel
+        XCTAssertTrue(amountLabel.text == testString2)
+        
+        XCTAssertTrue(cell.backgroundColor == 
+        	UIColor(rgb: TransactionListDetailCell.oddBackgroundRGB))
+    }
+    
+    func test_FooterCell_show_SetsCorrectly() {
+        
+        let cell = TransactionListFooterCell()
+        cell.setValue(UILabel(), forKey: "totalLabel")
+        
+        cell.show(row: .footer(total: testString, odd: false))
+        
+        let totalLabel = cell.value(forKey: "totalLabel") as! UILabel
+        XCTAssertTrue(totalLabel.text == testString)
+        XCTAssertTrue(cell.backgroundColor == 
+        	UIColor(rgb: TransactionListFooterCell.evenBackgroundRGB))
+    }
+    
+    func test_GrandFooterCell_show_SetsCorrectly() {
+        
+        let cell = TransactionListGrandFooterCell()
+        cell.setValue(UILabel(), forKey: "totalLabel")
+        
+        cell.show(row: .grandfooter(total: testString))
+        
+        let totalLabel = cell.value(forKey: "totalLabel") as! UILabel
+        XCTAssertTrue(totalLabel.text == testString)
+    }
+    
+    func test_MessageCell_show_SetsCorrectly() {
+        
+        let cell = TransactionListMessageCell()
+        cell.setValue(UILabel(), forKey: "messageLabel")
+        
+        cell.show(row: .message(message: testString))
+        
+        let totalLabel = cell.value(forKey: "messageLabel") as! UILabel
+        XCTAssertTrue(totalLabel.text == testString)
+    }
+}
+```
+
+
+
+
+
+
+
+
+
+
+
+**TODO: figure out when to introduce the convenience init**
