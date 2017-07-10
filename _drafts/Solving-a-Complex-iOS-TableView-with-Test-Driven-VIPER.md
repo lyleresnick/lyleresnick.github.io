@@ -71,7 +71,61 @@ Whenever possible, I prefer to inject dependencies via the constructor as oppose
 
 **TODO: ——-**
 
+```swift
+class TransactionListConnectorTests: XCTestCase {
+    
+    private var sut: TransactionListConnector!
+    private var adapter: TransactionListAdapter!
+    private var controller: TransactionListViewController!
+    private var useCase: TransactionListUseCase!
+    private var presenter: TransactionListPresenter!
+    
+    override func setUp() {
+        super.setUp()
+        
+        controller = TransactionListViewController()
+        adapter = TransactionListAdapter()
+        useCase = TransactionListUseCase(entityGateway: FakeNilEntityGateway())
+        presenter = TransactionListPresenter(useCase: useCase)
+        
+        sut = TransactionListConnector(viewController: controller, adapter: adapter, useCase: useCase, presenter: presenter)
+        sut.configure()
+    }
+    
+    func test_Init_SetsViewController() {
+        XCTAssertTrue(sut.viewController === controller)
+    }
+    
+    func test_Init_SetsAdapter() {
+        XCTAssertTrue(sut.adapter === adapter)
+    }
+    
+    func test_Init_SetsPresenter() {
+        XCTAssertTrue(sut.presenter === presenter)
+    }
+    
+    func test_Init_SetsUseCase() {
+        XCTAssertTrue(sut.useCase === useCase)
+    }
+    
+    func test_Configure_SetsControllersPresenter() {
+        XCTAssertTrue(controller.presenter === presenter)
+    }
+    
+    func test_Configure_SetsAdaptersPresenter() {
+        XCTAssertTrue(adapter.presenter === presenter)
+    }
+    
+    func test_Configure_SetsUseCasesOutput() {
+        XCTAssertTrue(useCase.output === presenter)
+    }
+    
+    func test_Configure_SetsPresentersOutput() {
+        XCTAssertTrue(presenter.output === controller)
+    }
+}
 
+```
 
 My first SUT is the `TransactionListConnector`. I try to create one in the test setup, but of course it will not compile because it does not exist. Since the purpose of the connector is to connect the ViewController, Adapter, Presenter and UseCase, I have to let the connector know about them and I choose to do this by  injection.
 
