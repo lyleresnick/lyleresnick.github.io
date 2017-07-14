@@ -1,16 +1,16 @@
 ---
 layout: post
-title: "Solving a Complex iOS TableView"
+title: "Solving a Complex UITableView"
 date: 2017-05-13
 ---
 
 ## Introduction
 
-In this article I want to present a technique for solving a complex iOS TableView. By complex, I mean a UITableView that is required to display more rows than occurs in the original data set.  At the same time I will present simple technique to reduce the size of the UIViewController that owns the UITableView.
+In this article I want to present a technique for solving a complex UITableView. By complex, I mean a UITableView that is required to display more rows than occurs in the original data set.  At the same time I will present simple technique to reduce the size of the UIViewController that owns the UITableView.
 
 ## Dynamic Display
 
-We often get requirements to create tableViews that display more than one kind of row. Maybe the rows are alternately coloured and there is a refresh button or a total at the end of the table. Maybe in one state, a cell has a particular arrangement of views, but in another state, it has another arrangement.
+We often get requirements to create UITableView that displays more than one kind of row. Maybe the rows are alternately coloured and there is a refresh button or a total at the end of the table. Maybe in one state, a cell has a particular arrangement of views, but in another state, it has another arrangement.a 
 
 Usually, this kind of requirement can be solved by using the cell index, as given via `cellForRowAt` , to access the item at the same index in the input data set. At the time that `cellForRowAt` is called, you can determine: 
 
@@ -30,11 +30,11 @@ Over time, new requirements will present themselves. Unless this code is refacto
 
 I refer to the activity in `cellForRowAt` as *dynamic*, because the class of the cell has to be determined over and over, each time that `cellForRowAt` is called. This is in contrast to a *static* technique, where the  type of  the cell is predetermined, once, before `cellForRowAt` is ever called.
 
-## TableView Sections
+## UITableView Sections
 
 Occasionally, a more complicated requirement comes along, such as having to create a table view that displays many kinds of cells, where the cells repeat in regular cycles. An example of this would be a report which has repeating groups, where each group consists of a Header, followed by a repetition of Detail Rows, followed by a Footer. The Headers display a date, location or type; they may even contain a button. The Footer displays a total for the section. The Details display all of the other data from the input dataset. There may be more than one kind of Detail - some might display a button and some might not.
 
-One solution for this kind of requirement is to use tableView sections. Tableview sections directly support the display of section header and footer views. The tableView can use indexPaths containing a section index and a row index to access each section and each section's associated data. 
+One solution for this kind of requirement is to use UITableView sections. Tableview sections directly support the display of section header and footer views. The tableView can use indexPaths containing a section index and a row index to access each section and each section's associated data. 
 
 When using sections you have to organize the input data into groups to represent the sections. Sometimes, by chance, the input data is already structured into groups, but, most of the  time you will have to structure it yourself. Usually the structure is an array of arrays of the input dataset.
 
