@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Solving a Complex iOS TableView Using VIPER"
+title: "Solving a Complex UITableView Using VIPER"
 date: 2017-06-09
 ---
 
@@ -10,7 +10,7 @@ VIPER is a micro-architecture - a set of classes that work together to structure
 
 VIPER is an implementation of [Bob Martin's Clean Architecture](https://8thlight.com/blog/uncle-bob/2012/08/13/the-clean-architecture.html). I'm going to demonstrate that VIPER can be very simple to implement and its benefits can be realized very quickly.   
 
-I'll use the requirement and solution to the Complex TableView from the last [post]({{site.url}}/blog/2017/05/13/Solving-a-Complex-iOS-TableView-Part-2.html) as the basis of this example.
+I'll use the requirement and solution to the Complex UITableView from the last [post]({{site.url}}/blog/2017/05/13/Solving-a-Complex-iOS-TableView-Part-2.html) as the basis of this example.
 
 The complete app which demonstrates this refactoring can be found at [**CleanReportTableDemo**](https://github.com/lyleresnick/CleanReportTableDemo).
 
