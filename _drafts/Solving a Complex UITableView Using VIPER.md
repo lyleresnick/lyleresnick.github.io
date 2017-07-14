@@ -2,6 +2,7 @@
 layout: post
 title: "Solving a Complex UITableView Using VIPER"
 date: 2017-06-09
+ 
 ---
 
 ## Introduction
@@ -16,7 +17,7 @@ The complete app which demonstrates this refactoring can be found at [**CleanRep
 
 ## VIPER Explained
 
-The purpose of the VIPER pattern is to reduce the amount of code in the ViewController(**V**) class by distributing it into other classes that have specific responsibilities. To understand VIPER you need to understand abit about the the clean architecture.
+The purpose of the VIPER pattern is to reduce the amount of code in the ViewController(**V**) class by distributing it into other classes that have specific responsibilities. To understand VIPER you need to understand a bit about the the clean architecture.
 
 ![Bob Martin's Clean Architecture](https://8thlight.com/blog/assets/posts/2012-08-13-the-clean-architecture/CleanArchitecture-5c6d7ec787d447a81b708b73abba1680.jpg)
 
