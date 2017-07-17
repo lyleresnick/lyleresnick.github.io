@@ -47,34 +47,32 @@ The ViewController owns a Presenter, which in turn owns an Interactor.  The View
 
 The Interactor uses the EntityGateway to obtain access to EntityManagers.  EntityManagers are responsible for providing access to the Entities.
 
-**TODO: FIXME:** The Clean Architecture mandates that dependencies can only be explicit in one direction - towards the centre. All other dependencies going away from the centre must be implemented as a dependency inversion, which means a protocol must be used.
-
 Since VIPER is an implementation of the Clean Architecture, there a few rules to follow: 
 
-1. dependencies can only be explicit in one direction - towards the centre. This means that messages flowing out of the centre must be sent to an interface (a.k.a. a Swift protocol). Classes in layers closer to the center cannot know the names of classes in Layers closer to the outside.
-2. data must be copied from layer to layer. This means that we can't pass a Swift class from one layer to the next
+1. The Clean Architecture mandates that dependencies can only be explicit in one direction - towards the centre. A classes in a layer closer to the center cannot know the names of a classe in a layer closer to the outside. All other dependencies going away from the centre must be implemented as a dependency inversion, which means a protocol must be used. 
+2. Data must be copied from layer to layer. This means that we can't pass a Swift class from one layer to the next
 
 
 
-**TODO: FIXME:** Entities are at the centre. In order to access the entities, the EntityGateway is be injected into the Interactor. In order to remove the explicit dependency of the Interactor on the EntityGateway, the gateway is implemented as a protocol.
+Entities are at the centre. In order to access the entities, the EntityGateway must be injected into the Use Case. In order to remove the explicit dependency of the Interactor on the EntityGateway, the gateway is implemented as a protocol.
 
-In order to transmit the results of the Interactor to the ViewController, they must be first sent to the Presenter, which in turn sends its results to the ViewController. Since these messages are moving away from the centre, the target classes are implemented as protocols. 
+In order to transmit the results of the Interactor to the ViewController, they must be first sent to the Presenter, which in tur`n sends its results to the ViewController. Since these messages are moving away from the centre, the target classes are implemented as protocols. 
 
 The output of the Interactor is a protocol called the InteractorOutput and the output of the Presenter is a protocol called the PresenterOutput. The ViewController implements the PresenterOutput protocol and the Presenter implements the InteractorOutput protocol.
 
 ### The ViewController
 
-The ViewController normally receives events from the UIControls, processes the data representing the system state and then send the results of the processing to the  UIControls and UIViews.
+The ViewController normally receives events from the UIControls, processes the data representing the system state and then sends the results of the processing to the  UIControls and UIViews.
 
-In VIPER, the ViewController sends <u>every</u> event that originates from a UIControl, or UIView directly to the Presenter.  The ViewController does not process the event in anyway whatsoever. 
+In VIPER, the ViewController sends <u>every</u> event that originates from a UIControl directly to the Presenter.  The ViewController does not process the event in anyway whatsoever. 
 
 The ViewController displays the data received via the PresenterOutput protocol.
 
-**TODO:**  Note that this set up makes it very easy to reskin a ui
+Note that this set up makes it very easy to reskin a ui
 
 ### The Presenter
 
-When the Presenter receives an event it routes the event, either, to the Interactor or to the Router.
+When the Presenter receives an event it routes the event to either the Interactor or to the Router.
 
 The Presenter's second responsibility is to process the data received via InteractorOutput or RouterOutput protocols. In the case of the InteractorOutput, it is converted to a format that is most convenient for display by the ViewController or is passed unconverted to the Router. In the case of the RouterOutput, it is converted and passed to the ViewController or passed directly to the Interactor. 
 
