@@ -31,13 +31,13 @@ The diagram shows that
 
 In VIPER, 
 
-- the ViewController(**V**) represents the user interface. 
+- the ViewController(**V**) implements the user interface. 
 
 
-- the Presenter(**P**) represents the presentation conversion layer
-- the Interactor(**I**), a.k.a the UseCase, represents the application business rule layer
-- the Entities(**E**) are provided by the EntityGateway via managers which operate on the entities
-- the Router(**R**), which has not been explained and 
+- the Presenter(**P**) implements the presentation conversion layer
+- the Interactor(**I**), a.k.a the UseCase, implements the application business rules
+- the Entities(**E**) are provided by the EntityGateway via Service Layer Methods
+- the Router(**R**) changes ViewControllers 
 
 Here is a diagran showing the relationship of the VIPER classes.
 
