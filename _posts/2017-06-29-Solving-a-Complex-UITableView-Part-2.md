@@ -1,12 +1,12 @@
 ---
 layout: post
-title: "Solving a Complex iOS TableView Part 2"
+title: "Solving a Complex UITableView Part 2"
 date: 2017-06-29
 ---
 
 ## Introduction
 
-In [part 1]({{site.url}}/blog/2017/05/13/Solving-a-Complex-iOS-TableView.html) of this article, I introduced a solution for solving a complex tableView. In this article, I want to improve the solution by refactoring the code in three ways:
+In [part 1]({{site.url}}/blog/2017/05/13/Solving-a-Complex-iOS-TableView.html) of this article, I introduced a solution for solving a complex UITableView. In this article, I want to improve the solution by refactoring the code in three ways:
 
 - remove even more responsibilities from the ViewController and distribute them into new or existing classes
 - take advantage of a few key Swift features, namely failable enum initializers, enums with associated values, and extensions and
@@ -239,7 +239,7 @@ enum TransactionListRow {
 }
 ```
 
-I like the enum notation, because it's more compact than a struct. They preserve the comparable property that I previously wanted from the structs. I really like the that the enum *namespaces* the cases. When you implement this kind of solution to drive a TableView, you end up with a lot of structs that have really long names. You need to have long names keep them unique and to make it obvious which scene they belong to.
+I like the enum notation, because it's more compact than a struct. They preserve the comparable property that I previously wanted from the structs. I really like the that the enum *namespaces* the cases. When you implement this kind of solution to back a UITableView, you end up with a lot of structs that have really long names. You end up using long names in order to keep them unique and make it obvious which scene they belong to.
 
 You may be wondering where the `cellId` and `height` information have gone. Since both are constants related to a given row type, they have been implemented as a read only variables of the `TransactionListRow`.  
 
@@ -414,7 +414,7 @@ The Adapter is no longer responsible for converting input data, such as the inbo
 
 ## Summary
 
-In this rendering of a complex tableView, the size of the ViewController was reduced to its bare minimum. It  contains only the code needed to call the Transformer. The Transformer is easy to test because the data is passed as a parameter at instantiation.
+In this rendering of a complex UITableView, the size of the ViewController was reduced to its bare minimum. It  contains only the code needed to call the Transformer. The Transformer is easy to test because the data is passed as a parameter at instantiation.
 
 Each item of input data was validated and converted from a `String` to its primitive type at instantiation of the TransactionModel. This was done so that the data was ready to be used in calculations. When the Transformer completed a calculation, the result was converted by the Adapter, into a form which was easiest to display in a view. The viewable data was finally placed in ViewModels implemented as enums, which can be directly displayed by the Adapter. 
 
