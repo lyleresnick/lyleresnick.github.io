@@ -24,10 +24,10 @@ The purpose of the VIPER pattern is to reduce the amount of code in the ViewCont
 The diagram shows that
 
 - the User Interface is at the outermost layer of the  system 
-- the Entities are at the centre of the system (and are the results of Enterprise Business Rules)
-- the Application Business Rules exist in the layer which surrounds the Entities
+- the Entities are at the centre of the system and are the results of applying Enterprise Business Rules. 
+- the Application Business Rules reside in the layer which surrounds the Entities
 - the data store which provides the entities is outside the system
-- the presentation conversion layer is placed in the middle between the User Interface and Application business logic  layers
+- the presentation conversion layer is placed in the middle between the User Interface and Application business logic layers
 
 In VIPER, 
 
@@ -35,9 +35,9 @@ In VIPER,
 
 
 - the Presenter(**P**) represents the presentation conversion layer
-- the Interactor(**I**), a.k.a the UseCase, represents the business rulelayer
+- the Interactor(**I**), a.k.a the UseCase, represents the application business rule layer
+- the Entities(**E**) are provided by the EntityGateway via managers which operate on the entities
 - the Router(**R**), which has not been explained and 
-- the EntityGateway(**E**) provides access to Entities and managers to operate on them
 
 Here is a diagran showing the relationship of the VIPER classes.
 
