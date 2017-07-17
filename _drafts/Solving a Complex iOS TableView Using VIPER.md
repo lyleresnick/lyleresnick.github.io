@@ -22,11 +22,11 @@ The purpose of the VIPER pattern is to reduce the amount of code in the ViewCont
 
 The diagram shows that
 
-- the User Interface is in the outermost layer of the  system 
-- the Entities are at the centre of the system
-- the Business Rules exist in the layer which surrounds the entities
+- the User Interface is at the outermost layer of the  system 
+- the Entities are at the centre of the system (and are the results of Enterprise Business Rules)
+- the Application Business Rules exist in the layer which surrounds the Entities
 - the data store which provides the entities is outside the system
-- the presentation conversion layer is placed in the middle between the user interface and business logic  layers
+- the presentation conversion layer is placed in the middle between the User Interface and Application business logic  layers
 
 In VIPER, 
 
