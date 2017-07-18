@@ -39,30 +39,32 @@ In VIPER,
 - the Entities(**E**) are provided by the EntityGateway via Service Layer Methods
 - the Router(**R**) changes ViewControllers 
 
-Here is a diagran showing the relationship of the VIPER classes.
+This diagram shows the relationships of the VIPER classes.
 
 ![Diagram of VIPER classes]({{ site.url }}/assets/VIPER Class Diagram.png)
 
-The ViewController owns a Presenter, which in turn owns an Interactor.  The ViewController sends messages to the Presenter, which in turn sends messages to the Interactor. 
+The ViewController owns a Presenter, which in turn owns an Interactor.  The presenter has a one-way relationship with the Router. The Router owns and has a one-way relationship with child ViewControllers that it creates and manages
+
+The ViewController sends messages to the Presenter, which in turn sends messages to the Interactor. 
 
 The Interactor uses the EntityGateway to obtain access to EntityManagers.  EntityManagers are responsible for providing access to the Entities.
 
 Since VIPER is an implementation of the Clean Architecture, there a few rules to follow: 
 
-1. The Clean Architecture mandates that dependencies can only be explicit in one direction - towards the centre. A classes in a layer closer to the center cannot know the names of a classe in a layer closer to the outside. All other dependencies going away from the centre must be implemented as a dependency inversion, which means a protocol must be used. 
-2. Data must be copied from layer to layer. This means that we can't pass a Swift class from one layer to the next
+1. The Clean Architecture specifies that dependencies can only be explicit in one direction - towards the centre. A class in a layer closer to the center cannot know the name of a class in a layer closer to the outside. All dependencies going in a direction away from the centre must be implemented as a dependency inversion, which means a protocol must be used. 
+2. Data must be copied from layer to layer. This means that we can't pass a Swift class from one layer to the next - we must pass values or structs of values
 
 
 
 Entities are at the centre. In order to access the entities, the EntityGateway must be injected into the Use Case. In order to remove the explicit dependency of the Interactor on the EntityGateway, the gateway is implemented as a protocol.
 
-In order to transmit the results of the Interactor to the ViewController, they must be first sent to the Presenter, which in tur`n sends its results to the ViewController. Since these messages are moving away from the centre, the target classes are implemented as protocols. 
+In order to transmit the results of the Interactor to the ViewController, they must be first sent to the Presenter, which in turn sends its results to the ViewController. Since these messages are moving away from the centre, the target classes are specified as protocols. 
 
 The output of the Interactor is a protocol called the InteractorOutput and the output of the Presenter is a protocol called the PresenterOutput. The ViewController implements the PresenterOutput protocol and the Presenter implements the InteractorOutput protocol.
 
 ### The ViewController
 
-The ViewController normally receives events from the UIControls, processes the data representing the system state and then sends the results of the processing to the  UIControls and UIViews.
+The ViewController normally receives events from the UIControls, combines UIControl Input with data representing the current system state to create new system state, and then displays the results in UIControls and UIViews.
 
 In VIPER, the ViewController sends <u>every</u> event that originates from a UIControl directly to the Presenter.  The ViewController does not process the event in anyway whatsoever. 
 
