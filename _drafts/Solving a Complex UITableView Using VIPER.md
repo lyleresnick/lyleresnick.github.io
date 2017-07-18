@@ -17,7 +17,9 @@ The complete app which demonstrates this refactoring can be found at [**CleanRep
 
 ## VIPER Explained
 
-The purpose of the VIPER pattern is to reduce the amount of code in a ViewController class by distributing it into other classes that have specific responsibilities. To understand VIPER you need to understand a bit about the the clean architecture.
+The purpose of the VIPER pattern is to reduce the amount of code in a ViewController class by distributing it into other classes that have specific responsibilities. You may recall that this echoes the purpose of the Single Responsibility Principle. 
+
+To understand VIPER you need to understand a bit about the the clean architecture.
 
 ![Bob Martin's Clean Architecture](https://8thlight.com/blog/assets/posts/2012-08-13-the-clean-architecture/CleanArchitecture-5c6d7ec787d447a81b708b73abba1680.jpg)
 
@@ -28,6 +30,10 @@ Uncle Bob's diagram, above, shows that in a clean system:
 - the Application Business Rules reside in the layer which surrounds the Entities
 - the data store which provides the entities is outside the system
 - the presentation conversion layer is placed in the middle between the User Interface and Application business logic layers
+
+The diagram also shows that the Clean Architecture dependencies can only be explicit in one direction - towards the centre. A class in a layer closer to the center cannot know the name of a class in a layer closer to the outside. All dependencies going in a direction away from the centre must be implemented as a dependency inversion, which means a protocol must be used. 
+
+Another requirement of the Clean Architecture is that data must be copied from layer to layer. This means that we can't pass a Swift class from one layer to the next - we must pass values or structs of values.
 
 In VIPER, 
 
@@ -51,8 +57,8 @@ The Interactor uses the EntityGateway to obtain access to EntityManagers.  Entit
 
 Since VIPER is an implementation of the Clean Architecture, there a few rules to follow: 
 
-1. The Clean Architecture specifies that dependencies can only be explicit in one direction - towards the centre. A class in a layer closer to the center cannot know the name of a class in a layer closer to the outside. All dependencies going in a direction away from the centre must be implemented as a dependency inversion, which means a protocol must be used. 
-2. Data must be copied from layer to layer. This means that we can't pass a Swift class from one layer to the next - we must pass values or structs of values
+1. Dependencies can only be explicit in one direction.
+2. Data must be copied from layer to layer via values or structs of values
 
 
 
