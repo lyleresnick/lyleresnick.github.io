@@ -19,17 +19,19 @@ The complete app which demonstrates this refactoring can be found at [**CleanRep
 
 The purpose of the VIPER pattern is to reduce the amount of code in a ViewController class by distributing it into other classes that have specific responsibilities. You may recall that this echoes the purpose of the Single Responsibility Principle. 
 
-To understand VIPER you need to understand a bit about the the clean architecture.
+To understand VIPER you need to understand a bit about the the clean architecture. As Uncle Bob's  diagram shows, a clean system is separated into layers.
 
 ![Bob Martin's Clean Architecture](https://8thlight.com/blog/assets/posts/2012-08-13-the-clean-architecture/CleanArchitecture-5c6d7ec787d447a81b708b73abba1680.jpg)
 
-Uncle Bob's diagram, above, shows that in a clean system:
+In the diagram you can see that:
 
 - the User Interface is at the outermost layer of the  system 
 - the Entities are at the centre of the system and are the results of applying Enterprise Business Rules. 
 - the Application Business Rules reside in the layer which surrounds the Entities
 - the data store which provides the entities is outside the system
 - the presentation conversion layer is placed in the middle between the User Interface and Application business logic layers
+
+One thing that is not obvious from this diagran is athat the Enties are 
 
 The diagram also shows that the Clean Architecture dependencies can only be explicit in one direction - towards the centre. A class in a layer closer to the center cannot know the name of a class in a layer closer to the outside. All dependencies going in a direction away from the centre must be implemented as a dependency inversion, which means a protocol must be used. 
 
@@ -70,13 +72,15 @@ The output of the Interactor is a protocol called the InteractorOutput and the o
 
 ### The ViewController
 
-The ViewController normally receives events from the UIControls, combines UIControl Input with data representing the current system state to create new system state, and then displays the results in UIControls and UIViews.
+Normally, the ViewController receives events from the UIControls, combines UIControl Input with data representing the current system state to create new system state, and then displays the results in UIControls and UIViews. Thr systems state can reside on a server or on a local database.
 
-In VIPER, the ViewController sends <u>every</u> event that originates from a UIControl directly to the Presenter.  The ViewController does not process the event in anyway whatsoever. 
+In VIPER, the ViewController sends <u>every</u> event originating from a UIControl directly to the Presenter.  The ViewController does not process the event in anyway whatsoever.
 
-The ViewController displays the data received via the PresenterOutput protocol.
+The ViewController also implements the PresenterOutput protocol by displaying the data received via the protocol's methods. The state of the Views is only set in the methods named by the protocol.
 
-Note that this set up makes it very easy to reskin a ui
+You can see that a VIPER ViewController has only one responsibiliy: configure Views and set data into them.
+
+Note that this set up makes it very easy to reskin a ui.
 
 ### The Presenter
 
@@ -103,6 +107,10 @@ The EntiryManagers are outside the scope of VIPER, but they are a very important
 In the end, the Interactor does not care where the data comes from or where it is going to. 
 
 The EntityManagers should deliver Entities whose data are in the most useful, validated form for use by the Interactor, not just simple Strings. For example date Strings should be converted to Dates, URL Strings should be converted to URLs, and number Strings should be converted to their specific number type.  
+
+
+
+**TODO:** The EntityGateway delivers the Managers of the service layer.
 
 ### The Connector
 
