@@ -4,24 +4,24 @@ title: My CV
 permalink: /my-cv
 ---
 {: .data-block }
-| iOS Architect / Developer |                               |
-| :------------------------ | ----------------------------: |
-| Lifetales, Toronto        | Aug 2016 – present (Contract) |
-| Lifetales Story App       |                               |
+| iOS Architect / Team Lead /Developer |                               |
+| :----------------------------------- | ----------------------------: |
+| Lifetales, Toronto                   | Aug 2016 – present (Contract) |
+| Lifetales Story App                  |                               |
 
 {: .data-block}
 
-| iOS Architect, SME, Developer / Android Developer |                                |
+| iOS Architect, SME, Team Lead, Developer / Android Developer |                                |
 | :--------------------------------------- | -----------------------------: |
 | RBC, Toronto                             | May 2015 – Aug 2016 (Contract) |
 | RBC Banking & Wallet Apps                |                                |
 
 
 {: .data-block }
-| iOS & Android Specialist |                              |
-| :----------------------- | ---------------------------: |
-| City of Toronto, Toronto | Nov 2014–Apr 2015 (Contract) |
-| Mobile Strategy          |                              |
+| Mobile Development Specialist |                              |
+| :---------------------------- | ---------------------------: |
+| City of Toronto, Toronto      | Nov 2014–Apr 2015 (Contract) |
+| Mobile Strategy               |                              |
 
 
 {: .data-block}
@@ -31,10 +31,10 @@ permalink: /my-cv
 | TDI Auto Incident App          |                         |
 
 {: .data-block}
-| iOS & Play! Architect / Project Leader |                     |
-| :------------------------------------- | ------------------: |
-| Aisle18, Toronto                       | Jul 2013 – Jun 2014 |
-| Aisle18 Retail Experience App          |                     |
+| iOS & Java Play! Architect / Project Leader |                     |
+| :--------------------------------------- | ------------------: |
+| Aisle18, Toronto                         | Jul 2013 – Jun 2014 |
+| Aisle18 Retail Experience App            |                     |
 
 {: .data-block}
 | iOS  Architect / Team Lead / Android Developer |                     |
@@ -43,10 +43,10 @@ permalink: /my-cv
 | Retirement Sensitivity Illustrator iPad App |                     |
 
 {: .data-block}
-| Java Architect / Team Lead       |                     |
-| :------------------------------- | ------------------: |
-| Cellarpoint, Toronto             | Apr 2006 – Apr 2012 |
-| Wine Inventory Management System |                     |
+| Mobile Developer, Java Architect / Team Lead |                     |
+| :--------------------------------------- | ------------------: |
+| Cellarpoint, Toronto                     | Apr 2006 – Apr 2012 |
+| Wine Inventory Management System         |                     |
 
 {: .data-block}
 | Architect / Team Lead              |                     |
