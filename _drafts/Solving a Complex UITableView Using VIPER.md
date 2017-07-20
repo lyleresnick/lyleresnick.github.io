@@ -29,18 +29,18 @@ As Uncle Bob's diagram shows, a clean system is separated into layers:
 - the Entities are at the centre of the system and are the results of applying Enterprise Business Rules. 
 - the Application Business Rules reside in the layer which surrounds the Entities
 - the Data Store and Network, which provide the entities, are in the outer layer
-- the presentation conversion layer is placed in the middle between the User Interface and Application business logic layers
+- the Interface Adapters, and in particular the Presenters and Gateways are placed in a layer between the User Interface and Application Business logic layers
 
-The diagram shows that in the Clean Architecture, dependencies can only be explicit in one direction - towards the centre. A class in a layer closer to the center cannot know the name of a class in a layer closer to the outside. All dependencies going in a direction away from the centre must be implemented as a dependency inversion, which means a protocol must be used. 
+In the Clean Architecture, dependencies can only be explicit in one direction - towards the centre. This is shown in the diagram by the dependency arrow pointing inward. A class in a layer closer to the center cannot know the name of a class in a layer closer to the outside. All dependencies going in a direction away from the centre must be implemented as a dependency inversion, which means a protocol must be used. 
 
-Another requirement of the Clean Architecture is that data must be copied from layer to layer. This means that we can't pass the same data or data structure from one layer to the next. In swift, this is easy, we can copy values or structs of values. This prevents changes from one layer inadvertently affecting other layers.
+Another requirement of the Clean Architecture is that data must be copied from layer to layer. This means that we can't pass the same data or data structure from one layer to the next: we can only pass copies. In swift we can simply pass values or structs of values and they will be copied for us. This prevents changes of implementation in one layer accidentally affecting other layers. Just as important: when data is copied between the UseCases and the Presenters, it is converted between internal and external formats
 
 In VIPER, 
 
 - the ViewController(**V**) implements the user interface. 
 - the Presenter(**P**) implements the presentation conversion layer
 - the Interactor(**I**), a.k.a the UseCase, implements the application business rules
-- the Entities(**E**) are provided by the EntityGateway via Gateway Methods
+- the Entities(**E**) are provided by an EntityGateway via Gateway Methods
 - the Router(**R**) changes ViewControllers 
 
 This diagram shows the relationships of the VIPER classes.
