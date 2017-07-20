@@ -4,10 +4,10 @@ title: My CV
 permalink: /my-cv
 ---
 {: .data-block }
-| iOS Architect / Team Lead /Developer |                               |
-| :----------------------------------- | ----------------------------: |
-| Lifetales, Toronto                   | Aug 2016 – present (Contract) |
-| Lifetales Story App                  |                               |
+| iOS Architect / Team Lead / Developer |                               |
+| :------------------------------------ | ----------------------------: |
+| Lifetales, Toronto                    | Aug 2016 – present (Contract) |
+| Lifetales Story App                   |                               |
 
 {: .data-block}
 
