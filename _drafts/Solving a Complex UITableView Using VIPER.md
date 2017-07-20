@@ -17,34 +17,30 @@ The complete app which demonstrates this refactoring can be found at [**CleanRep
 
 ## VIPER Explained
 
-The purpose of the VIPER pattern is to reduce the amount of code in a ViewController class by distributing it into other classes that have specific responsibilities. You may recall that this echoes the purpose of the Single Responsibility Principle. 
+The purpose of the VIPER architecture is to reduce the amount of code in a ViewController class. VIPER does this by distributing the most of code of the ViewController into other classes that have specific responsibilities. You may recall that this echoes the Single Responsibility Principle. 
 
-To understand VIPER you need to understand a bit about the the clean architecture. As Uncle Bob's  diagram shows, a clean system is separated into layers.
+To understand VIPER you need to understand a bit about the the clean architecture. 
 
 ![Bob Martin's Clean Architecture](https://8thlight.com/blog/assets/posts/2012-08-13-the-clean-architecture/CleanArchitecture-5c6d7ec787d447a81b708b73abba1680.jpg)
 
-In the diagram you can see that:
+As Uncle Bob's diagram shows, a clean system is separated into layers:
 
-- the User Interface is at the outermost layer of the  system 
+- the User Interface is in the outermost layer of the  system 
 - the Entities are at the centre of the system and are the results of applying Enterprise Business Rules. 
 - the Application Business Rules reside in the layer which surrounds the Entities
-- the data store which provides the entities is outside the system
+- the Data Store and Network, which provide the entities, are in the outer layer
 - the presentation conversion layer is placed in the middle between the User Interface and Application business logic layers
 
-One thing that is not obvious from this diagran is athat the Enties are 
+The diagram shows that in the Clean Architecture, dependencies can only be explicit in one direction - towards the centre. A class in a layer closer to the center cannot know the name of a class in a layer closer to the outside. All dependencies going in a direction away from the centre must be implemented as a dependency inversion, which means a protocol must be used. 
 
-The diagram also shows that the Clean Architecture dependencies can only be explicit in one direction - towards the centre. A class in a layer closer to the center cannot know the name of a class in a layer closer to the outside. All dependencies going in a direction away from the centre must be implemented as a dependency inversion, which means a protocol must be used. 
-
-Another requirement of the Clean Architecture is that data must be copied from layer to layer. This means that we can't pass a Swift class from one layer to the next - we must pass values or structs of values.
+Another requirement of the Clean Architecture is that data must be copied from layer to layer. This means that we can't pass the same data or data structure from one layer to the next. In swift, this is easy, we can copy values or structs of values. This prevents changes from one layer inadvertently affecting other layers.
 
 In VIPER, 
 
 - the ViewController(**V**) implements the user interface. 
-
-
 - the Presenter(**P**) implements the presentation conversion layer
 - the Interactor(**I**), a.k.a the UseCase, implements the application business rules
-- the Entities(**E**) are provided by the EntityGateway via Service Layer Methods
+- the Entities(**E**) are provided by the EntityGateway via Gateway Methods
 - the Router(**R**) changes ViewControllers 
 
 This diagram shows the relationships of the VIPER classes.
