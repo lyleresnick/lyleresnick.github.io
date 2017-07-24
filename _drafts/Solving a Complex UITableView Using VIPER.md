@@ -33,13 +33,15 @@ As Uncle Bob's diagram shows, a clean system is separated into layers:
 
 In the Clean Architecture, dependencies can only be explicit in one direction - towards the centre. This is shown in the diagram by the dependency arrow pointing inward. A class in a layer closer to the center cannot know the name of a class in a layer closer to the outside. All dependencies going in a direction away from the centre must be implemented as a dependency inversion, which means a protocol must be used. 
 
-Another requirement of the Clean Architecture is that data must be copied from layer to layer. This means that we can't pass the same data or data structure from one layer to the next: we can only pass copies. In swift we can simply pass values or structs of values and they will be copied for us. This prevents changes of implementation in one layer accidentally affecting other layers. Just as important: when data is copied between the UseCases and the Presenters, it is converted between internal and external formats
+The diagram on the right shows the implementation of a dependency inversion where the Presenter implements the Use Case Output, which is produced by the Use Case.
+
+Another requirement of the Clean Architecture is that data must be copied from layer to layer. This means that we can't pass the same data or data structure from one layer to the next: we can only pass copies. In Swift we can simply pass values or structs of values and they will be copied automatically. This prevents changes of implementation in one layer accidentally affecting other layers. When data is copied between the UseCases and the Presenters, it is converted between internal and external formats
 
 In VIPER, 
 
-- the ViewController(**V**) implements the user interface. 
-- the Presenter(**P**) implements the presentation conversion layer
-- the Interactor(**I**), a.k.a the UseCase, implements the application business rules
+- the ViewController(**V**) implements the User Interface. 
+- the Presenter(**P**) implements 2 parts of the interface adapter layer: data conversion and selection of Use Case or Router  
+- the Interactor(**I**), a.k.a the Use Case, implements the application business rules
 - the Entities(**E**) are provided by an EntityGateway via Gateway Methods
 - the Router(**R**) changes ViewControllers 
 
@@ -49,7 +51,7 @@ This diagram shows the relationships of the VIPER classes.
 
 The ViewController owns a Presenter, which in turn owns an Interactor.  The presenter has a one-way relationship with the Router. The Router owns and has a one-way relationship with child ViewControllers that it creates and manages
 
-The ViewController sends messages to the Presenter, which in turn sends messages to the Interactor. 
+The ViewController sends messages to the Presenter, which in turn sends messages to the Interactor or the Router. 
 
 The Interactor uses the EntityGateway to obtain access to EntityManagers.  EntityManagers are responsible for providing access to the Entities.
 
@@ -62,9 +64,11 @@ Since VIPER is an implementation of the Clean Architecture, there a few rules to
 
 Entities are at the centre. In order to access the entities, the EntityGateway must be injected into the Use Case. In order to remove the explicit dependency of the Interactor on the EntityGateway, the gateway is implemented as a protocol.
 
-In order to transmit the results of the Interactor to the ViewController, they must be first sent to the Presenter, which in turn sends its results to the ViewController. Since these messages are moving away from the centre, the target classes are specified as protocols. 
+In order to transmit the results of the Interactor to the ViewController, they must be first sent to the Presenter. The Presenter sends its converted results to the ViewController. Since these messages are moving away from the centre, the target classes are specified as protocols. 
 
 The output of the Interactor is a protocol called the InteractorOutput and the output of the Presenter is a protocol called the PresenterOutput. The ViewController implements the PresenterOutput protocol and the Presenter implements the InteractorOutput protocol.
+
+If you are wondering why I have not mentioned the Use Case Input, shown in the diagram, its because it is not really neccessary, and its annoying, when trying to determine a call path. Even for testing, which would be its most useful use case, the concrete class' methods can be  overridden. Hey, you can certainly use Input protocols if you prefer.
 
 ### The ViewController
 
