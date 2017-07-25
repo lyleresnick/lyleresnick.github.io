@@ -70,47 +70,77 @@ The output of the Interactor is a protocol called the InteractorOutput and the o
 
 If you are wondering why I have not mentioned the Use Case Input, shown in the diagram, its because it is not really neccessary, and its annoying, when trying to determine a call path. Even for testing, which would be its most useful use case, the concrete class' methods can be  overridden. Hey, you can certainly use Input protocols if you prefer.
 
-### The ViewController
 
-Normally, the ViewController receives events from the UIControls, combines UIControl Input with data representing the current system state to create new system state, and then displays the results in UIControls and UIViews. Thr systems state can reside on a server or on a local database.
 
-In VIPER, the ViewController sends <u>every</u> event originating from a UIControl directly to the Presenter.  The ViewController does not process the event in anyway whatsoever.
+## The Pipeline
 
-The ViewController also implements the PresenterOutput protocol by displaying the data received via the protocol's methods. The state of the Views is only set in the methods named by the protocol.
+You can think of VIPER as a pipeline. Each stage of the pipeline has a well defined job to do. 
 
-You can see that a VIPER ViewController has only one responsibiliy: configure Views and set data into them.
+Here is a diagram showing the event and information flow between the View Controller and the Entity Gateway
 
-Note that this set up makes it very easy to reskin a ui.
+![Diagram of VIPER classes]({{ site.url }}/assets/VIPER UseCase Sequence.png)
+
+The diagram shows that a user or device initiates a sequence by sending an event to a UIViewController. An event can be the result of a user touching a button or a device delivering a location or other sensor data.
+
+The event is passed to the ViewController as usual.
+
+### The ViewController 
+
+In VIPER, the UIViewController sends <u>every</u> event coming from a UIControl or lifecycle method directly to the Presenter. The ViewController does not process the event in any way, whatsoever. Super simple! 
+
+As you can see in the diagram, the ViewController has another role. I will cover this later.
 
 ### The Presenter
 
-When the Presenter receives an event it routes the event to either the Interactor or to the Router.
+When the Presenter receives an event, it routes the event to either the UseCase or the Router. It converts its input (the ViewControllers output) to a form that can be used directly by the UseCase.   
 
-The Presenter's second responsibility is to process the data received via InteractorOutput or RouterOutput protocols. In the case of the InteractorOutput, it is converted to a format that is most convenient for display by the ViewController or is passed unconverted to the Router. In the case of the RouterOutput, it is converted and passed to the ViewController or passed directly to the Interactor. 
+Examples of input conversion might be from String to Int, formatted String date to Date, an Int from a UIPickerView to an enum - the list goes on. 
 
-Data passed as output is called a ViewModel. In the case of repeating data the Presenter hold the viewModel structures and delivers them via an index method call.
+As you can see in the diagram, the Presenter has another role. Again, I will cover this later.
 
-### The Interactor
 
-The Interactor is sometimes called a UseCase because it has one responsibility: run the use case defined for the event. Most events received by the Interactor cause it to access data via the EntityGateway. The Interactor can perform calculations and update the state of the system via the EntityGateway.
 
-Data passed as output is called a PresentationModel. In the case of repeating data the Presenter convert the data and hold it as viewModel structures.
+### The UseCase
+
+The UseCase, known in VIPER as the Interactor, probably to supply the "I", has one responsibility: run the application use case defined for the event. Upon receiving an event, the UseCase will either access data via the EntityGateway and process it, or process it and update it via the EntityGateway.
+
+The results of processing the UseCase are passed as output in a form called a PresentationModel to the UseCaseOutput protocol. 
 
 ### The EntityGateway
 
 As I mentioned, the EntityGateway is a protocol. 
 
-The implementation of the EntityGateway yields access to the EntityManagers.  EntityManagers are responsible for providing access to the Entities.
+The implementation of the EntityGateway yields access to the EntityManagers.  EntityManagers are responsible for providing access to the Entities and for updating them.
 
-The EntiryManagers are outside the scope of VIPER, but they are a very important aspect of the architecture as a whole. They access and transform the state of the system. They can deliver Entities originating in CoreData, over the network, or from local resources
+The EntiryManagers are outside the scope of VIPER, but they are a very important aspect of the architecture as a whole. They access and transform the state of the system. They can deliver Entities originating from CoreData, over the network, or from local resources
 
 In the end, the Interactor does not care where the data comes from or where it is going to. 
 
-The EntityManagers should deliver Entities whose data are in the most useful, validated form for use by the Interactor, not just simple Strings. For example date Strings should be converted to Dates, URL Strings should be converted to URLs, and number Strings should be converted to their specific number type.  
-
-
+The EntityManagers should deliver Entities whose data are converted to a form that can be used directly by the UseCase, not just simple Strings or JSON dictionaries. For example date Strings should be converted to Dates, URL Strings should be converted to URLs, and number Strings should be converted to their specific number type.  
 
 **TODO:** The EntityGateway delivers the Managers of the service layer.
+
+### The Transformer
+
+The Transformer is not formally part of VIPER. I have found it useful to create one transformer for each event to be processed by the UseCase . As we will see, this makes is very easy to test the Transformer and separates the UseCase's responsibilities from one another.
+
+### The Presenter as UseCase Output
+
+The Presenter's second responsibility is to process the data received via InteractorOutput or RouterOutput protocols. In the case of the InteractorOutput, it is converted to a format that is most convenient for display by the ViewController or is passed unconverted to the Router. In the case of the RouterOutput, it is converted and passed to the ViewController or passed directly to the Interactor. 
+
+Data passed as output is called a ViewModel. In the case of repeating data the Presenter hold the viewModel structures and delivers them via an index method call.
+
+### The ViewController as Presenter Output
+
+The ViewController has one other VIPER responsibility: set data, which is obtained from the Presenter, into the views.  The Presenter sends data to the ViewController via the PresenterOutput protocol. The ViewController implements the protocol by  displaying the data received from the Presenter via the methods of protocol.
+
+You can see that a VIPER ViewController has only one responsibiliy: configure Views and set data into them.
+
+Note that this set up makes it very easy to reskin a ui.
+
+### 
+
+
 
 ### The Connector
 
@@ -124,21 +154,9 @@ We do not want the ViewController to know anything about the Interactor. The Int
 
 The Connector is created and executed by the ViewController by overriding `awakeFromNib()`, which occurs after all outlets are created.
 
-### The Transformer
-
-The Transformer is not formally part of VIPER. I have found it useful to create one transformer for each event forwarded to the UseCase . As we will see, this makes is very easy to test the Transformer and separates out the UseCase's responsibilities.
+### 
 
 
-
-### The Complete picture
-
-**TODO: FIXME**: Another way to look at the processing stages is that the events with their arguments are combined with the state of the system, the system may be updated by the uses case and the results of the event are then given to the presenter, which localizes and formats the results for display by the viewController 
-
-
-
-Here is a diagarm showing the event and information flow between the View Controller and the Entity Gateway
-
-![Diagram of VIPER classes]({{ site.url }}/assets/VIPER UseCase Sequence.png)
 
 ## The App
 
