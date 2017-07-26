@@ -102,27 +102,37 @@ As you can see in the diagram, the Presenter has another role. Again, I will cov
 
 ### The UseCase
 
-The UseCase, known in VIPER as the Interactor, probably to supply the "I", has one responsibility: run the application use case defined for the event. Upon receiving an event, the UseCase will either access data via the EntityGateway and process it, or process it and update it via the EntityGateway.
+The UseCase, known in VIPER as the Interactor, has one responsibility: execute the application use case defined for the event. Upon receiving an event, the UseCase may use the EntityGateway to access the system state in the form of Entities, process the Entities with the incoming parameters, and may update the system state via the EntityGateway.
 
-The results of processing the UseCase are passed as output in a form called a PresentationModel to the UseCaseOutput protocol. 
+The results of executing the UseCase are passed as output in a form called a PresentationModel to the UseCaseOutput protocol. The Presentation Model contains only the data that will be required for the output display. The data is not converted for output.
 
-### The EntityGateway
+The Presentation Model never contains the Entities. This helps ensure that the UseCase is decoupled from the Presentor.
 
-As I mentioned, the EntityGateway is a protocol. 
+### The EntityGateway and EntityManagers
 
-The implementation of the EntityGateway yields access to the EntityManagers.  EntityManagers are responsible for providing access to the Entities and for updating them.
+The UseCase uses the EntityGateway to obtain access to EntityManagers. EntityManagers are responsible for providing access to the Entities and for updating them. Entity Managers are also known as Service Layer or Data Access Objects in other layered architectures.
 
-The EntiryManagers are outside the scope of VIPER, but they are a very important aspect of the architecture as a whole. They access and transform the state of the system. They can deliver Entities originating from CoreData, over the network, or from local resources
+The EntiryManagers are outside the scope of VIPER, but they are a very important aspect of the architecture as a whole. They provide access to and transform the state of the system. They can deliver Entities originating from either local data stores (CoreData or a local file system) and from the Internet. 
 
-In the end, the Interactor does not care where the data comes from or where it is going to. 
+The UseCase does not care where the data is coming from or where it is going to - that is the job of the EntityManager.
 
-The EntityManagers should deliver Entities whose data are converted to a form that can be used directly by the UseCase, not just simple Strings or JSON dictionaries. For example date Strings should be converted to Dates, URL Strings should be converted to URLs, and number Strings should be converted to their specific number type.  
+The Entities delivered by the EntityManagers contain data that has been converted from its external form to a form that can be used directly by the UseCase, not just simple Strings or JSON dictionaries. For example date Strings should be converted to Dates, URL Strings should be converted to URLs, and number Strings should be converted to their specific number type. 
 
-**TODO:** The EntityGateway delivers the Managers of the service layer.
+Likewise, data provided to the EntityManagers should not require conversion. it is the job of the EntityManager to convert data from its internal form to its external form.
+
+By providing the data conversion, the EntityManagers effectively decouple the UseCase from the physicallity of the outside storage and location. This makes the UseCase conversion and data validation free. The only code left in the UseCase is code to process the application business rules. 
+
+As I mentioned, the EntityGateway is a protocol. It is defined as a protocol so that the UseCase is decoupled from the source of the data. EntityManagers should also be defined in terms of protocols. This makes it very easy to unit test the UseCase. You can inject substitute implementations of EntiryManagers to control the data .
 
 ### The Transformer
 
-The Transformer is not formally part of VIPER. I have found it useful to create one transformer for each event to be processed by the UseCase . As we will see, this makes is very easy to test the Transformer and separates the UseCase's responsibilities from one another.
+The Transformer is not formally part of VIPER. Because of the number of events that a UseCase ends up having to process, I have found it useful to create one Transformer for each event that changes the state of the system.  
+
+Most of the time a Transformer would simply be a method of the UseCase. i convert the method to a method-object. That is, I initialize the Transformer with the required EntityManagers obtained from the EntityGateway and any data required from previously run UseCases. 
+
+I pass the event parameters from UseCase to the Transformer along with the reference to the Presenter (for output) to a transform method.
+
+You will see that this setup makes is very easy to test the Transformer. It separates the UseCase's responsibilities from one another, making it very easy to understand the code.
 
 ### The Presenter as UseCase Output
 
