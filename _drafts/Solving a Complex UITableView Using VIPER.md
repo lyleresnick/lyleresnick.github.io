@@ -80,7 +80,7 @@ Here is a diagram showing the event and information flow between the View Contro
 
 ![Diagram of VIPER classes]({{ site.url }}/assets/VIPER UseCase Sequence.png)
 
-The diagram shows that a user or device initiates a sequence by sending an event to a UIViewController. An event can be the result of a user touching a button or a device delivering a location or other sensor data.
+The diagram shows that a user or device initiates a sequence by sending an event to a UIViewController. An event can be the result of a user touching a button or a device delivering a location or some other sensor data.
 
 The event is passed to the ViewController as usual.
 
@@ -88,7 +88,7 @@ The event is passed to the ViewController as usual.
 
 In VIPER, the UIViewController sends <u>every</u> event coming from a UIControl or lifecycle method directly to the Presenter. The ViewController does not process the event in any way, whatsoever. Super simple! 
 
-As you can see in the diagram, the ViewController has another role. I will cover this later.
+As you can see in the diagram, the ViewController has another role, which I will cover this later.
 
 ### The Presenter
 
@@ -96,17 +96,23 @@ When the Presenter receives an event, it routes the event to either the UseCase 
 
 Examples of input conversion might be from String to Int, formatted String date to Date, an Int from a UIPickerView to an enum - the list goes on. 
 
-As you can see in the diagram, the Presenter has another role. Again, I will cover this later.
-
-
+As you can see in the diagram, the Presenter has another role, again which, I will cover later.
 
 ### The UseCase
 
 The UseCase, known in VIPER as the Interactor, has one responsibility: execute the application use case defined for the event. Upon receiving an event, the UseCase may use the EntityGateway to access the system state in the form of Entities, process the Entities with the incoming parameters, and may update the system state via the EntityGateway.
 
-The results of executing the UseCase are passed as output in a form called a PresentationModel to the UseCaseOutput protocol. The Presentation Model contains only the data that will be required for the output display. The data is not converted for output.
+The results of executing the UseCase are passed as output to the UseCaseOutput protocol. 
 
-The Presentation Model never contains the Entities. This helps ensure that the UseCase is decoupled from the Presentor.
+Even when the Entities do not require processing to create the required output, they are never passed directly to the UseCaseOutput. The results are passed in a form known as the PresentationModel. The Presentation Model contains only the data that will be required for the output display. The data is not converted for output. 
+
+A presentation model can be passed as a struct or as simple scalars - whatever is most convenient.
+
+The separation of the Entity from the Presentation Model helps ensure that the UseCase is decoupled from the Presenter. This way the Entity can chage without affecting the outer layers of the system.
+
+Note that the UseCase never has to convert data, as that is the job of the Presenter and the EntityGateway.
+
+ The UseCase has no direct dependencies - both the EntityGateway and the PresenterOutput are Protocols and are injected (by the Connector).
 
 ### The EntityGateway and EntityManagers
 
@@ -126,19 +132,29 @@ As I mentioned, the EntityGateway is a protocol. It is defined as a protocol so 
 
 ### The Transformer
 
-The Transformer is not formally part of VIPER. Because of the number of events that a UseCase ends up having to process, I have found it useful to create one Transformer for each event that changes the state of the system.  
+The Transformer is not formally part of VIPER, but because of the number of events that a UseCase ends up having to process, I have found it useful to create one Transformer for each event that changes the state of the system.  
 
-Most of the time a Transformer would simply be a method of the UseCase. i convert the method to a method-object. That is, I initialize the Transformer with the required EntityManagers obtained from the EntityGateway and any data required from previously run UseCases. 
+Most of the time a Transformer would simply be a method of the UseCase. I convert the method to a method-object. The Transformer usually consists of just a constructor and a method called `transform` . In the UseCase, I initialize the constructor with the required EntityManagers obtained from the EntityGateway and any data required from previously run UseCases. 
 
-I pass the event parameters from UseCase to the Transformer along with the reference to the Presenter (for output) to a transform method.
+I pass the event parameters from UseCase to the `transform` method along with the reference to the Presenter (for output).
 
 You will see that this setup makes is very easy to test the Transformer. It separates the UseCase's responsibilities from one another, making it very easy to understand the code.
 
-### The Presenter as UseCase Output
+There are occasions when a Transformer has more than one method. An example of this is when the use case supports data collection from multiple fields. The events would deliver individual data items to the UseCase, for validation and temporary storage. A final event would then save the changes. 
 
-The Presenter's second responsibility is to process the data received via InteractorOutput or RouterOutput protocols. In the case of the InteractorOutput, it is converted to a format that is most convenient for display by the ViewController or is passed unconverted to the Router. In the case of the RouterOutput, it is converted and passed to the ViewController or passed directly to the Interactor. 
+### The Presenter as UseCaseOutput
 
-Data passed as output is called a ViewModel. In the case of repeating data the Presenter hold the viewModel structures and delivers them via an index method call.
+**TODO: Fix me:** The Presenter's second responsibility is to process the data received via UseCaseOutput. The Presentor decides whether to send the data on to the PresentorOutput or to the RouterOutput. 
+
+When sending data on to the PresenterOutput, it is converted to a format that is most convenient for display by the ViewController. When sending data on to the RouterOut, it is passed unconverted.  
+
+Data that is passed to PresentorOutput is called a ViewModel. In the case of repeating data the Presenter hold the viewModel structures and delivers them via an index method call.
+
+
+
+I find that it is a good practice to create one output protocol for each event. As the number of use cases that a scene supports grows large, the number of methods  on a single output protocol becomes unwieldy, as it is really hard to tell which methods are used by what events. This works out really nicely when you place the implementation of each output protocol in it's own extension.
+
+### 
 
 ### The ViewController as Presenter Output
 
