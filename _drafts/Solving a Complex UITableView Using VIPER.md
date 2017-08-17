@@ -154,7 +154,7 @@ Data that is passed to PresenterOutput is called a ViewModel. In the case of rep
 
 I find it is a good practice to create one UseCaseOutput protocol for each event. When the number of use cases that a scene supports becomes large, the number of methods on a single output protocol becomes even larger. It becomes really hard to tell at a glance which methods are used by what events. Your code become really organized when you place the implementation of each output protocol in it's own extension.
 
-### The ViewController as Presenter Output
+### The ViewController as PresenterOutput
 
 The ViewController has one other VIPER responsibility: set data, which is obtained from the Presenter, into the views.  The Presenter sends data to the ViewController via the PresenterOutput protocol. The ViewController implements the protocol by  displaying the data received from the Presenter via the methods of protocol.
 
