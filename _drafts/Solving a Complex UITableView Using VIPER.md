@@ -144,15 +144,15 @@ There are occasions when a Transformer has more than one method. An example of t
 
 ### The Presenter as UseCaseOutput
 
-The Presenter's second responsibility is to process the data received via UseCaseOutput. The Presenter decides whether to send the data on to the ViewController via the PresenterOutput or on to the Router via a RouterDelegate. Note that in VIPER, the purpose of the RouterDelegate is the same as that of a ViewControllerDelegate under the normal architecture.
+The Presenter's second responsibility is to process the data received via UseCaseOutput. The Presenter decides whether to send the data on to the ViewController via the PresenterOutput or on to the Router via a RouterDelegate. Note that in VIPER, the purpose of the RouterDelegate is the same as that of a ViewControllerDelegate under the standard architecture.
 
-When sending data on via the PresenterOutput, it must be converted to a format that is most convenient for display by the ViewController. When sending data on to the RouterDelegate, it is passed on unconverted. 
+When sending data on via the PresenterOutput, the Presenter must convert it to a format that is convenient for display by the ViewController. When sending data on to the RouterDelegate, the Presenter  passes it on unconverted. 
 
-**TODO: CHECK THESE STATMENTS:** Remember that Entities must not be passed back to the Presenter from the UseCase. In particular, the only data that should be passed the to the Presenter is an indication of UseCase processing status and this is usually done via the method's name. The usecase does not need to send system state back through a router as it is already acualty holding that data on behalf of the use cases.
+Remember that the UseCase must not pass Entities to the Presenter via the UseCaseOutput. The UseCaseOutput should contain only immutable values or immutable structs of values. 
 
-Data that is passed to PresenterOutput is called a ViewModel. In the case of repeating data the Presenter holds the ViewModel structures and delivers them via an index method call.
+Data that is passed to PresenterOutput is called a ViewModel. In the case of repeating data the Presenter holds the ViewModel structures and delivers them via an index method call. ViewModels are immutable.
 
-I find it is a good practice to create one UseCaseOutput protocol for each event. When the number of use cases that a scene supports grows larger, the number of methods on a single output protocol becomes even larger. It becomes really hard to tell at a glance which methods are used by what events. This works out really nicely when you place the implementation of each output protocol in it's own extension.
+I find it is a good practice to create one UseCaseOutput protocol for each event. When the number of use cases that a scene supports becomes large, the number of methods on a single output protocol becomes even larger. It becomes really hard to tell at a glance which methods are used by what events. Your code become really organized when you place the implementation of each output protocol in it's own extension.
 
 ### The ViewController as Presenter Output
 
