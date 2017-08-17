@@ -156,13 +156,25 @@ I find it is a good practice to create one UseCaseOutput protocol for each event
 
 ### The ViewController as PresenterOutput
 
-The ViewController has one other VIPER responsibility: set data, which is obtained from the Presenter, into the views.  The Presenter sends data to the ViewController via the PresenterOutput protocol. The ViewController implements the protocol by  displaying the data received from the Presenter via the methods of protocol.
+The ViewController has one other VIPER responsibility: set the data, which is obtained from the Presenter, into the Views.  
 
-You can see that a VIPER ViewController has only one responsibiliy: configure Views and set data into them.
+The ViewController obtains data in one of two ways, depending on the situation. 
 
-Note that this set up makes it very easy to reskin a ui.
+In the case of non-repeating data, the data is sent from the Presenter via a PresenterOutput protocol, either as values or as an immutable struct. This data is known as a ViewModel.
 
-### 
+In the case of repeating data, the data is aquired from the Presenter via an indexed accessor method. The methods are used by a UITablesViewDataSource or UIPickerDataSource. The accessor method returns 
+
+
+
+
+
+The ViewController implements the protocol by  displaying the data received from the Presenter via the methods of protocol.
+
+
+
+For the same reasons that I mentioned regarding the UseCaseOutput, I find it is a good practice to create one PresenterOutput protocol for each event. 
+
+
 
 
 
