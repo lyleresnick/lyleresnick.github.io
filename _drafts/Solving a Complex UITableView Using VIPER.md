@@ -106,7 +106,7 @@ The UseCase, known in VIPER as the Interactor, has one responsibility: execute t
 
 The results of executing the UseCase are passed as output to the UseCaseOutput protocol. 
 
-Even when the Entities do not require processing to create the required output, they are never passed directly to the UseCaseOutput. The results are passed in a form known as the PresentationModel. The Presentation Model contains only the data that will be required for the output display. The data is not converted for output. 
+Even when the Entities do not require processing to create the required output, they are never passed directly to the UseCaseOutput. The results are passed in a form known as the PresentationModel. The Presentation Model contains only the data that will be required for the output display for this UseCase. The data is not converted for output. 
 
 A presentation model can be passed as a struct or as simple scalars - whatever is most convenient. When a struct is used, a good practice is to initialize the struct with the Entity.
 
@@ -146,39 +146,29 @@ There are occasions when a Transformer has more than one method. An example of t
 
 ### The Presenter as UseCaseOutput
 
-**TODO: READ THIS and organize vs Presenter section.** 
+Acting as UseCaseOutput, the Presenter's second responsibility is to convert the received PresentationModels to a format called a ViewModel. The ViewModel can be implemented as an immutable struct or as a set of scalars. 
 
-The Presenter's second responsibility is to process the data received via UseCaseOutput. The Presenter decides whether to send the data on to the ViewController via the PresenterOutput 
+The data in the ViewModel is formatted for use by the implementor of the PresentationOutput, which is the ViewController. 
 
-Before sending data on via the PresenterOutput, the Presenter must convert it to a format that is convenient for display by the ViewController. 
+Normally the converted ViewModel struct or individual values are passed as parameters to the PresentationOutput methods.
 
-The data that is passed to the PresenterOutput is called a ViewModel. In the case of repeating data the Presenter holds the ViewModel structures and delivers them via an index method call. ViewModels are immutable.
+ In the case of repeating data the Presenter holds ViewModel structures in an array and delivers them via an index method call.
 
-I find it is a good practice to create one UseCaseOutput protocol for each event. When the number of use cases that a scene supports becomes large, the number of methods on a single output protocol becomes even larger. It becomes really hard to tell at a glance which methods are used by what events. Your code become really organized when you place the implementation of each output protocol in it's own extension.
+When the number of use cases that a scene supports becomes large, the number of methods on a single output protocol becomes even larger. It becomes really hard to tell at a glance which methods are used by what events. for this reason, it is a good practice to create one UseCaseOutput protocol for each event. Your code becomes really organized when you place the implementation of each output protocol in it's own extension.
 
 ### The ViewController as PresenterOutput
 
 **TODO: READ THIS and organize vs ViewController section.**
 
-The ViewController has one other VIPER responsibility: set the data, which is obtained from the Presenter, into the Views.  
+Acting as PresenterOutput, the ViewController has one other VIPER responsibility: set the data, which is obtained from the Presenter, into the Views.
 
-The ViewController obtains data in one of two ways, depending on whether the data is repeating or non-repeating. 
+The ViewController obtains from the Presenter's data in one of two ways, depending on whether the data is repeating or non-repeating. 
 
-In the case of non-repeating data, the data is sent from the Presenter via a PresenterOutput protocol, either as individual parameter values or as an immutable struct parameter. This data is known as a ViewModel.
+In the case of non-repeating data, the ViewController obtains the ViewModel data directly from the Presenter via a PresenterOutput method, either as individual parameter values or as an immutable struct parameter.
 
 In the case of repeating data, the data is aquired from the Presenter via an indexed accessor method. The methods are used by a UITablesViewDataSource or UIPickerDataSource. The accessor method returns 
 
-
-
-
-
-The ViewController implements the protocol by  displaying the data received from the Presenter via the methods of protocol.
-
-
-
-For the same reasons that I mentioned regarding the UseCaseOutput, I find it is a good practice to create one PresenterOutput protocol for each event. 
-
-
+For the same reasons that I mentioned regarding the UseCaseOutput, it is a good practice to create one PresenterOutput protocol for each event. 
 
 ### The Connector
 
@@ -192,7 +182,7 @@ We do not want the ViewController to know anything about the Interactor. The Int
 
 The Connector is created and executed by the ViewController by overriding `awakeFromNib()`, which occurs after all outlets are created.
 
-### 
+ **TODO: HERE:**
 
 
 
