@@ -146,19 +146,19 @@ There are occasions when a Transformer has more than one method. An example of t
 
 ### The Presenter as UseCaseOutput
 
-Acting as UseCaseOutput, the Presenter's second responsibility is to convert the received PresentationModels to a format called a ViewModel. The ViewModel can be implemented as an immutable struct or as a set of scalars. 
+When acting as the UseCaseOutput, the Presenter's second responsibility is to convert the data received as PresentationModels to a format called a ViewModel. The data in the ViewModel is formatted so it can be used directly by the ViewController. This usually means Strings, but depending on the requirements of the output controls, it may be a state or a boolean.
 
-The data in the ViewModel is formatted for use by the implementor of the PresentationOutput, which is the ViewController. 
+If data must be localized, made accessible, or otherwise converted in any way, the process of conversion is done here in the presenter.
 
-Normally the converted ViewModel struct or individual values are passed as parameters to the PresentationOutput methods.
+ A ViewModel can be implemented as an immutable struct or as a set of scalars, whichever is easier. When implemented as scalars, the values are passed directly as parameters to the PresentationOutput methods. 
 
- In the case of repeating data the Presenter holds ViewModel structures in an array and delivers them via an index method call.
+If the number of parameters is large, it is better to put the values in a struct and them pass them as a parameter. In this case the conversion can take place in the init of the struct.
 
-When the number of use cases that a scene supports becomes large, the number of methods on a single output protocol becomes even larger. It becomes really hard to tell at a glance which methods are used by what events. for this reason, it is a good practice to create one UseCaseOutput protocol for each event. Your code becomes really organized when you place the implementation of each output protocol in it's own extension.
+In the case of repeating data, the Presenter holds the relating ViewModel structures in an array and delivers them via an indexed method call.
+
+When the number of use cases that a scene supports becomes large, the number of methods on a single output protocol becomes even larger. It becomes really hard to tell at a glance which UseCaseOutput methods are used by what events. For this reason, it is a good practice to create one UseCaseOutput protocol for each event. Your code will be really organized when you place the implementation of each output protocol in its own extension.
 
 ### The ViewController as PresenterOutput
-
-**TODO: READ THIS and organize vs ViewController section.**
 
 Acting as PresenterOutput, the ViewController has one other VIPER responsibility: set the data, which is obtained from the Presenter, into the Views.
 
@@ -166,7 +166,7 @@ The ViewController obtains from the Presenter's data in one of two ways, dependi
 
 In the case of non-repeating data, the ViewController obtains the ViewModel data directly from the Presenter via a PresenterOutput method, either as individual parameter values or as an immutable struct parameter.
 
-In the case of repeating data, the data is aquired from the Presenter via an indexed accessor method. The methods are used by a UITablesViewDataSource or UIPickerDataSource. The accessor method returns 
+In the case of repeating data, the data is aquired from the Presenter via an indexed accessor method. The methods are used by a UITableView-, UIPicker-, UICollectionView- or other DataSource. The accessor method returns a ViewModel containing the data to be displayed
 
 For the same reasons that I mentioned regarding the UseCaseOutput, it is a good practice to create one PresenterOutput protocol for each event. 
 
@@ -178,11 +178,11 @@ A ViewController is normally defined via IB, so we cannot use its init. Usually 
 
 We do not want the ViewController to know anything about the Interactor. The Interactor must exist before the presenter can  own it. The Presenter must exist before the ViewController can own it.
 
- The VIPER stack is assembled by a 3rd party class that knows about all of the parts in the stack and how they are connected together. I have called this part the connector.
+ The VIPER stack is assembled by a 3rd party class that knows about all of the parts in the stack and how they are connected together. I have called this part the Connector.
 
 The Connector is created and executed by the ViewController by overriding `awakeFromNib()`, which occurs after all outlets are created.
 
- **TODO: HERE:**
+The connector is also useful to set the values of the Presenter into any classes which need to know about them. This usually includes the UITableView-, UIPicker-, UICollectionView- or other DataSources
 
 
 
