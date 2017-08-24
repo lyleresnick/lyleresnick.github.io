@@ -28,15 +28,15 @@ In the next article, I'm going to demonstrate that VIPER can be very simple to i
 
 The main purpose of the VIPER architecture is to reduce the amount of code in a ViewController class. VIPER does this by allocating almost all of the responsibilities of a typical ViewController into other classes that have predefined responsibilities. You may recall that this echoes the Single Responsibility Principle. 
 
-Another purpose of the VIPER architecture is to decouple dependencies by passing only values between the layers and by demanding that dependencies only go in one direction.
+Another purpose of the VIPER architecture is to reduce dependencies. It does this by honouring the layers, passing only values between the layers and demanding that explicit object dependencies only go in one direction.
 
-All of this makes it so that it is easier to change the code which is normally contained in a UIViewController. 
+All of this makes it easier to change code which is normally contained in a UIViewController. 
 
-To understand VIPER you need to understand a bit about the the clean architecture. 
+To understand VIPER you need to understand a bit about the the Clean Architecture. 
 
 ![Bob Martin's Clean Architecture](https://8thlight.com/blog/assets/posts/2012-08-13-the-clean-architecture/CleanArchitecture-5c6d7ec787d447a81b708b73abba1680.jpg)
 
-As Uncle Bob's diagram shows, a clean system is separated into layers:
+As Uncle Bob's diagram shows, a Clean System is separated into layers:
 
 - the User Interface is in the outermost layer of the  system 
 - the Entities are at the centre of the system and are the results of applying Enterprise Business Rules. 
@@ -44,9 +44,11 @@ As Uncle Bob's diagram shows, a clean system is separated into layers:
 - the Data Store and Network, which provide the entities, are in the outer layer
 - the Interface Adapters, and in particular the Presenters and Gateways are placed in a layer between the User Interface and Application Business logic layers
 
-In the Clean Architecture, dependencies can only be explicit in one direction - towards the centre. This is shown in the diagram by the dependency arrow pointing inward. A class in a layer closer to the center cannot know the name of a class in a layer closer to the outside. All dependencies going in a direction away from the centre must be implemented as a dependency inversion, which means a protocol must be used. 
+In the Clean Architecture, object dependencies can only be explicit in one direction - towards the centre. This is shown in the diagram by the dependency arrow pointing inward. A class in a layer closer to the center cannot know the name of a class in a layer closer to the outside. 
 
-The diagram on the right shows the implementation of a dependency inversion where the Presenter implements the Use Case Output, which is produced by the Use Case.
+All dependencies going in a direction away from the centre must be implemented as a dependency inversion. The inversion is implemented as a protocol and the object has to be injected into the layer. This works great for testing. 
+
+The *Flow of control* diagram, on the right, shows the implementation of a dependency inversion where the Presenter implements the UseCaseOutput, which is produced by the UseCase. This makes it so that the UseCase has no idea who where it is sending its output. The relationship between the UI and the PresenterOutput is analogous.
 
 Another requirement of the Clean Architecture is that data must be copied from layer to layer. This means that we can't pass the same data or data structure from one layer to the next: we can only pass copies. In Swift we can simply pass values or structs of values and they will be copied automatically. This prevents changes of implementation in one layer accidentally affecting other layers. When data is copied between the UseCases and the Presenters, it is converted between internal and external formats
 
