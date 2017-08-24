@@ -6,17 +6,31 @@ date: 2017-06-09
 
 ## Introduction
 
-VIPER is a micro-architecture - a set of classes that work together to structure a solution.  
+I've been exploring and using VIPER now for about 2 years. I think it is a really sensible solution for organizing and reducing the size of a view controller. 
 
-VIPER is an implementation of [Bob Martin's Clean Architecture](https://8thlight.com/blog/uncle-bob/2012/08/13/the-clean-architecture.html). I'm going to demonstrate that VIPER can be very simple to implement and its benefits can be realized very quickly.   
+Reducing the size of a viewController is a notable goal, but how should it be done? 
 
-I'll use the requirement and solution to the Complex UITableView from the last [post]({{site.url}}/blog/2017/05/13/Solving-a-Complex-iOS-TableView-Part-2.html) as the basis of this example.
+One common way to architect an app is to layer the app into an interface layer and a service layer. 
 
-The complete app which demonstrates this refactoring can be found at [**CleanReportTableDemo**](https://github.com/lyleresnick/CleanReportTableDemo).
+The service layer is responsible for transferring data to and from the internet, local databases, audio and video for the use by the interface layer.  This layer may also perform other non-functional functions such as  caching, syncing, etc. 
+
+The interface layer does something with all this data that is ultimately the purpose of the app.
+
+This two layer architecture is too simple. It does not account for the placement of all of the responsibilities of the so called *interface layer*. A lot of processing happens in this layer. All of this processing ends up in a UIViewController.
+
+In commercial applications, UIViewControllers get large. I've seen 3000 lines in a UIViewController.
+
+VIPER is a micro-architecture - a predefined set of classes that work together to structure a solution. VIPER is an implementation of [Bob Martin's Clean Architecture](https://8thlight.com/blog/uncle-bob/2012/08/13/the-clean-architecture.html). 
+
+In the next article, I'm going to demonstrate that VIPER can be very simple to implement and its benefits can be realized very quickly.  I'll use the requirement and solution to the Complex UITableView from the last [post]({{site.url}}/blog/2017/05/13/Solving-a-Complex-iOS-TableView-Part-2.html) as the basis of this example. A complete app which demonstrates the refactoring to Clean Architecture can be found at [**CleanReportTableDemo**](https://github.com/lyleresnick/CleanReportTableDemo). I will be explaining this app in the next post.
 
 ## VIPER Explained
 
-The purpose of the VIPER architecture is to reduce the amount of code in a ViewController class. VIPER does this by distributing the most of code of the ViewController into other classes that have specific responsibilities. You may recall that this echoes the Single Responsibility Principle. 
+The main purpose of the VIPER architecture is to reduce the amount of code in a ViewController class. VIPER does this by allocating almost all of the responsibilities of a typical ViewController into other classes that have predefined responsibilities. You may recall that this echoes the Single Responsibility Principle. 
+
+Another purpose of the VIPER architecture is to decouple dependencies by passing only values between the layers and by demanding that dependencies only go in one direction.
+
+All of this makes it so that it is easier to change the code which is normally contained in a UIViewController. 
 
 To understand VIPER you need to understand a bit about the the clean architecture. 
 
