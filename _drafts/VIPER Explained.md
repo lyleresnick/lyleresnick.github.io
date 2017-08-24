@@ -72,7 +72,7 @@ The Interactor uses the EntityGateway to obtain access to EntityManagers.  Entit
 
 Since VIPER is an implementation of the Clean Architecture, there a few rules to follow: 
 
-1. Dependencies can only be explicit in one direction.
+1. Dependencies can only be explicit in one direction, towards the centre.
 2. Data must be copied from layer to layer via values or structs of values
 
 
@@ -82,10 +82,6 @@ Entities are at the centre. In order to access the entities, the EntityGateway m
 In order to transmit the results of the Interactor to the ViewController, they must be first sent to the Presenter. The Presenter sends its converted results to the ViewController. Since these messages are moving away from the centre, the target classes are specified as protocols. 
 
 The output of the Interactor is a protocol called the InteractorOutput and the output of the Presenter is a protocol called the PresenterOutput. The ViewController implements the PresenterOutput protocol and the Presenter implements the InteractorOutput protocol.
-
-If you are wondering why I have not mentioned the Use Case Input, shown in the diagram, its because it is not really neccessary, and its annoying, when trying to determine a call path. Even for testing, which would be its most useful use case, the concrete class' methods can be  overridden. Hey, you can certainly use Input protocols if you prefer.
-
-
 
 ## The Pipeline
 
@@ -101,7 +97,7 @@ The event is passed to the ViewController as usual.
 
 ### The ViewController 
 
-In VIPER, the UIViewController sends <u>every</u> event coming from a UIControl or lifecycle method directly to the Presenter. The ViewController does not process the event in any way, whatsoever. Super simple! 
+In VIPER, the UIViewController sends <u>every</u> event coming from a UIControl or lifecycle method directly to the Presenter. The ViewController does not process the event in any way, whatsoever. It just sends the event and its assocoiated data to the Presenter. Super simple! 
 
 As you can see in the diagram, the ViewController has another role, which I will cover this later.
 
