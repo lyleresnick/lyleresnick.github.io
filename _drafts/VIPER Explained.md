@@ -28,11 +28,13 @@ In the next article, I'm going to demonstrate that VIPER can be very simple to i
 
 The main purpose of the VIPER architecture is to reduce the amount of code in a ViewController class. VIPER does this by allocating almost all of the responsibilities of a typical ViewController into other classes that have predefined responsibilities. You may recall that this echoes the Single Responsibility Principle. 
 
-Another purpose of the VIPER architecture is to reduce dependencies. It does this by honouring the layers, passing only values between the layers and demanding that explicit object dependencies only go in one direction.
+Another purpose of the VIPER architecture is to reduce dependencies. It does this by honouring the layer boundaries, passing only values between the layers and demanding that explicit object dependencies only go in one direction.
 
 All of this makes it easier to change code which is normally contained in a UIViewController. 
 
 To understand VIPER you need to understand a bit about the the Clean Architecture. 
+
+### Uncle Bob's Diagram
 
 ![Bob Martin's Clean Architecture](https://8thlight.com/blog/assets/posts/2012-08-13-the-clean-architecture/CleanArchitecture-5c6d7ec787d447a81b708b73abba1680.jpg)
 
@@ -44,19 +46,37 @@ As Uncle Bob's diagram shows, a Clean System is separated into layers:
 - the Data Store and Network, which provide the entities, are in the outer layer
 - the Interface Adapters, and in particular the Presenters and Gateways are placed in a layer between the User Interface and Application Business logic layers
 
+### Object Dependencies
+
 In the Clean Architecture, object dependencies can only be explicit in one direction - towards the centre. This is shown in the diagram by the dependency arrow pointing inward. A class in a layer closer to the center cannot know the name of a class in a layer closer to the outside. 
 
 All dependencies going in a direction away from the centre must be implemented as a dependency inversion. The inversion is implemented as a protocol and the object has to be injected into the layer. This works great for testing. 
 
 The *Flow of control* diagram, on the right, shows the implementation of a dependency inversion where the Presenter implements the UseCaseOutput, which is produced by the UseCase. This makes it so that the UseCase has no idea who where it is sending its output. The relationship between the UI and the PresenterOutput is analogous.
 
-Another requirement of the Clean Architecture is that data must be copied from layer to layer. This means that we can't pass the same data or data structure from one layer to the next: we can only pass copies. In Swift we can simply pass values or structs of values and they will be copied automatically. This prevents changes of implementation in one layer accidentally affecting other layers. When data is copied between the UseCases and the Presenters, it is converted between internal and external formats
+### Copy Data Values
+
+Another requirement of the Clean Architecture is that data must be copied from layer to layer. This means that we can't pass the same data or data structure from one layer to the next: we can only pass copies. 
+
+In Swift we can simply pass values or structs of values and they will be copied automatically. 
+
+Copying data between layers by passing values, instead of objects prevents changes of implementation in one layer accidentally affecting other layers. It also prevents errors due to implementation of concurrency.
+
+### Honour The Layer Boundaries
+
+Clean Architecture also requires that objects in one layer can only communicate to adjacent layers. Objects in non-adjacent layers cannot communicate with one another. 
+
+Objects in a layer must not expose their implementation to any other layer. Their implementation mudst be be encapsulated. For example an array or dictionary in a layer must not be exposed by name to another layer. 
+
+This is what I mean by honouring the layer boundaries.
+
+### Viper Classes
 
 In VIPER, 
 
 - the ViewController(**V**) implements the User Interface. 
 - the Presenter(**P**) implements 2 parts of the interface adapter layer: data conversion and selection of Use Case or Router  
-- the Interactor(**I**), a.k.a the Use Case, implements the application business rules
+- the Interactor(**I**), a.k.a the UseCase, implements the application business rules
 - the Entities(**E**) are provided by an EntityGateway via Gateway Methods
 - the Router(**R**) changes ViewControllers 
 
@@ -66,9 +86,11 @@ This diagram shows the relationships of the VIPER classes.
 
 The ViewController owns a Presenter, which in turn owns an Interactor.  The presenter has a one-way relationship with the Router. The Router owns and has a one-way relationship with child ViewControllers that it creates and manages
 
-The ViewController sends messages to the Presenter, which in turn sends messages to the Interactor or the Router. 
+The ViewController sends messages to the Presenter, which in turn sends messages to the UseCase or the Router. 
 
-The Interactor uses the EntityGateway to obtain access to EntityManagers.  EntityManagers are responsible for providing access to the Entities.
+The UseCase uses the EntityGateway to obtain access to EntityManagers.  EntityManagers are responsible for providing access to the Entities.
+
+### Communication Between the Classes
 
 Since VIPER is an implementation of the Clean Architecture, there a few rules to follow: 
 
@@ -76,12 +98,13 @@ Since VIPER is an implementation of the Clean Architecture, there a few rules to
 2. Data must be copied from layer to layer via values or structs of values
 
 
+Entities are at the centre. In order to access the entities, the EntityGateway must be injected into the Use Case. In order to remove the explicit dependency of the UseCase on the EntityGateway, the gateway is implemented as a protocol.
 
-Entities are at the centre. In order to access the entities, the EntityGateway must be injected into the Use Case. In order to remove the explicit dependency of the Interactor on the EntityGateway, the gateway is implemented as a protocol.
+In order to transmit the results of the UseCase to the ViewController, they must be first sent to the Presenter. The Presenter sends its converted results to the ViewController. Since these messages are moving away from the centre, the target classes are specified as protocols. 
 
-In order to transmit the results of the Interactor to the ViewController, they must be first sent to the Presenter. The Presenter sends its converted results to the ViewController. Since these messages are moving away from the centre, the target classes are specified as protocols. 
+The output of the UseCase is a protocol called the UseCaseOutput and the output of the Presenter is a protocol called the PresenterOutput. The ViewController implements the PresenterOutput protocol and the Presenter implements the UseCaseOutput protocol.
 
-The output of the Interactor is a protocol called the InteractorOutput and the output of the Presenter is a protocol called the PresenterOutput. The ViewController implements the PresenterOutput protocol and the Presenter implements the InteractorOutput protocol.
+Although outside the scope of this blog, I want to mention that the EntityManagers, that the EntityGateway provides, should also be implemented as protocols.
 
 ## The Pipeline
 
@@ -103,7 +126,7 @@ As you can see in the diagram, the ViewController has another role, which I will
 
 ### The Presenter
 
-When the Presenter receives an event, it routes the event to either the UseCase or the Router. It converts its input (the ViewControllers output) to a form that can be used directly by the UseCase.   
+When the Presenter receives an event, it routes the event to either the UseCase or the Router. It converts the event's parameters from external format to an internal format that can be used directly by the UseCase.   
 
 Examples of input conversion might be from String to Int, formatted String date to Date, an Int from a UIPickerView to an enum - the list goes on. 
 
