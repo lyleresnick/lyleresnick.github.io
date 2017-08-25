@@ -7786,7 +7786,7 @@
 											},
 											"edgePosition": 1,
 											"underline": false,
-											"text": "8 : eventX.seeResultY",
+											"text": "8 : see ResultY",
 											"horizontalAlignment": 2,
 											"verticalAlignment": 5,
 											"wordWrap": false
@@ -8050,7 +8050,7 @@
 							"_parent": {
 								"$ref": "AAAAAAFck4GkwuZ5z40="
 							},
-							"name": "eventX.seeResultY",
+							"name": "see ResultY",
 							"source": {
 								"$ref": "AAAAAAFck4Pmg+acasg="
 							},
