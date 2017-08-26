@@ -43,12 +43,12 @@ As Uncle Bob's diagram shows, a Clean System is separated into layers:
 - the User Interface is in the outermost layer of the  system 
 - the Entities are at the centre of the system and are the results of applying Enterprise Business Rules. 
 - the Application Business Rules reside in the layer which surrounds the Entities
-- the Data Store and Network, which provide the entities, are in the outer layer
+- the Data Store and Network, which provide the entities, are in the outermost layer
 - the Interface Adapters, and in particular the Presenters and Gateways are placed in a layer between the User Interface and Application Business logic layers
 
 ### Object Dependencies
 
-In the Clean Architecture, object dependencies can only be explicit in one direction - towards the centre. This is shown in the diagram by the dependency arrow pointing inward. A class in a layer closer to the center cannot know the name of a class in a layer closer to the outside. 
+In the Clean Architecture, object dependencies can only be explicit in one direction - towards the centre. This is shown in the diagram by the dependency arrow pointing inward. A class in a layer closer to the center cannot know the name of a class in a layer closer to the outside. All dependencies going in a direction away from the centre must be implemented as a dependency inversion, which means a protocol (in Swift, interface, in Java) must be used. 
 
 All dependencies going in a direction away from the centre must be implemented as a dependency inversion. The inversion is implemented as a protocol and the object has to be injected into the layer. This works great for testing. 
 
@@ -60,13 +60,13 @@ Another requirement of the Clean Architecture is that data must be copied from l
 
 In Swift we can simply pass values or structs of values and they will be copied automatically. 
 
-Copying data between layers by passing values, instead of objects prevents changes of implementation in one layer accidentally affecting other layers. It also prevents errors due to implementation of concurrency.
+Copying data between layers by passing values, instead of objects prevents implementation changes in one layer accidentally affecting other layers. It also prevents errors due to implementation of concurrency.
 
 ### Honour The Layer Boundaries
 
 Clean Architecture also requires that objects in one layer can only communicate to adjacent layers. Objects in non-adjacent layers cannot communicate with one another. 
 
-Objects in a layer must not expose their implementation to any other layer. Their implementation mudst be be encapsulated. For example an array or dictionary in a layer must not be exposed by name to another layer. 
+Objects in a layer must not expose their implementation to any other layer. The implementation must be encapsulated. For example an array or dictionary in a layer must not be exposed by name to another layer. 
 
 This is what I mean by honouring the layer boundaries.
 
@@ -75,7 +75,7 @@ This is what I mean by honouring the layer boundaries.
 In VIPER, 
 
 - the ViewController(**V**) implements the User Interface. 
-- the Presenter(**P**) implements 2 parts of the interface adapter layer: data conversion and selection of Use Case or Router  
+- the Presenter(**P**) implements 2 parts of the interface adapter layer: data conversion and selection of whether to Route to another scene or perform a UseCase 
 - the Interactor(**I**), a.k.a the UseCase, implements the application business rules
 - the Entities(**E**) are provided by an EntityGateway via Gateway Methods
 - the Router(**R**) changes ViewControllers 
