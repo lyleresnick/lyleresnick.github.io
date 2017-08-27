@@ -140,7 +140,7 @@ As you can see in the diagram, the Presenter has another role: presenting the re
 
 ### The UseCase
 
-The UseCase has one responsibility: execute the application business requirement. 
+The UseCase has one responsibility: execute the application business requirement. The only code that belongs in a UseCase is that which implements the application business rules. The UseCase should not contain data conversion or external format validation - these are both the domain of the Presenter.
 
 The UseCase typically uses the EntityGateway to access the system state in the form of Entities, processes the Entities against the incoming parameters, and updates the system state via the EntityGateway. It may do this over the course of responding to more than one event. One event may cause the entities to be accessed and output in some order and the next event may select one of the entities and the UseCase will update it in some way.
 
@@ -148,13 +148,15 @@ The results of executing the UseCase are passed as parameters to the UseCaseOutp
 
 Entities are never passed directly to the UseCaseOutput. PresentationModels are created from Entities, even when the Entity does not require much processing. The PresentationModel  contains only the data that is required for the output. The UseCase does not convert data for output - it does not know anything about the output format, localization or target view. Output via PresentationModels is kind of like logging without any descriptive text.
 
-Data Conversion is performed by the Presenter and the EntityGateway.
+Data Conversion is performed by the Presenter and the EntityGateway. This allows the code in the UseCase to be free of conversion and data validation. 
 
 A PresentationModel can be passed as a `struct`, as an `enum` or as simple scalars - whatever is most convenient. When a `struct` is used, a good practice is to initialize it by passing it the Entity.
 
 The separation of the Entities in the UseCase from the PresentationModels used by the Presenter makes sure that the UseCase is decoupled from the Presenter, thus promoting a reduction of shared mutable state. This way the form of Entity can change without affecting the outer layers of the system.
 
- The UseCase has no direct dependencies - both the EntityGateway and the PresenterOutput are Protocols and are injected (by the Connector).
+ The UseCase has no direct dependencies - both the EntityGateway and the UseCaseOutput are protocols and are injected (by the Connector).
+
+When the number of use cases that a scene supports becomes large, the number of methods on a single output protocol becomes even larger. It becomes really hard to tell at a glance which UseCaseOutput methods are used by what events. For this reason, it is a good practice to create one UseCaseOutput protocol for each event. Your code will be really organized when you place the implementation of each output protocol in its own extension.
 
 ### The EntityGateway and EntityManagers
 
@@ -162,17 +164,19 @@ The UseCase uses the EntityGateway to obtain access to EntityManagers. EntityMan
 
 The EntiryManagers are outside the scope of VIPER, but they are a very important aspect of the architecture as a whole. They provide access to and transform the state of the system. They can deliver Entities originating from either local data stores (CoreData or a local file system) and from the Internet. 
 
-The UseCase does not care where the data is coming from or where it is going to - that is the job of the EntityManager.
+It is a good practice to create an EntityManager for each type of Entity that has its own lifecycle. 
 
-An EntityManager receives data originating as JSON, XML, or other external format from an external store and converts it to either structs or classes. If the Entities are going to persist for a while in memory, they probably should be classes. 
+The UseCase does not know where the data is coming from or where it is going to - that is the job of the EntityManager.
 
-Entities should contain data that has been converted from its external form to a form that can be used directly by the UseCase. They should not contain simple Strings or JSON dictionaries. For example: date Strings should be converted to Dates, URL Strings should be converted to URLs, and number Strings should be converted to their specific number type. 
+An EntityManager receives data originating as JSON, XML, or some other external format from an external store and converts it to either structs or classes. I suggest that Entities should be classes, since you will probably want to mutate them over the course of many events. 
 
-After processing, an EntityManager receives Entities and parameters from the UseCase, combines them and sends the changes to the Entity to an external store.
+The EntityManager creates the Entity by converting data from an external form to a form that can be used directly by the UseCase. Entities should not contain Strings that are actually numbers and enums, or unconverted JSON dictionaries. For example: date Strings should be converted to Dates, URL Strings should be converted to URLs, number Strings should be converted to their specific number type and exclusive values should be converted to enums. 
 
-Likewise, data provided to the EntityManagers should not require conversion by the UseCase. It is the job of the EntityManager to convert data from its internal form to its external form.
+After processing, the UseCase sends an Entity with parameters to the EntityManager, where it combines them and sends the changes in an external format to an external store.
 
-By providing the data conversion, the EntityManagers effectively decouple the UseCase from the physicality of the outside storage and location. This allows the code in the UseCase to be free of conversion and data validation. The only code in the UseCase is code to process the application business rules. 
+Data sent to an EntityManager should not require conversion by the UseCase. It is the job of the EntityManager to convert data from its internal form to its external form.
+
+By providing the data conversion, the EntityManagers effectively decouple the UseCase from the physical form and location of external storage. 
 
 As I mentioned, the EntityGateway is a protocol. It is defined as a protocol so that the UseCase is decoupled from the source of the data. EntityManagers should also be defined in terms of protocols. This makes it very easy to unit test the UseCase. You can inject an alternate implementation of an EntityManager to control the data for a test.
 
@@ -180,7 +184,7 @@ As I mentioned, the EntityGateway is a protocol. It is defined as a protocol so 
 
 The Transformer is not formally part of VIPER, but due of the number of events that a typical UseCase has  to process, I find it useful to create one Transformer for each event that changes the state of the system.  
 
-Most of the time a Transformer would simply be a method of the UseCase. I convert the method to a *method-object*. The Transformer usually consists of just a constructor and a method called `transform` . In the UseCase, I initialize the constructor with the required EntityManagers obtained from the EntityGateway and any data required from previously run UseCases. 
+Normally the function of a Transformer would simply be rendered as a method of a UseCase. I convert the method to a *method-object* and then call it from the UseCase event method. The Transformer usually consists of a constructor and a method called `transform` . In the UseCase method, I initialize the constructor with the required EntityManagers obtained from the EntityGateway and any data required from previously run UseCases. 
 
 I pass the event parameters from UseCase to the `transform` method along with the reference to the Presenter (for output).
 
@@ -190,19 +194,23 @@ There are occasions when a UseCase does not use a transformer. An example of thi
 
 ### The Presenter as UseCaseOutput
 
-When acting as the UseCaseOutput, the Presenter's second responsibility is to convert the data received as PresentationModels to a format called a ViewModel. The data in the ViewModel is formatted so it can be used directly by the ViewController. This usually means Strings, but depending on the requirements of the output controls, it may be a state or a boolean.
+The Presenter's second responsibility is to convert the data received as PresentationModels to a format called a ViewModel. The Presenter implements the UseCaseOutput protocol. 
 
-If data must be localized, made accessible, or otherwise converted in any way, the process of conversion is done here in the presenter.
+The role of the Presenter as UseCaseOutput is to format the data received in the PresentationModel into a format that can be used directly by the ViewController. The formatted output is called a ViewModel. This usually means Strings, but depending on the requirements of the output controls, it may be an enum or a boolean.
 
- A ViewModel can be implemented as an immutable struct or as a set of scalars, whichever is easier. When implemented as scalars, the values are passed directly as parameters to the PresentationOutput methods. 
+If data must be localized, made accessible, or otherwise converted in any way, the process of conversion is done by the Presenter.
+
+ A ViewModel can be implemented as an immutable struct or as a set of scalars, whichever is easier. When implemented as scalars, the values are passed directly as parameters to the methods of the PresentationOutput protocol. 
 
 If the number of parameters is large, it is better to put the values in a struct and them pass them as a parameter. In this case the conversion can take place in the init of the struct.
 
-In the case of repeating data, the Presenter holds the relating ViewModel structures in an array and delivers them via an indexed method call.
+When the input to the Presenter is repetitive, the Presenter holds the ViewModel structures in an array and delivers them via an indexed method call.
 
-When the number of use cases that a scene supports becomes large, the number of methods on a single output protocol becomes even larger. It becomes really hard to tell at a glance which UseCaseOutput methods are used by what events. For this reason, it is a good practice to create one UseCaseOutput protocol for each event. Your code will be really organized when you place the implementation of each output protocol in its own extension.
+When the input to the Presenter is repetitive and heterogeneous, it is a good practice to use *associated-value* `enum`s to hold the data. Although, due to syntax, I find that when an enum contains a large number of associated values, the extraction of values is painful, not to mention that every time a value is added you have to add another '-' . An even better practice is to use enums whose sole associated-value is a struct. This would allow you to use names to extract values, instead of positions.
 
 ### The ViewController as PresenterOutput
+
+**TODO: Continue HERE:**
 
 Acting as PresenterOutput, the ViewController has one other VIPER responsibility: set the data, which is obtained from the Presenter, into the Views.
 
@@ -210,7 +218,7 @@ The ViewController obtains from the Presenter's data in one of two ways, dependi
 
 In the case of non-repeating data, the ViewController obtains the ViewModel data directly from the Presenter via a PresenterOutput method, either as individual parameter values or as an immutable struct parameter.
 
-In the case of repeating data, the data is aquired from the Presenter via an indexed accessor method. The methods are used by a UITableView-, UIPicker-, UICollectionView- or other DataSource. The accessor method returns a ViewModel containing the data to be displayed
+In the case of repeating data, the data is acquired from the Presenter via an indexed accessor method. The methods are used by a UITableView-, UIPicker-, UICollectionView- or other DataSource. The accessor method returns a ViewModel containing the data to be displayed
 
 For the same reasons that I mentioned regarding the UseCaseOutput, it is a good practice to create one PresenterOutput protocol for each event. 
 
