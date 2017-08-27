@@ -58,7 +58,7 @@ The *Flow of control* diagram, on the right, shows the implementation of a depen
 
 Another requirement of the Clean Architecture is that data must be copied from layer to layer. This means that we can't pass the same data or data structure from one layer to the next: we can only pass copies. 
 
-In Swift we can simply pass values or structs of values and they will be copied automatically. 
+In Swift we can pass singular values, `struct`s of values or `enum`s with values as parameters and they will be copied automatically. 
 
 Copying data between layers by passing values, instead of objects prevents implementation changes in one layer accidentally affecting other layers. It also prevents errors due to implementation of concurrency.
 
@@ -110,41 +110,49 @@ Although outside the scope of this blog, I want to mention that the EntityManage
 
 You can think of VIPER as a pipeline. Each stage of the pipeline has a well defined job to do. 
 
-Here is a diagram showing the event and information flow between the View Controller and the Entity Gateway
+Here is a diagram showing the event flow between the View Controller and the Entity Gateway
 
 ![Diagram of VIPER classes]({{ site.url }}/assets/VIPER UseCase Sequence.png)
 
 The diagram shows that a user or device initiates a sequence by sending an event to a UIViewController. An event can be the result of a user touching a button or a device delivering a location or some other sensor data.
 
-The event is passed to the ViewController as usual.
+The event is passed to the ViewController as usual. 
+
+In the case of repeating touchable areas displayed by UITable and UICollectionViews, a touch event should be sent to the UITable- or UICollectionViewCell, respectively. The index can be accessed from the cell's collection and then sent with the event.
+
+**TODO: PLACE THIS:** It is also useful think of the arrows as data all flowing to the right.
 
 ### The ViewController 
 
-In VIPER, the UIViewController sends <u>every</u> event coming from a UIControl or lifecycle method directly to the Presenter. The ViewController does not process the event in any way, whatsoever. It just sends the event and its assocoiated data to the Presenter. Super simple! 
+In VIPER, the UIViewController sends <u>every</u> event coming from a UIControl or lifecycle method directly to the Presenter. The ViewController does not process the event in any way, whatsoever. It just sends the event and its associated data to the Presenter. In the case of repeating UIControls contained in a UITableView or UICollectionView, the Cell receives the event and sends it to the Presenter.  Super simple!
 
-As you can see in the diagram, the ViewController has another role, which I will cover this later.
+As you can see in the diagram, the ViewController has another role: showing the result of the event. I will cover this later in the article.
 
 ### The Presenter
 
-When the Presenter receives an event, it routes the event to either the UseCase or the Router. It converts the event's parameters from external format to an internal format that can be used directly by the UseCase.   
+When the Presenter receives an event, it routes the event to either the UseCase or the Router. It converts the event's parameters from external format to an internal format that can be used directly by the UseCase or the router.   
 
 Examples of input conversion might be from String to Int, formatted String date to Date, an Int from a UIPickerView to an enum - the list goes on. 
 
-TODO: When the event is sent to a Router, it is sent via a RouterRequest. RouterRequests have asynchronous callbacks, unless they are completion callbacks.
+**TODO: CHECK ON THIS:** When the event is sent to a Router, it is sent via a RouterRequest. RouterRequests have asynchronous callbacks, unless they are completion requests.
 
-As you can see in the diagram, the Presenter has another role, again, I will cover that shortly.
+As you can see in the diagram, the Presenter has another role: presenting the result of the event - again, I will cover that shortly.
 
 ### The UseCase
 
-The UseCase, known in VIPER as the Interactor, has one responsibility: execute the application use case defined for the event. Upon receiving an event, the UseCase may use the EntityGateway to access the system state in the form of Entities, process the Entities with the incoming parameters, and may update the system state via the EntityGateway.
+**TODO: MORE FOCUS ON THIS IS WHERE IT ALL HAPPENS:**
+
+The UseCase, known in VIPER as the Interactor, has one responsibility: execute the application use case defined for the event. Upon receiving an event, the UseCase may use the EntityGateway to access the system state in the form of Entities, process the Entities against the incoming parameters, and may update the system state via the EntityGateway.
 
 The results of executing the UseCase are passed as output to the UseCaseOutput protocol. 
 
-Even when the Entities do not require processing to create the required output, they are never passed directly to the UseCaseOutput. The results are passed in a form known as the PresentationModel. The Presentation Model contains only the data that will be required for the output display for this UseCase. The data is not converted for output. 
+Even when the Entities do not require processing to create the required output, they are never passed directly to the UseCaseOutput. The results are passed in a form known as the PresentationModel. The Presentation Model contains only the data that will be required for the output display for this UseCase. The data is not converted for output as the UseCase does not know anything about the output formats, localization or target controls. 
 
-A presentation model can be passed as a struct or as simple scalars - whatever is most convenient. When a struct is used, a good practice is to initialize the struct with the Entity.
+Think of logging the output.
 
-The separation of the Entity from the Presentation Model helps ensure that the UseCase is decoupled from the Presenter. This way the Entity can chage without affecting the outer layers of the system.
+A presentation model can be passed as a `struct`, as an `enum` or as simple scalars - whatever is most convenient. When a `struct` or `enum` is used, a good practice is to initialize it with the Entity.
+
+The separation of the Entity from the PresentationModel helps ensure that the UseCase is decoupled from the Presenter. This way the form of Entity can change without affecting the outer layers of the system.
 
 Note that the UseCase never has to convert data, as that is the job of the Presenter and the EntityGateway.
 
@@ -158,13 +166,17 @@ The EntiryManagers are outside the scope of VIPER, but they are a very important
 
 The UseCase does not care where the data is coming from or where it is going to - that is the job of the EntityManager.
 
-The Entities delivered by the EntityManagers contain data that has been converted from its external form to a form that can be used directly by the UseCase, not just simple Strings or JSON dictionaries. For example date Strings should be converted to Dates, URL Strings should be converted to URLs, and number Strings should be converted to their specific number type. 
+An EntityManager receives data originating as JSON, XML, or other external format from an external store and converts it to either structs or classes. If the Entities are going to persist for a while in memory, they probably should be classes. 
+
+Entities should contain data that has been converted from its external form to a form that can be used directly by the UseCase. They should not contain simple Strings or JSON dictionaries. For example: date Strings should be converted to Dates, URL Strings should be converted to URLs, and number Strings should be converted to their specific number type. 
+
+After processing an EntityManager receives Entities and parameters from the UseCase, combines and sends the entity to an external store.
 
 Likewise, data provided to the EntityManagers should not require conversion. it is the job of the EntityManager to convert data from its internal form to its external form.
 
 By providing the data conversion, the EntityManagers effectively decouple the UseCase from the physicallity of the outside storage and location. This makes the UseCase conversion and data validation free. The only code left in the UseCase is code to process the application business rules. 
 
-As I mentioned, the EntityGateway is a protocol. It is defined as a protocol so that the UseCase is decoupled from the source of the data. EntityManagers should also be defined in terms of protocols. This makes it very easy to unit test the UseCase. You can inject substitute implementations of EntiryManagers to control the data .
+As I mentioned, the EntityGateway is a protocol. It is defined as a protocol so that the UseCase is decoupled from the source of the data. EntityManagers should also be defined in terms of protocols. This makes it very easy to unit test the UseCase. You can inject substitute implementations of EntiryManagers to control the data for a test.
 
 ### The Transformer
 
