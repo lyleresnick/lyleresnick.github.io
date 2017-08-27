@@ -170,25 +170,25 @@ An EntityManager receives data originating as JSON, XML, or other external forma
 
 Entities should contain data that has been converted from its external form to a form that can be used directly by the UseCase. They should not contain simple Strings or JSON dictionaries. For example: date Strings should be converted to Dates, URL Strings should be converted to URLs, and number Strings should be converted to their specific number type. 
 
-After processing an EntityManager receives Entities and parameters from the UseCase, combines and sends the entity to an external store.
+After processing, an EntityManager receives Entities and parameters from the UseCase, combines them and sends the changes to the Entity to an external store.
 
-Likewise, data provided to the EntityManagers should not require conversion. it is the job of the EntityManager to convert data from its internal form to its external form.
+Likewise, data provided to the EntityManagers should not require conversion by the UseCase. It is the job of the EntityManager to convert data from its internal form to its external form.
 
-By providing the data conversion, the EntityManagers effectively decouple the UseCase from the physicallity of the outside storage and location. This makes the UseCase conversion and data validation free. The only code left in the UseCase is code to process the application business rules. 
+By providing the data conversion, the EntityManagers effectively decouple the UseCase from the physicality of the outside storage and location. This allows the code in the UseCase to be free of conversion and data validation. The only code in the UseCase is code to process the application business rules. 
 
-As I mentioned, the EntityGateway is a protocol. It is defined as a protocol so that the UseCase is decoupled from the source of the data. EntityManagers should also be defined in terms of protocols. This makes it very easy to unit test the UseCase. You can inject substitute implementations of EntiryManagers to control the data for a test.
+As I mentioned, the EntityGateway is a protocol. It is defined as a protocol so that the UseCase is decoupled from the source of the data. EntityManagers should also be defined in terms of protocols. This makes it very easy to unit test the UseCase. You can inject an alternate implementation of an EntityManager to control the data for a test.
 
 ### The Transformer
 
-The Transformer is not formally part of VIPER, but because of the number of events that a UseCase ends up having to process, I have found it useful to create one Transformer for each event that changes the state of the system.  
+The Transformer is not formally part of VIPER, but due of the number of events that a typical UseCase has  to process, I find it useful to create one Transformer for each event that changes the state of the system.  
 
-Most of the time a Transformer would simply be a method of the UseCase. I convert the method to a method-object. The Transformer usually consists of just a constructor and a method called `transform` . In the UseCase, I initialize the constructor with the required EntityManagers obtained from the EntityGateway and any data required from previously run UseCases. 
+Most of the time a Transformer would simply be a method of the UseCase. I convert the method to a *method-object*. The Transformer usually consists of just a constructor and a method called `transform` . In the UseCase, I initialize the constructor with the required EntityManagers obtained from the EntityGateway and any data required from previously run UseCases. 
 
 I pass the event parameters from UseCase to the `transform` method along with the reference to the Presenter (for output).
 
 You will see that this setup makes is very easy to test the Transformer. It separates the UseCase's responsibilities from one another, making it very easy to understand the code.
 
-There are occasions when a Transformer has more than one method. An example of this is when the use case supports data collection from multiple fields. The events would deliver individual data items to the UseCase, for validation and temporary storage. A final event would then save the changes. 
+There are occasions when a UseCase does not use a transformer. An example of this is when the UseCase involves collecting data from multiple fields. The events would deliver individual data items to the UseCase, for validation and temporary storage. Finally, an event would cause the changes to be saved. The UseCase would then call a Transformer with the saved data as parameters. 
 
 ### The Presenter as UseCaseOutput
 
