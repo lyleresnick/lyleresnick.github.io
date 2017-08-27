@@ -18,7 +18,7 @@ The interface layer does something with all this data that is ultimately the pur
 
 This two layer architecture is too simple. It does not account for the placement of all of the responsibilities of the so called *interface layer*. A lot of processing happens in this layer. All of this processing ends up in a UIViewController.
 
-In commercial applications, UIViewControllers get large. I've seen 3000 lines in a UIViewController.
+In commercial applications, UIViewControllers get large. I've seen 2000 lines in a UIViewController.
 
 VIPER is a micro-architecture - a predefined set of classes that work together to structure a solution. VIPER is an implementation of [Bob Martin's Clean Architecture](https://8thlight.com/blog/uncle-bob/2012/08/13/the-clean-architecture.html). 
 
@@ -140,21 +140,19 @@ As you can see in the diagram, the Presenter has another role: presenting the re
 
 ### The UseCase
 
-**TODO: MORE FOCUS ON THIS IS WHERE IT ALL HAPPENS:**
+The UseCase has one responsibility: execute the application business requirement. 
 
-The UseCase, known in VIPER as the Interactor, has one responsibility: execute the application use case defined for the event. Upon receiving an event, the UseCase may use the EntityGateway to access the system state in the form of Entities, process the Entities against the incoming parameters, and may update the system state via the EntityGateway.
+The UseCase typically uses the EntityGateway to access the system state in the form of Entities, processes the Entities against the incoming parameters, and updates the system state via the EntityGateway. It may do this over the course of responding to more than one event. One event may cause the entities to be accessed and output in some order and the next event may select one of the entities and the UseCase will update it in some way.
 
-The results of executing the UseCase are passed as output to the UseCaseOutput protocol. 
+The results of executing the UseCase are passed as parameters to the UseCaseOutput protocol in a form known as the PresentationModel. 
 
-Even when the Entities do not require processing to create the required output, they are never passed directly to the UseCaseOutput. The results are passed in a form known as the PresentationModel. The Presentation Model contains only the data that will be required for the output display for this UseCase. The data is not converted for output as the UseCase does not know anything about the output formats, localization or target controls. 
+Entities are never passed directly to the UseCaseOutput. PresentationModels are created from Entities, even when the Entity does not require much processing. The PresentationModel  contains only the data that is required for the output. The UseCase does not convert data for output - it does not know anything about the output format, localization or target view. Output via PresentationModels is kind of like logging without any descriptive text.
 
-Think of logging the output.
+Data Conversion is performed by the Presenter and the EntityGateway.
 
-A presentation model can be passed as a `struct`, as an `enum` or as simple scalars - whatever is most convenient. When a `struct` or `enum` is used, a good practice is to initialize it with the Entity.
+A PresentationModel can be passed as a `struct`, as an `enum` or as simple scalars - whatever is most convenient. When a `struct` is used, a good practice is to initialize it by passing it the Entity.
 
-The separation of the Entity from the PresentationModel helps ensure that the UseCase is decoupled from the Presenter. This way the form of Entity can change without affecting the outer layers of the system.
-
-Note that the UseCase never has to convert data, as that is the job of the Presenter and the EntityGateway.
+The separation of the Entities in the UseCase from the PresentationModels used by the Presenter makes sure that the UseCase is decoupled from the Presenter, thus promoting a reduction of shared mutable state. This way the form of Entity can change without affecting the outer layers of the system.
 
  The UseCase has no direct dependencies - both the EntityGateway and the PresenterOutput are Protocols and are injected (by the Connector).
 
