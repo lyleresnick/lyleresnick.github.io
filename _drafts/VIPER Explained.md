@@ -46,7 +46,7 @@ As Uncle Bob's diagram shows, a Clean System is separated into layers:
 - the Data Store and Network, which provide the entities, are in the outermost layer
 - the Interface Adapters, and in particular the Presenters and Gateways are placed in a layer between the User Interface and Application Business logic layers
 
-### Object Dependencies
+### Object Dependencies should point Towards the Centre 
 
 In the Clean Architecture, object dependencies can only be explicit in one direction - towards the centre. This is shown in the diagram by the dependency arrow pointing inward. A class in a layer closer to the center cannot know the name of a class in a layer closer to the outside. All dependencies going in a direction away from the centre must be implemented as a dependency inversion, which means a protocol (in Swift, interface, in Java) must be used. 
 
