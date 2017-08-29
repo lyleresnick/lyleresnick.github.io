@@ -22,7 +22,7 @@ In commercial applications, UIViewControllers get large. I've seen 2000 lines in
 
 VIPER is a micro-architecture - a predefined set of classes that work together to structure a solution. VIPER is an implementation of [Bob Martin's Clean Architecture](https://8thlight.com/blog/uncle-bob/2012/08/13/the-clean-architecture.html). 
 
-In the next article, I'm going to demonstrate that VIPER can be very simple to implement and its benefits can be realized very quickly.  I'll use the requirement and solution to the Complex UITableView from the last [post]({{site.url}}/blog/2017/05/13/Solving-a-Complex-iOS-TableView-Part-2.html) as the basis of this example. A complete app which demonstrates the refactoring to Clean Architecture can be found at [**CleanReportTableDemo**](https://github.com/lyleresnick/CleanReportTableDemo). I will be explaining this app in the next post.
+In the next article, I'm going to demonstrate that VIPER can be very simple to implement and its benefits can be realized very quickly.  I'll use the requirement and solution to the Complex UITableView from the last [post]({{site.url}}/blog/2017/05/13/Solving-a-Complex-UITableView-Part-2.html) as the basis of this example. A complete app which demonstrates the refactoring to Clean Architecture can be found at [**CleanReportTableDemo**](https://github.com/lyleresnick/CleanReportTableDemo). I will be explaining this app in the next post.
 
 ## VIPER Explained
 
@@ -144,9 +144,9 @@ As you can see in the diagram, the Presenter has another role: presenting the re
 
 ### The Router
 
-When the event is sent to a Router, it is sent via a RouterRequest. RouterRequests have asynchronous callbacks, unless they are completion requests.
+When the event is sent to a Router, it is sent via a RouterRequest. RouterRequests can have callbacks.
 
-I am not going to discuss the router any further in this article, as I will discuss it in the future.
+I will leave the details of router implementation to a future article. 
 
 ### The UseCase
 
@@ -246,13 +246,15 @@ The connector is also useful to set the values of the Presenter into any classes
 
 ## Summary
 
-Here I have described the VIPER as a pipeline. I have shown that each stage in the pipeline has a specific purpose. 
+I find that the easiest way to determine whether you are implementing VIPER correctly is to use the rules and classes correctly and consistently. 
 
-The easiest way to determine whether you are implementing VIPER correctly is to use the rules and classes correctly and consistently. Your team members will thank you for that because they will know where everything is in every Scene, and in turn they will know where to place new code.
+VIPER is easy to implement if you keep it simple.  
+
+The benefit of VIPER is the organizational lever it provides for the project. Everything has a place. Each team member knows the rules and purposes of the classes in the VIPER stack. This makes everyone happy! 
 
 I think that VIPER is the perfect architecture for large codebases with frequently changing requirements. It is an effective antidote to the Massive ViewController problem.
 
-In my next blog I will demonstrate the implementation of VIPER using the Banking Report from the last [post]({{site.url}}/blog/2017/05/13/Solving-a-Complex-iOS-TableView-Part-2.html).
+In my next blog I will demonstrate an implementation of VIPER using the Banking Report from the last [post]({{site.url}}/blog/2017/05/13/Solving-a-Complex-UITableView-Part-2.html).
 
 
 
