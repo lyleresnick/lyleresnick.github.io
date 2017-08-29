@@ -90,7 +90,7 @@ The ViewController sends messages to the Presenter, which in turn sends messages
 
 Each ViewController, Presenter and UseCase are called the VIP stack. In a VIPER architected system one VIP stack is created whenever a new UIViewControler would be created.
 
-The UseCase uses the EntityGateway to obtain access to EntityManagers.  EntityManagers are responsible for providing access to the Entities. The EntityGateway is used by all UseCases to get access to any available EntityManager.
+The UseCase uses the EntityGateway to obtain access to EntityManagers.  EntityManagers are responsible for providing access to the Entities. The EntityGateway is used by all UseCases to  access  all available EntityManagers.
 
 The Router is a VIP stack that knows about child ViewControllers. 
 
