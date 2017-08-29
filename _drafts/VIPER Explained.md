@@ -216,7 +216,7 @@ When the input to the Presenter is repetitive and heterogeneous, it is a good pr
 
 **TODO: Continue HERE:**
 
-The ViewController's second responsibility is to set the data, which is obtained from the Presenter, into the Views.  The ViewController implements the PresenterOutput protocol.
+The ViewController's second responsibility is to set the data, obtained from the Presenter, into the Views.  The ViewController implements the PresenterOutput protocol.
 
 The ViewController obtains from the Presenter's data in one of two ways, depending on whether the data is repeating or non-repeating. 
 
