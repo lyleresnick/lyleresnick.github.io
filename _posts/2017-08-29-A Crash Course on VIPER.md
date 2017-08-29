@@ -254,7 +254,7 @@ The benefit of VIPER is the organizational lever it provides for the project. Ev
 
 I think that VIPER is the perfect architecture for large codebases with frequently changing requirements. It is an effective antidote to the Massive ViewController problem.
 
-In my next blog I will demonstrate an implementation of VIPER using the Banking Report from the last [post]({{site.url}}/blog/2017/05/13/Solving-a-Complex-UITableView-Part-2.html).
+In my next blog I will demonstrate an implementation of VIPER using the Banking Report from the last [post]({{site.url}}/blog/2017/06/29/Solving-a-Complex-UITableView-Part-2.html).
 
 
 
