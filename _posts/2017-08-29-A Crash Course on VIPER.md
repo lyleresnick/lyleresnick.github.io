@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "A Crash Course on VIPER"
-date: 2017-06-09
+date: 2017-08-29
 ---
 
 ## Introduction
