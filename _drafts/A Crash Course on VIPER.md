@@ -6,9 +6,9 @@ date: 2017-06-09
 
 ## Introduction
 
-I've been exploring and using VIPER now for about 2 years. I think it is a really sensible solution for organizing and reducing the size of a view controller. 
+I've been exploring and using VIPER now for about 2 years. I think it is a really sensible solution for organizing and reducing the size of a massive View Controller. 
 
-Reducing the size of a viewController is a notable goal, but how should it be done? 
+Reducing the size of a UIViewController is a notable goal, but how should it be done? 
 
 One common way to architect an app is to layer the app into an interface layer and a service layer. 
 
@@ -110,7 +110,7 @@ The output of the UseCase is a protocol called the UseCaseOutput and the output 
 
 Although outside the scope of this blog, I want to mention that the EntityManagers, that the EntityGateway provides, should also be implemented as protocols.
 
-## The Pipeline
+## The VIPER Pipeline
 
 You can think of VIPER as a pipeline. Each stage of the pipeline has a well defined job to do. 
 
@@ -124,7 +124,7 @@ The event is passed to the ViewController as usual.
 
 In the case of repeating touchable areas displayed by UITable and UICollectionViews, a touch event should be sent to the UITable- or UICollectionViewCell, respectively. The index can be accessed from the cell's collection and then sent with the event.
 
-**TODO: PLACE THIS:** It is also useful think of the arrows as data all flowing to the right.
+It is useful think of the arrows as if they all pointed to the right as if in a waterfall. This promotes the idea that data flows in one direction only.
 
 ### The ViewController 
 
@@ -140,9 +140,13 @@ When the Presenter receives an event, it routes the event to either the UseCase 
 
 Examples of input conversion might be from String to Int, formatted String date to Date, an Int from a UIPickerView to an enum - the list goes on. 
 
-**TODO: CHECK ON THIS:** When the event is sent to a Router, it is sent via a RouterRequest. RouterRequests have asynchronous callbacks, unless they are completion requests.
-
 As you can see in the diagram, the Presenter has another role: presenting the result of the event - again, I will cover that shortly.
+
+### The Router
+
+When the event is sent to a Router, it is sent via a RouterRequest. RouterRequests have asynchronous callbacks, unless they are completion requests.
+
+I am not going to discuss the router any further in this article, as I will discuss it in the future.
 
 ### The UseCase
 
@@ -244,7 +248,9 @@ The connector is also useful to set the values of the Presenter into any classes
 
 Here I have described the VIPER as a pipeline. I have shown that each stage in the pipeline has a specific purpose. 
 
-The easiest way to determine whether you are implementing VIPER correctly is to use the rules and classes correctly and consistently. Your team members will thank you for that.
+The easiest way to determine whether you are implementing VIPER correctly is to use the rules and classes correctly and consistently. Your team members will thank you for that because they will know where everything is in every Scene, and in turn they will know where to place new code.
+
+I think that VIPER is the perfect architecture for large codebases with frequently changing requirements. It is an effective antidote to the Massive ViewController problem.
 
 In my next blog I will demonstrate the implementation of VIPER using the Banking Report from the last [post]({{site.url}}/blog/2017/05/13/Solving-a-Complex-iOS-TableView-Part-2.html).
 
