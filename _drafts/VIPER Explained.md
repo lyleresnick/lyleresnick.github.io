@@ -128,7 +128,9 @@ In the case of repeating touchable areas displayed by UITable and UICollectionVi
 
 ### The ViewController 
 
-In VIPER, the UIViewController sends <u>every</u> event coming from a UIControl or lifecycle method directly to the Presenter. The ViewController does not process the event in any way, whatsoever. It just sends the event and its associated data to the Presenter. In the case of repeating UIControls contained in a UITableView or UICollectionView, the Cell receives the event and sends it to the Presenter.  Super simple!
+The ViewController's main role in VIPER is to the configure the View hierarchy. Most of this configuration should performed by Interface Builder.
+
+In VIPER, the UIViewController sends <u>every</u> event coming from a UIControl or lifecycle method directly to the Presenter. The ViewController does not process the event in any way, whatsoever. It simply retrieves associated data, either input as text or selected by index, and sends it with the event to the Presenter. In the case of repeating UIControls contained in a UITableView or UICollectionView, the Cell receives the event and sends it to the Presenter.  Super simple!
 
 As you can see in the diagram, the ViewController has another role: showing the result of the event. I will cover this later in the article.
 
@@ -214,8 +216,6 @@ When the input to the Presenter is repetitive and heterogeneous, it is a good pr
 
 ### The ViewController as PresenterOutput
 
-**TODO: Continue HERE:**
-
 The ViewController's second responsibility is to set the data, obtained from the Presenter, into the Views.  The ViewController implements the PresenterOutput protocol.
 
 The ViewController obtains from the Presenter's data in one of two ways, depending on whether the data is repeating or non-repeating. 
@@ -228,15 +228,25 @@ For the same reasons that I mentioned regarding the UseCaseOutput, it is a good 
 
 ### The Connector
 
-You may be wondering how this stack of classes is created.
+You may be wondering how each VIPER stack is created.
 
-A ViewController is normally defined via IB, so we cannot use its init. Usually the ViewController allocates everything it needs, but: 
+A ViewController is normally defined via Interface Builder, so we cannot use its init. Usually the ViewController allocates everything it needs, but: 
 
 We do not want the ViewController to know anything about the Interactor. The Interactor must exist before the presenter can  own it. The Presenter must exist before the ViewController can own it.
 
- The VIPER stack is assembled by a 3rd party class that knows about all of the parts in the stack and how they are connected together. I have called this part the Connector.
+ The VIPER stack is assembled by a 3rd party class that knows about all of the classes in the stack and how they are connected together. I call this part a Connector.
 
-The Connector is created and executed by the ViewController by overriding `awakeFromNib()`, which occurs after all outlets are created.
+A Connector is created and executed by the ViewController by overriding `awakeFromNib()`, which occurs after all outlets are created.
 
-The connector is also useful to set the values of the Presenter into any classes which need to know about them. This usually includes the UITableView-, UIPicker-, UICollectionView- or other DataSources
+The connector is also useful to set the values of the Presenter into any classes which need to know about them. This usually includes the UITableViewDataSource, UIPicker-, UICollectionView- or other DataSources.
+
+## Summary
+
+Here I have described the VIPER as a pipeline. I have shown that each stage in the pipeline has a specific purpose. 
+
+The easiest way to determine whether you are implementing VIPER correctly is to use the rules and classes correctly and consistently. Your team members will thank you for that.
+
+In my next blog I will demonstrate the implementation of VIPER using the Banking Report from the last [post]({{site.url}}/blog/2017/05/13/Solving-a-Complex-iOS-TableView-Part-2.html).
+
+
 
