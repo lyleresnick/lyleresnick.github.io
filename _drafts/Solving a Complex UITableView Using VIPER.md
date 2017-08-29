@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Solving a Complex UITableView Using VIPER"
-date: 2017-06-09
+date: 2017-09-05
 ---
 
 ## Introduction
