@@ -132,7 +132,36 @@ The ViewController's main role in VIPER is to the configure the View hierarchy. 
 
 In VIPER, the UIViewController sends <u>every</u> event coming from a UIControl or lifecycle method directly to the Presenter. The ViewController does not process the event in any way, whatsoever. It simply retrieves associated data, either input as text or selected by index, and sends it with the event to the Presenter. In the case of repeating UIControls contained in a UITableView or UICollectionView, the Cell receives the event and sends it to the Presenter.  Super simple!
 
-As you can see in the diagram, the ViewController has another role: showing the result of the event. I will cover this later in the article.
+Here are some examples of events being captured and sent on to the presenter: 
+
+- Given that all views have been configured in Interface Builder, here is a `UIViewController`  `viewDidLoad` method:
+
+```swift
+override func viewDidLoad() {
+   super.viewDidLoad()
+   presenter.eventViewReady()
+ }
+```
+
+- Here is a typical `@IBAction` method found in either a UIViewController or UITableViewCell :
+
+```swift
+@IBAction func saveButtonTouched(_ sender: UIButton) {
+	presenter.eventSave(firstName: firstNameTextField.text, lastName: lastNameTextField.text)
+}
+```
+
+- When a UITableView row is selected, the event is sent from the `UITableViewDelegate` `didSelectRowAt` method:
+
+```swift
+extension ContactListAdapter: UITableViewDelegate {
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+      presenter.eventContactSelected(at: indexPath.row)
+    }
+}
+```
+
+You can see in the interaction diagram that the ViewController has another role: show the output for the event. I will cover this later on in this article.
 
 ### The Presenter
 
