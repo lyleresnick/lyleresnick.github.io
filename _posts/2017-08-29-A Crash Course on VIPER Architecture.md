@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "A Crash Course on VIPER"
+title: "A Crash Course on VIPER Architecture"
 date: 2017-08-29
 ---
 
