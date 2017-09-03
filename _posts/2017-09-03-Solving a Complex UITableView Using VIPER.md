@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Solving a Complex UITableView Using VIPER"
-date: 2017-08-29
+date: 2017-09-03
 ---
 
 ## Introduction
@@ -40,26 +40,21 @@ class TransactionListViewController: UIViewController {
         presenter.eventViewReady()
     }
 }
-
-extension TransactionListViewController: TransactionListPresenterOutput {
-    
-    func showReport() {
-        tableView.reloadData()
-    }
-}
 ```
 I have made three additions. 
 - I overrode `awakeFromNib()` , 
-- i added a property called `presenter`, and
-- i added a method called `showReport`, which I will discuss later.
+- I added a property called `presenter`, and
+- I added a method called `showReport`, which I will discuss later.
 
-As I mentioned previously, the VIPER stack must be configured, or more specifically, connected. I have allocated the configuration responsibility to a class I call the Connector.
+I made one more very significant change: the ViewController is no longer responsible for knowing where the data comes from. 
 
-Storyboards are a very important part of my workflow because of their visual layout capabilities and documentative qualities. Even though I'm implementing VIPER, I definitely want to continue using storyboards to define ViewController layouts.
+Storyboards are a very important part of my workflow because of their visual layout and resulting documentation. Even though I'm implementing VIPER, I definitely want to continue using Storyboards to define ViewController layouts.
 
 `awakeFromNib()` is called immediately after the ViewController is constructed and the outlets are set. This is the perfect place to call the Connector to configure the remainder of the VIPER stack. 
 
-You might have noticed that the presenter property has not been set. This is because it will be set by the Connector.
+As I mentioned previously, the VIPER stack must be configured, or more specifically, connected. I have allocated the configuration responsibility to a class I call the Connector.
+
+You might have noticed that the `presenter` property has not been set. This is because it will be set by the Connector.
 
 ### The Connector
 
@@ -107,17 +102,13 @@ class TransactionListConnector {
 }
 ```
 
-With a eye toward testability, I decided to inject the UseCase into the Presenter, as well. Because the adapter is part of the view, it also needs a reference to the presenter.  
+With a view toward testability, I decided to inject the UseCase into the Presenter, as well. Because the adapter is part of the view, it also needs a reference to the presenter.  
 
 ### The Presenter
 
-In the previous version, the adapter had two responsibilities: format the data into a format suitable for display by the view and to react to the tableView's requests by delivering cells containing the formatted data. The former responsibility has been moved to the Presenter.
+In the previous version, the adapter had two responsibilities: convert the data into a format suitable for display by the view and to react to the tableView's requests by delivering cells containing the formatted data. The former responsibility has been moved to the Presenter.
 
-I changed the name of the rows by calling them `TransactionListViewModel`s, because this is the what they are.  In general, any form of data that passed between the Presenter and the ViewController, is a ViewModel. It does not matter whether the data is grouped into a struct, an enum, a bunch of parameters, or a struct embedded in an enum, they are all just ViewModels in VIPER parlance. 
-
-My preference is that, other than at init, ViewModels have no behaviour. In many cases, it is prudent to use init to translate a PresentationModel into a ViewModel.
-
-The same thinking applies to PresentationModels, which I will discuss later.
+I changed the name of the rows by calling them `TransactionListViewModel`s, because this is the what they are known as in VIPER.  
 
 ```swift
 class TransactionListPresenter {
@@ -136,7 +127,7 @@ class TransactionListPresenter {
     }
 
     func eventViewReady() {
-        useCase.begin()
+        useCase.eventViewReady()
     }
     
     func cellId(at index: Int) -> String {
@@ -161,8 +152,6 @@ All messages moving towards the UseCase (towards the centre of the architecture 
 
 The other methods provide to access the viewModel. They have been extracted from the original adapter. They do not begin with the word `event`, as they are called by the ViewController to pull data from the Presenter. I talk more about this below. 
 
-**TODO:** It does seem like there should be a protocol for row access 
-
 ### The UseCase 
 
 As mentioned before, VIPER's UseCase actually implements the business logic - well normally. Subject to the SRP, I have further delegated the work to a transformer.
@@ -177,19 +166,15 @@ class TransactionListUseCase {
         self.entityGateway = entityGateway
     }
     
-    func begin() {
+    func eventViewReady() {
         
-        let authorizedTransactions = entityGateway.fetchAuthorizedTransactions()
-        let postedTransactions = entityGateway.fetchPostedTransactions()
-        let transformer = TransactionListBeginTwoSourceUseCaseTransformer(
-            authorizedTransactions: authorizedTransactions,
-            postedTransactions: postedTransactions)
+        let transformer = TransactionListViewReadyTwoSourceUseCaseTransformer(transactionManager: entityGateway.twoSourceManager)
         transformer.transform(output: output)
     }
 }
 ```
 
-The use case's two methods are exactly the same as the two methods found in the ViewController of the previous version. As you already know from the previous post, they do almost exactly the same thing - we are using the `begin` method, now. I will discuss the `beginOneSource` method another day.
+The use case's two methods are exactly the same as the two methods found in the ViewController of the previous version. As you already know from the previous post, they do almost exactly the same thing - we are using the `eventViewReady` method, now. I will discuss the `eventViewReadyOneSource` method another day.
 
 You can see that the injected EntityGateway provides some opaque indirection w.r.t. the access of the transactions, whereas in the previous version, the transactions where accessed from a known location. Here, only the EntityGateway knows where they are located. 
 
@@ -197,12 +182,12 @@ You can see that the injected EntityGateway provides some opaque indirection w.r
 
 Except for some cosmetic naming changes, the Transformer called by the UseCase is identical to the previous version. 
 
-The naming of the output protocol have been changed to align it with the VIPER structure. The `TransactionListTransformerOutput` protocol is now called the `TransactionListUseCaseOutput` protocol and the `append` methods have been renamed to `present` methods.
+The naming of the output protocol have been changed to align it with the VIPER structure. The `TransactionListTransformerOutput` protocol is now called the `TransactionListViewReadyUseCaseOutput` protocol and the `append` methods have been renamed to `present` methods.
 
 You will notice that I added two methods to the protocol: `presentInit()` and `presentReport()`. In real world situations, you might generate the report a number of times to, say, keep it up to date. In the previous version, it was assumed that it would not be regenerated.
 
 ```swift
-protocol TransactionListUseCaseOutput: class {
+protocol TransactionListViewReadyUseCaseOutput: class {
     
     func presentInit()
     func presentHeader(group: TransactionGroup)
@@ -221,29 +206,27 @@ protocol TransactionListUseCaseOutput: class {
 Remember that the `output` is connected to the Presenter, whereas previously it was connected to the adapter.  
 
 ```swift
-class TransactionListUseCaseBeginTwoSourceTransformer {
+class TransactionListViewReadyTwoSourceUseCaseTransformer {
     
-    private let authorizedTransactions: [TransactionEntity]?
-    private let postedTransactions: [TransactionEntity]?
+    private let transactionManager: TwoSourceManager
 
-    init(authorizedTransactions: [TransactionEntity]?, postedTransactions: [TransactionEntity]?) {
-        self.authorizedTransactions = authorizedTransactions
-        self.postedTransactions = postedTransactions
+    init(transactionManager: TwoSourceManager) {
+        self.transactionManager = transactionManager
     }
     
-    func transform(output: TransactionListUseCaseOutput) {
+    func transform(output: TransactionListViewReadyUseCaseOutput) {
         
         output.presentInit()
 
         var grandTotal = 0.0
-        grandTotal += transform(transactions: authorizedTransactions, group: .authorized, output: output)
-        grandTotal += transform(transactions: postedTransactions, group: .posted, output: output)
+        grandTotal += transform(transactions: transactionManager.fetchAuthorizedTransactions(), group: .authorized, output: output)
+        grandTotal += transform(transactions: transactionManager.fetchPostedTransactions(), group: .posted, output: output)
         output.presentGrandFooter(grandTotal: grandTotal)
 
         output.presentReport()
     }
 
-    private func transform(transactions: [TransactionEntity]?, group: TransactionGroup, output: TransactionListUseCaseOutput) -> Double {
+    private func transform(transactions: [TransactionEntity]?, group: TransactionGroup, output: TransactionListViewReadyUseCaseOutput) -> Double {
         
         var total = 0.0
 
@@ -267,7 +250,8 @@ class TransactionListUseCaseBeginTwoSourceTransformer {
                           localTransaction.date == currentDate {
                         
                         total += localTransaction.amount
-                        output.presentDetail(description: localTransaction.description, amount: localTransaction.amount)
+                        output.presentDetail(description: localTransaction.description, 
+                                             amount: localTransaction.amount)
                         transaction = transactionStream.next()
                     }
                     output.presentSubfooter()
@@ -284,16 +268,22 @@ class TransactionListUseCaseBeginTwoSourceTransformer {
 }
 ```
 
+Except for the names and use of entity managers to access the data, the code here is identical to the previous version.
+
 ### The UseCaseOutput 
+
+The UseCaseOutput is composed of all of the *Event*UseCaseOutputs.
 
 As I mentioned earlier, the data formatting responsibility has been moved from the Adapter to the Presenter.  
 
-Since all data conversion is to be done in the Presenter as a response to the UseCaseOutput, all text is handled here. If we were required to perform localization, it would be done here as well. In the previous version there is still data conversion being performed in the header cell.
+All conversion to text is handled by the UseCaseOutput. If we were required to perform localization, it would be done here as well. In the previous version there is still data conversion being performed in the header cell.
 
 `presentInit()` makes sure everything is reset and `presentReport()` tells its output to show the report.
 
 ```swift
-extension TransactionListPresenter: TransactionListUseCaseOutput {
+extension TransactionListUseCaseOutput: TransactionListViewReadyUseCaseOutput {}
+
+extension TransactionListPresenter: TransactionListViewReadyUseCaseOutput {
     
     func presentInit() {
         rows.removeAll()
@@ -363,7 +353,7 @@ extension Double {
 }
 ```
 
-The TransactionListViewModel extension has been moved from the Adapter to the Presenter, since that is the only class that needs it.
+The TransactionListViewModel extension has been moved from the Adapter to the Presenter and has been made private, since that is the only class that needs to know about it.
 
 ```swift
 private extension TransactionListViewModel {
@@ -425,10 +415,14 @@ private extension TransactionListViewModel {
 
 ### The PresenterOutput 
 
-The `TransactionListPresenterOutput` is simple:
+The PresenterOutput is composed of all of the *EventPresenter*Outputs
+
+The `TransactionListViewReadyPresenterOutput` is simple. 
 
 ```swift
-protocol TransactionListPresenterOutput: class {
+protocol TransactionListPresenterOutput: TransactionListViewReadyPresenterOutput {}
+
+protocol TransactionListViewReadyPresenterOutput: class {
     func showReport()
 }
 ```
@@ -436,7 +430,9 @@ protocol TransactionListPresenterOutput: class {
 It simply tells the table to reload.
 
 ```swift
-extension TransactionListViewController: TransactionListPresenterOutput {
+extension TransactionListViewController: TransactionListPresenterOutput {}
+
+extension TransactionListViewController: TransactionListViewReadyPresenterOutput {
     
     func showReport() {
         tableView.reloadData()
@@ -448,7 +444,7 @@ The reload makes the adapter start pulling data from the presenter.
 
 ### The Adapter
 
-The size of the Adapter is now as small as possible. It's only responsibility is to react to the tableView by delegating to the presenter. It is now truly an *adapter*. The responsibility of output formatting has been moved the Presenter.  
+The size of the Adapter is now as small as possible. It's only responsibility is to react to the tableView by delegating to the presenter. It is now truly an *adapter*. The responsibility of output formatting was moved to the Presenter.  
 
 ```swift
 class TransactionListAdapter: NSObject {
@@ -484,9 +480,25 @@ The cells are exactly the same as the previous version, except the header cell i
 
 The thing that is important about the cells is that they do no calculations whatsoever. They simply assign data to their views. 
 
-
-
 ## Summary 
 
+As you may have noticed, the function of the app is identical to the previous version, but there are two major differences: 
 
+- the place where each kind of processing occurs has been formalized and
+- the names of each method have been formalized.
+
+This formality makes it easier for those with the same background to understand the code and therefore makes it easier to change.
+
+There are more classes: each one has very specific responsibilities.
+
+The biggest change is that the responsibility for creation and storage of the ViewModels has been moved from the table Adapter to the UseCaseOutput, A.K.A. the Presenter. The Adapter is now solely responsible for attaching the TableView to the Presenter
+
+Another major change is that the ViewController has no idea where its data is coming from. Only the UseCase knows that it comes from the EntityGateway.
+
+The Transformer has remained identical to the previous version except for changes involving:
+
+- use of formalized names and 
+- formalizing access to data via entity managers.
+
+As we will see in the next article, this deconstruction of the ViewController makes it very easy to practice Test Driven Development.
 
