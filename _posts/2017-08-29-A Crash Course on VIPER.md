@@ -88,7 +88,7 @@ The ViewController owns a Presenter, which in turn owns an Interactor.  The pres
 
 The ViewController sends messages to the Presenter, which in turn sends messages to the UseCase or the Router. 
 
-Each ViewController, Presenter and UseCase are called the VIP stack. In a VIPER architected system one VIP stack is created whenever a new UIViewControler would be created.
+Each ViewController, Presenter and UseCase is called a VIP stack. In a VIPER architected system one VIP stack is created whenever a new UIViewControler is created.
 
 The UseCase uses the EntityGateway to obtain access to EntityManagers.  EntityManagers are responsible for providing access to the Entities. The EntityGateway is used by all UseCases to  access  all available EntityManagers.
 
@@ -132,7 +132,7 @@ The ViewController's main role in VIPER is to the configure the View hierarchy. 
 
 In VIPER, the UIViewController sends <u>every</u> event coming from a UIControl or lifecycle method directly to the Presenter. The ViewController does not process the event in any way, whatsoever. It simply retrieves associated data, either input as text or selected by index, and sends it with the event to the Presenter. In the case of repeating UIControls contained in a UITableView or UICollectionView, the Cell receives the event and sends it to the Presenter.  Super simple!
 
-Here are some examples of events being captured and sent on to the presenter: 
+Here are some examples of events being captured and sent on to the Presenter: 
 
 - Given that all views have been configured in Interface Builder, here is a `UIViewController`  `viewDidLoad` method:
 
@@ -147,11 +147,13 @@ override func viewDidLoad() {
 
 ```swift
 @IBAction func saveButtonTouched(_ sender: UIButton) {
-	presenter.eventSave(firstName: firstNameTextField.text, lastName: lastNameTextField.text)
+	presenter.eventSave(firstName: firstNameTextField.text, 
+                        lastName: lastNameTextField.text, 
+                        age: ageTextField.text)
 }
 ```
 
-- When a UITableView row is selected, the event is sent from the `UITableViewDelegate` `didSelectRowAt` method:
+- When a UITableView row is selected, the event is delegated in the `UITableViewDelegate` `didSelectRowAt` method:
 
 ```swift
 extension ContactListAdapter: UITableViewDelegate {
@@ -165,15 +167,49 @@ You can see in the interaction diagram that the ViewController has another role:
 
 ### The Presenter
 
-When the Presenter receives an event, it routes the event to either the UseCase or the Router. It converts the event's parameters from external format to an internal format that can be used directly by the UseCase or the router.   
+The Presenter's role is to receive an event and route it to either the UseCase or the Router. It converts the event's parameters from external format to an internal format that can be used directly by the UseCase or the Router.   
 
 Examples of input conversion might be from String to Int, formatted String date to Date, an Int from a UIPickerView to an enum - the list goes on. 
+
+Here are some examples of events coming from the UIViewController and being sent on to the UseCase:
+
+- Here the Presenter's `eventViewReady()` just delegates to the useCase
+
+```swift
+ func eventViewReady() {
+   useCase.eventViewReady()
+ }
+```
+- Here `eventSave(firstName:lastName:age:)` tries to convert the age parameter and on success delegates the event to the useCase with the converted data
+
+```swift
+enum eventSaveError: Error { case invalidAge }
+
+ func eventSave(firstName: String,  lastName: String,  age: String) throws {
+    if let age = Int(age) {
+        useCase.eventSave(firstName: firstName, lastName: lastName, age: age)
+    }
+    else {
+        throw eventSaveError.invalidAge
+    }
+ }
+```
+
+- When `eventContactSelected(at row: Int)` the event is delegated to the router to display the selected contact:
+
+```swift
+func eventContactSelected(at row: Int) {
+    router.eventContactSelected(at: row)
+}
+```
+
+If the Presenter required a callback, it would send itself as a PresenterDelegate parameter to be passed on to .
 
 As you can see in the diagram, the Presenter has another role: presenting the result of the event - again, I will cover that shortly.
 
 ### The Router
 
-When the event is sent to a Router, it is sent via a RouterRequest. RouterRequests can have callbacks.
+The Router is responsible for managing scene transition. A Router may be a UINavigationController,  UITabController or a custom container ViewController. 
 
 I will leave the details of router implementation to a future article. 
 
