@@ -88,7 +88,7 @@ The ViewController owns a Presenter, which in turn owns an Interactor.  The pres
 
 The ViewController sends messages to the Presenter, which in turn sends messages to the UseCase or the Router. 
 
-Each ViewController, Presenter and UseCase are called the VIP stack. In a VIPER architected system one VIP stack is created whenever a new UIViewControler would be created.
+Each ViewController, Presenter and UseCase is called a VIP stack. In a VIPER architected system one VIP stack is created whenever a new UIViewControler is created.
 
 The UseCase uses the EntityGateway to obtain access to EntityManagers.  EntityManagers are responsible for providing access to the Entities. The EntityGateway is used by all UseCases to  access  all available EntityManagers.
 
@@ -132,19 +132,100 @@ The ViewController's main role in VIPER is to the configure the View hierarchy. 
 
 In VIPER, the UIViewController sends <u>every</u> event coming from a UIControl or lifecycle method directly to the Presenter. The ViewController does not process the event in any way, whatsoever. It simply retrieves associated data, either input as text or selected by index, and sends it with the event to the Presenter. In the case of repeating UIControls contained in a UITableView or UICollectionView, the Cell receives the event and sends it to the Presenter.  Super simple!
 
-As you can see in the diagram, the ViewController has another role: showing the result of the event. I will cover this later in the article.
+Here are some examples of events being captured and, in most cases, sent on to the Presenter: 
+
+- Given that all views have been configured in Interface Builder, here is a `UIViewController`  `viewDidLoad` method:
+
+```swift
+override func viewDidLoad() {
+   super.viewDidLoad()
+   presenter.eventViewReady()
+ }
+```
+
+- Here is a typical `UITextDelegate` `textFieldShouldReturn` method:
+
+```swift
+func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+    return presenter.eventCapture(quantity: textField.text)
+}
+```
+
+- Here is a typical `@IBAction` method found in either a UIViewController or UITableViewCell :
+
+```swift
+@IBAction func saveButtonTouched(_ sender: UIButton) {
+	presenter.eventSave()
+}
+```
+
+- When a UITableView row is selected, the event is delegated in the `UITableViewDelegate` `didSelectRowAt` method:
+
+```swift
+extension ContactListAdapter: UITableViewDelegate {
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+      presenter.eventContactSelected(at: indexPath.row)
+    }
+}
+```
+
+You can see in the interaction diagram that the ViewController has another role: show the output for the event. I will cover this later on in this article.
 
 ### The Presenter
 
-When the Presenter receives an event, it routes the event to either the UseCase or the Router. It converts the event's parameters from external format to an internal format that can be used directly by the UseCase or the router.   
+The Presenter's role is to receive an event and route it to either the UseCase or the Router. It converts the event's parameters from external format to an internal format that can be used directly by the UseCase or the Router.   
 
 Examples of input conversion might be from String to Int, formatted String date to Date, an Int from a UIPickerView to an enum - the list goes on. 
 
-As you can see in the diagram, the Presenter has another role: presenting the result of the event - again, I will cover that shortly.
+Here are some examples of events coming from the UIViewController and being sent on to the UseCase:
+
+- Here the Presenter's `eventViewReady()` method just delegates to the useCase
+
+```swift
+func eventViewReady() {
+    useCase.eventViewReady()
+}
+```
+- The Presenter's `eventCapture(quantity:)` tries to convert the quantity parameter to an `Int`. On success it delegates the event to the UseCase with the converted data. It is up to the UseCase to determine whether the quantity is valid. On failure to convert the quantity, the event is delegated back to the ViewController. 
+
+  Note that it is entirely possible that validation could be done by a "smart" textField, whose configuration would include its format and error message. In this case, the configuration would be specified to the ViewController by the Presenter on `viewDidLoad`.  Either way, the format of the data and the text of an error message are the domain of the presenter. This is particularity due to factors such as localization and accessibility. Smart textfields would have to be used in the case of format-as-you-type phone numbers.
+
+```swift
+func eventCapture(quantity: String) -> Bool {
+    if let quantity = Int(quantity) {
+        useCase.eventCapture(quantity: quantity)
+        return true
+    }
+    else {
+          viewController.showFormatError( "Format of Quantity must be digits only")
+          return false
+    }
+}
+```
+
+- On `eventSave()`, the Presenter just delegates to the UseCase
+
+```swift
+func eventSave() {
+    useCase.eventSave()
+}
+```
+
+- When the Presenter receives  `eventContactSelected(at row: Int)` , the event is delegated to the router to display the selected contact.
+
+  If the Presenter required a callback, it would send itself as a PresenterDelegate parameter to be passed on to the Presenter of the VIP Stack that the router would instantiate.
+
+```swift
+func eventContactSelected(at row: Int) {
+    router.eventContactSelected(at: row)
+}
+```
+
+As you may have noticed in the diagram, the Presenter has another role: presenting the result of the event - again, I will cover that shortly.
 
 ### The Router
 
-When the event is sent to a Router, it is sent via a RouterRequest. RouterRequests can have callbacks.
+The Router is responsible for managing scene transition. A Router may be a UINavigationController,  UITabController or a custom container ViewController. 
 
 I will leave the details of router implementation to a future article. 
 
@@ -160,13 +241,13 @@ Entities are never passed directly to the UseCaseOutput. PresentationModels are 
 
 Data Conversion is performed by the Presenter and the EntityGateway. This allows the code in the UseCase to be free of conversion and data validation. 
 
-A PresentationModel can be passed as a `struct`, as an `enum` or as simple scalars - whatever is most convenient. When a `struct` is used, a good practice is to initialize it by passing it the Entity.
+A PresentationModel can be passed to the UseCaseOutput as a `struct`, as an `enum` or as simple scalars - whatever is most convenient. When a `struct` is used, a good practice is to initialize it by passing it the Entity.
 
 The separation of the Entities in the UseCase from the PresentationModels used by the Presenter makes sure that the UseCase is decoupled from the Presenter, thus promoting a reduction of shared mutable state. This way the form of Entity can change without affecting the outer layers of the system.
 
  The UseCase has no direct dependencies - both the EntityGateway and the UseCaseOutput are protocols and are injected (by the Connector).
 
-When the number of use cases that a scene supports becomes large, the number of methods on a single output protocol becomes even larger. It becomes really hard to tell at a glance which UseCaseOutput methods are used by what events. For this reason, it is a good practice to create one UseCaseOutput protocol for each event. Your code will be really organized when you place the implementation of each output protocol in its own extension.
+When the number of use cases that a scene supports becomes large, the number of methods on a single output protocol becomes even larger. It becomes really hard to tell at a glance which UseCaseOutput methods are used by what events. For this reason, it is a good practice to create one UseCaseOutput protocol for each event. Your code will be well organized when you place the implementation of each output protocol in its own extension. You can place reusable implementations in the general UseCaseOutput extension.
 
 ### The EntityGateway and EntityManagers
 
@@ -216,7 +297,7 @@ If the number of parameters is large, it is better to put the values in a struct
 
 When the input to the Presenter is repetitive, the Presenter holds the ViewModel structures in an array and delivers them via an indexed method call.
 
-When the input to the Presenter is repetitive and heterogeneous, it is a good practice to use *associated-value* `enum`s to hold the data. Although, due to syntax, I find that when an enum contains a large number of associated values, the extraction of values is painful, not to mention that every time a value is added you have to add another '-' . An even better practice is to use enums whose sole associated-value is a struct. This would allow you to use names to extract values, instead of positions.
+When the input to the Presenter is repetitive and heterogeneous, it is a good practice to use *associated-value* `enum`s to hold the data. Although, due to syntax, I find that when an enum contains a large number of associated values, the extraction of values is painful, not to mention that every time a value is added you have to add another '_' . A better practice is to use enums whose sole associated-value is a struct. This would allow you to use `struct` field names to extract values, instead of `enum` named positions.
 
 ### The ViewController as PresenterOutput
 
@@ -250,7 +331,7 @@ I find that the easiest way to determine whether you are implementing VIPER corr
 
 VIPER is easy to implement if you keep it simple.  
 
-The benefit of VIPER is the organizational lever it provides for the project. Everything has a place. Each team member knows the rules and purposes of the classes in the VIPER stack. This makes everyone happy! 
+The benefit of VIPER is the organizational lever it provides for a project. Everything has a place. Each team member knows the rules and purposes of the classes in the VIPER stack. This makes everyone happy! 
 
 I think that VIPER is the perfect architecture for large codebases with frequently changing requirements. It is an effective antidote to the Massive ViewController problem.
 
