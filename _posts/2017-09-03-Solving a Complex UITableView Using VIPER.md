@@ -12,7 +12,7 @@ VIPER is an implementation of [Bob Martin's Clean Architecture](https://8thlight
 
 I'll use the requirement and solution to the Complex UITableView from [part 1]({{site.url}}/blog/2017/05/13/Solving-a-Complex-UITableView.html) of this series as the basis of this example. I will refactor the solution of [part 2]({{site.url}}/blog/2017/06/29/Solving-a-Complex-UITableView-Part-2.html) in to a solution as it would be rendered in VIPER. The complete App which demonstrates this refactoring can be found at [**CleanReportTableDemo**](https://github.com/lyleresnick/CleanReportTableDemo).
 
-I discussed how I think VIPER should be structured in [A Crash Course on VIPER]({{site.url}}/blog/2017/06/29/Solving-a-Complex-UITableView-Part-2.html).
+I discussed how I think VIPER should be structured in [A Crash Course on VIPER]({{site.url}}/blog/2017/08/29/A-Crash-Course-on-VIPER.html).
 
 ## The App
 
