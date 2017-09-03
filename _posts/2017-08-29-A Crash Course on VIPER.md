@@ -132,7 +132,7 @@ The ViewController's main role in VIPER is to the configure the View hierarchy. 
 
 In VIPER, the UIViewController sends <u>every</u> event coming from a UIControl or lifecycle method directly to the Presenter. The ViewController does not process the event in any way, whatsoever. It simply retrieves associated data, either input as text or selected by index, and sends it with the event to the Presenter. In the case of repeating UIControls contained in a UITableView or UICollectionView, the Cell receives the event and sends it to the Presenter.  Super simple!
 
-Here are some examples of events being captured and sent on to the Presenter: 
+Here are some examples of events being captured and, in most cases, sent on to the Presenter: 
 
 - Given that all views have been configured in Interface Builder, here is a `UIViewController`  `viewDidLoad` method:
 
@@ -143,13 +143,19 @@ override func viewDidLoad() {
  }
 ```
 
+- Here is a typical `UITextDelegate` `textFieldShouldReturn` method:
+
+```swift
+func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+    return presenter.eventCapture(quantity: textField.text)
+}
+```
+
 - Here is a typical `@IBAction` method found in either a UIViewController or UITableViewCell :
 
 ```swift
 @IBAction func saveButtonTouched(_ sender: UIButton) {
-	presenter.eventSave(firstName: firstNameTextField.text, 
-                        lastName: lastNameTextField.text, 
-                        age: ageTextField.text)
+	presenter.eventSave()
 }
 ```
 
@@ -173,29 +179,41 @@ Examples of input conversion might be from String to Int, formatted String date 
 
 Here are some examples of events coming from the UIViewController and being sent on to the UseCase:
 
-- Here the Presenter's `eventViewReady()` just delegates to the useCase
+- Here the Presenter's `eventViewReady()` method just delegates to the useCase
 
 ```swift
- func eventViewReady() {
-   useCase.eventViewReady()
- }
+func eventViewReady() {
+    useCase.eventViewReady()
+}
 ```
-- Here `eventSave(firstName:lastName:age:)` tries to convert the age parameter and on success delegates the event to the useCase with the converted data
+- The Presenter's `eventCapture(quantity:)` tries to convert the quantity parameter to an `Int`. On success it delegates the event to the UseCase with the converted data. It is up to the UseCase to determine whether the quantity is valid. On failure to convert the quantity, the event is delegated back to the ViewController. 
+
+  Note that it is entirely possible that validation could be done by a "smart" textField, whose configuration would include its format and error message. In this case, the configuration would be specified to the ViewController by the Presenter on `viewDidLoad`.  Either way, the format of the data and the text of an error message are the domain of the presenter. This is particularity due to factors such as localization and accessibility. Smart textfields would have to be used in the case of format-as-you-type phone numbers.
 
 ```swift
-enum eventSaveError: Error { case invalidAge }
-
- func eventSave(firstName: String,  lastName: String,  age: String) throws {
-    if let age = Int(age) {
-        useCase.eventSave(firstName: firstName, lastName: lastName, age: age)
+func eventCapture(quantity: String) -> Bool {
+    if let quantity = Int(quantity) {
+        useCase.eventCapture(quantity: quantity)
+        return true
     }
     else {
-        throw eventSaveError.invalidAge
+          viewController.showFormatError( "Format of Quantity must be digits only")
+          return false
     }
- }
+}
 ```
 
-- When `eventContactSelected(at row: Int)` the event is delegated to the router to display the selected contact:
+- On `eventSave()`, the Presenter just delegates to the UseCase
+
+```swift
+func eventSave() {
+    useCase.eventSave()
+}
+```
+
+- When the Presenter receives  `eventContactSelected(at row: Int)` , the event is delegated to the router to display the selected contact.
+
+  If the Presenter required a callback, it would send itself as a PresenterDelegate parameter to be passed on to the Presenter of the VIP Stack that the router would instantiate.
 
 ```swift
 func eventContactSelected(at row: Int) {
@@ -203,9 +221,7 @@ func eventContactSelected(at row: Int) {
 }
 ```
 
-If the Presenter required a callback, it would send itself as a PresenterDelegate parameter to be passed on to .
-
-As you can see in the diagram, the Presenter has another role: presenting the result of the event - again, I will cover that shortly.
+As you may have noticed in the diagram, the Presenter has another role: presenting the result of the event - again, I will cover that shortly.
 
 ### The Router
 
