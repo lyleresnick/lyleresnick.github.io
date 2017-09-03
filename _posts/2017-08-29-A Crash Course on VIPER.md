@@ -241,13 +241,13 @@ Entities are never passed directly to the UseCaseOutput. PresentationModels are 
 
 Data Conversion is performed by the Presenter and the EntityGateway. This allows the code in the UseCase to be free of conversion and data validation. 
 
-A PresentationModel can be passed as a `struct`, as an `enum` or as simple scalars - whatever is most convenient. When a `struct` is used, a good practice is to initialize it by passing it the Entity.
+A PresentationModel can be passed to the UseCaseOutput as a `struct`, as an `enum` or as simple scalars - whatever is most convenient. When a `struct` is used, a good practice is to initialize it by passing it the Entity.
 
 The separation of the Entities in the UseCase from the PresentationModels used by the Presenter makes sure that the UseCase is decoupled from the Presenter, thus promoting a reduction of shared mutable state. This way the form of Entity can change without affecting the outer layers of the system.
 
  The UseCase has no direct dependencies - both the EntityGateway and the UseCaseOutput are protocols and are injected (by the Connector).
 
-When the number of use cases that a scene supports becomes large, the number of methods on a single output protocol becomes even larger. It becomes really hard to tell at a glance which UseCaseOutput methods are used by what events. For this reason, it is a good practice to create one UseCaseOutput protocol for each event. Your code will be really organized when you place the implementation of each output protocol in its own extension.
+When the number of use cases that a scene supports becomes large, the number of methods on a single output protocol becomes even larger. It becomes really hard to tell at a glance which UseCaseOutput methods are used by what events. For this reason, it is a good practice to create one UseCaseOutput protocol for each event. Your code will be well organized when you place the implementation of each output protocol in its own extension. You can place reusable implementations in the general UseCaseOutput extension.
 
 ### The EntityGateway and EntityManagers
 
@@ -297,7 +297,7 @@ If the number of parameters is large, it is better to put the values in a struct
 
 When the input to the Presenter is repetitive, the Presenter holds the ViewModel structures in an array and delivers them via an indexed method call.
 
-When the input to the Presenter is repetitive and heterogeneous, it is a good practice to use *associated-value* `enum`s to hold the data. Although, due to syntax, I find that when an enum contains a large number of associated values, the extraction of values is painful, not to mention that every time a value is added you have to add another '-' . An even better practice is to use enums whose sole associated-value is a struct. This would allow you to use names to extract values, instead of positions.
+When the input to the Presenter is repetitive and heterogeneous, it is a good practice to use *associated-value* `enum`s to hold the data. Although, due to syntax, I find that when an enum contains a large number of associated values, the extraction of values is painful, not to mention that every time a value is added you have to add another '_' . A better practice is to use enums whose sole associated-value is a struct. This would allow you to use `struct` field names to extract values, instead of `enum` named positions.
 
 ### The ViewController as PresenterOutput
 
@@ -331,7 +331,7 @@ I find that the easiest way to determine whether you are implementing VIPER corr
 
 VIPER is easy to implement if you keep it simple.  
 
-The benefit of VIPER is the organizational lever it provides for the project. Everything has a place. Each team member knows the rules and purposes of the classes in the VIPER stack. This makes everyone happy! 
+The benefit of VIPER is the organizational lever it provides for a project. Everything has a place. Each team member knows the rules and purposes of the classes in the VIPER stack. This makes everyone happy! 
 
 I think that VIPER is the perfect architecture for large codebases with frequently changing requirements. It is an effective antidote to the Massive ViewController problem.
 
