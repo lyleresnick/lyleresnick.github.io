@@ -134,12 +134,12 @@ In VIPER, the UIViewController sends <u>every</u> event coming from a UIControl 
 
 Here are some examples of events being captured and, in most cases, sent on to the Presenter: 
 
-- Given that all views have been configured in Interface Builder, here is a `UIViewController`  `viewDidLoad` method:
+- Given that all views have been configured in Interface Builder, here is a `UIViewController`  `viewDidLoad` method (the main view's height is passed in for error an zero situations):
 
 ```swift
 override func viewDidLoad() {
    super.viewDidLoad()
-   presenter.eventViewReady()
+   presenter.eventViewReady(maxHeight: view.bounds.height)
  }
 ```
 
@@ -179,10 +179,11 @@ Examples of input conversion might be from String to Int, formatted String date 
 
 Here are some examples of events coming from the UIViewController and being sent on to the UseCase:
 
-- Here the Presenter's `eventViewReady()` method just delegates to the useCase
+- Here the Presenter's `eventViewReady()` method retains the `maxHeight` and then just delegates to the useCase
 
 ```swift
-func eventViewReady() {
+func eventViewReady(maxHeight: Int) {
+  	self.maxHeight = maxHeight
     useCase.eventViewReady()
 }
 ```
@@ -211,13 +212,14 @@ func eventSave() {
 }
 ```
 
-- When the Presenter receives  `eventContactSelected(at row: Int)` , the event is delegated to the router to display the selected contact.
+- When the Presenter receives  `eventContactSelected(at row: Int)` , it gets the contactId from the ViewModel and then delegates the event  to the router to display the selected contact. Yes, you should put data in the ViewModel to support the processing of potential future events.
 
   If the Presenter required a callback, it would send itself as a PresenterDelegate parameter to be passed on to the Presenter of the VIP Stack that the router would instantiate.
 
 ```swift
 func eventContactSelected(at row: Int) {
-    router.eventContactSelected(at: row)
+  	let contactId = contactViewModels[row].id
+    router.eventContactSelected(id: contactId)
 }
 ```
 
@@ -231,13 +233,96 @@ I will leave the details of router implementation to a future article.
 
 ### The UseCase
 
-The UseCase has one responsibility: execute the application business requirement. The only code that belongs in a UseCase is that which implements the application business rules. The UseCase should not contain data conversion or external format validation - these are both the domain of the Presenter.
+The UseCase has one responsibility: execute the application business requirement. The only code that belongs in a UseCase is that which implements the application business rules. The UseCase should not contain data conversion or external format validation - these are both the domain of the Presenter or the EntityManagers.
 
 The UseCase typically uses the EntityGateway to access the system state in the form of Entities, processes the Entities against the incoming parameters, and updates the system state via the EntityGateway. It may do this over the course of responding to more than one event. One event may cause the entities to be accessed and output in some order and the next event may select one of the entities and the UseCase will update it in some way.
 
 The results of executing the UseCase are passed as parameters to the UseCaseOutput protocol in a form known as the PresentationModel. 
 
 Entities are never passed directly to the UseCaseOutput. PresentationModels are created from Entities, even when the Entity does not require much processing. The PresentationModel  contains only the data that is required for the output. The UseCase does not convert data for output - it does not know anything about the output format, localization or target view. Output via PresentationModels is kind of like logging without any descriptive text.
+
+Here are some examples of events coming from the Presenter and being processed by the UseCase:
+
+- Here the UseCase's `eventViewReady()` method accesses contacts from a `ContactManager`, which is provided by the `EntityGateway` . It processes and sends each contact to the UseCaseOutput
+
+```swift
+func eventViewReady() {
+  
+    let currentUser = entityGateway.userManager.currentUser
+    entityGateway.contactManager.fetchAll(user: currentUser) { result in
+        
+        output.presentContactListStart()
+        switch result {
+        case .success(contacts):
+            if contacts.count > 0 {
+                for contact in contacts {
+                    output.present(contact: ContactListPresentationModel(contact))
+                }
+            }
+            else {
+                output.presentNoContactsFound()
+            }
+
+        case .failure(error):
+            output.present(error:error.reason)
+        }
+        output.presentContactListEnd()
+    }
+}	
+```
+
+- Here the UseCase's `eventViewReady(contactId:)` method accesses a contact from the same  `ContactManager` as before. It processes and sends the contact on to the UseCaseOutput. Notice the the PresentationModels are different, since the previous list model contains different data than this model.
+
+```swift
+func eventViewReady(contactId: String) {
+  
+    entityGateway.contactManager.fetch(contactId: contactId) { result in
+        
+        switch result {
+        case .success(contact):
+             output.present(contact: ContactPresentationModel(contact))
+        case .failure(error):
+            output.present(error:error.reason)
+        }
+    }
+}	
+```
+
+- Here the UseCase's `eventCapture(quantity:)`  and `eventCapture(productId:)` methods simply set the values  to non-nil. 
+
+  The `eventSave()` method verifies that all mandatory fields have been entered and uses an `orderManager` to create an order. It sends the newly created order on to the UseCaseOutput. This output may include shopping and billing information.
+
+```swift
+var quantity: Int?
+var productId: String?
+
+func eventCapture(quantity: Int) {
+    self.quantity = quantity
+}
+
+func eventCapture(productId: String) {
+    self.productId = productId
+}
+
+func eventSave() {
+  
+    if let quantity = quantity, let productId = productId {
+      
+        entityGateway.orderManager.create(userId: userId, productId: productId, quantity: quantity) { result in 
+          
+            switch(result)                                                                                          
+            case .success(order):
+                output.present(order: OrderPresentationModel(order))
+            case .failure(error):
+                output.present(error:error.reason)
+            }                                                                                          
+        }
+      }
+    else {
+        output.presentManditoryFieldsMissing(productId: productId == nil, quantity: quantity == nil)
+   }
+}
+```
 
 Data Conversion is performed by the Presenter and the EntityGateway. This allows the code in the UseCase to be free of conversion and data validation. 
 
@@ -251,7 +336,7 @@ When the number of use cases that a scene supports becomes large, the number of 
 
 ### The EntityGateway and EntityManagers
 
-The UseCase uses the EntityGateway to obtain access to EntityManagers. EntityManagers are responsible for providing access to the Entities and for updating them. Entity Managers are also known as Service Layer or Data Access Objects in other layered architectures.
+The UseCase uses the EntityGateway to obtain access to EntityManagers. EntityManagers are responsible for providing access to the Entities and for updating them. Entity Managers are also known as the Service Layer or Data Access Objects in other layered architectures.
 
 The EntiryManagers are outside the scope of VIPER, but they are a very important aspect of the architecture as a whole. They provide access to and transform the state of the system. They can deliver Entities originating from either local data stores (CoreData or a local file system) and from the Internet. 
 
