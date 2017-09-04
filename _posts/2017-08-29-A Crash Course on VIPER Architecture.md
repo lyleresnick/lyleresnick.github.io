@@ -6,7 +6,7 @@ date: 2017-08-29
 
 ## Introduction
 
-I've been exploring and using VIPER now for about 2 years. I think it is a really sensible solution for organizing and reducing the size of a massive View Controller. 
+I've been exploring and using the VIPER architecture now for about 2 years. I think it is a really sensible solution for organizing and reducing the size of a massive View Controller. 
 
 Reducing the size of a UIViewController is a notable goal, but how should it be done? 
 
@@ -22,9 +22,9 @@ In commercial applications, UIViewControllers get large. I've seen 2000 lines in
 
 VIPER is a micro-architecture - a predefined set of classes that work together to structure a solution. VIPER is an implementation of [Bob Martin's Clean Architecture](https://8thlight.com/blog/uncle-bob/2012/08/13/the-clean-architecture.html). 
 
-In the next article, I'm going to demonstrate that VIPER can be very simple to implement and its benefits can be realized very quickly.  I'll use the requirement and solution to the Complex UITableView from the last [post]({{site.url}}/blog/2017/06/29/Solving-a-Complex-UITableView-Part-2.html) as the basis of this example. A complete app which demonstrates the refactoring to Clean Architecture can be found at [**CleanReportTableDemo**](https://github.com/lyleresnick/CleanReportTableDemo). I will be explaining this app in the next post.
+In the next article, I'm going to demonstrate that the VIPER architecture can be very simple to implement and its benefits can be realized very quickly.  I'll use the requirement and solution to the Complex UITableView from the last [post]({{site.url}}/blog/2017/06/29/Solving-a-Complex-UITableView-Part-2.html) as the basis of this example. A complete app which demonstrates the refactoring to Clean Architecture can be found at [**CleanReportTableDemo**](https://github.com/lyleresnick/CleanReportTableDemo). I will be explaining this app in the next post.
 
-## VIPER Explained
+## An Explanation of the VIPER Architecture 
 
 The main purpose of the VIPER architecture is to reduce the amount of code in a ViewController class. VIPER does this by allocating almost all of the responsibilities of a typical ViewController into other classes that have predefined responsibilities. You may recall that this echoes the Single Responsibility Principle. 
 
@@ -70,9 +70,9 @@ Objects in a layer must not expose their implementation to any other layer. The 
 
 This is what I mean by honouring the layer boundaries.
 
-### Viper Classes
+### The VIPER Classes
 
-In VIPER, 
+In the VIPER architecture, 
 
 - the ViewController(**V**) implements the User Interface. 
 - the Presenter(**P**) implements 2 parts of the interface adapter layer: data conversion and selection of whether to Route to another scene or perform a UseCase 
@@ -80,7 +80,7 @@ In VIPER,
 - the Entities(**E**) are provided by an EntityGateway via Gateway Methods
 - the Router(**R**) changes ViewControllers 
 
-This diagram shows the relationships of the VIPER classes.
+This diagram shows the relationships between the VIPER classes.
 
 ![Diagram of VIPER classes]({{ site.url }}/assets/VIPER Class Diagram.png)
 
@@ -112,7 +112,7 @@ Although outside the scope of this blog, I want to mention that the EntityManage
 
 ## The VIPER Pipeline
 
-You can think of VIPER as a pipeline. Each stage of the pipeline has a well defined job to do. 
+You can think of the VIPER architecture as a pipeline. Each stage of the pipeline has a well defined job to do. 
 
 Here is a diagram showing the event flow between the View Controller and the Entity Gateway
 
@@ -327,7 +327,7 @@ The connector is also useful to set the values of the Presenter into any classes
 
 ## Summary
 
-I find that the easiest way to determine whether you are implementing VIPER correctly is to use the rules and classes correctly and consistently. 
+I find that the easiest way to determine whether you are implementing the VIPER architecture correctly is to use the rules and classes correctly and consistently. 
 
 VIPER is easy to implement if you keep it simple.  
 
