@@ -248,6 +248,8 @@ Here are some examples of events coming from the Presenter and being processed b
 - Here the UseCase's `eventViewReady()` method accesses contacts from a `ContactManager`, which is provided by the `EntityGateway` . It processes and sends each contact to the UseCaseOutput
 
 ```swift
+var output: ContactListViewReadyUseCaseOutput!
+
 func eventViewReady() {
   
     let currentUser = entityGateway.userManager.currentUser
@@ -258,7 +260,7 @@ func eventViewReady() {
         case .success(contacts):
             if contacts.count > 0 {
                 for contact in contacts {
-                    output.present(contact: ContactListPresentationModel(contact))
+                    output.present(contact: ContactListPresentationModel(contact: contact))
                 }
             }
             else {
@@ -282,7 +284,7 @@ func eventViewReady(contactId: String) {
         
         switch result {
         case .success(contact):
-             output.present(contact: ContactPresentationModel(contact))
+             output.present(contact: ContactPresentationModel(contact: contact))
         case .failure(error):
             output.present(error:error.reason)
         }
@@ -398,7 +400,7 @@ class OrderSaveUseCaseTransformer {
 }
 ```
 
-I would then implement `eventSave` as follows: 
+I would implement `eventSave` as follows: 
 
 ```swift
 func eventSave() {
@@ -412,23 +414,69 @@ Note that I would still implement the UseCase's `Capture` methods in the UseCase
 
 You will see that this setup makes is very easy to test the Transformer. It separates the UseCase's responsibilities from one another, making it very easy to understand the code. When you need to decompose a large amount of processing by implementing  private methods, you immediately know who they belong to.
 
-### The Presenter as UseCaseOutput
+### The Presenter in the role of UseCaseOutput
 
-The Presenter's second responsibility is to convert the data received as PresentationModels to a format called a ViewModel. The Presenter implements the UseCaseOutput protocol. 
+The Presenter's second responsibility is to convert the data received a PresentationModel into a format called a ViewModel. The Presenter implements the UseCaseOutput protocol. 
 
-The role of the Presenter as UseCaseOutput is to format the data received in the PresentationModel into a format that can be used directly by the ViewController. The formatted output is called a ViewModel. This usually means Strings, but depending on the requirements of the output controls, it may be an enum or a boolean.
+The role of the Presenter as UseCaseOutput is to format the data received in the PresentationModel into a format that can be used directly by the ViewController. The formatted output is called a ViewModel. This usually means Strings, but depending on the requirements of the output controls, it may be an `enum` or a `Bool`.
 
-If data must be localized, made accessible, or otherwise converted in any way, the process of conversion is done by the Presenter.
+If data must be localized, made accessible, or otherwise converted in any way, the process of conversion is done by the Presenter acting in the role UseCaseOutput.
 
  A ViewModel can be implemented as an immutable struct or as a set of scalars, whichever is easier. When implemented as scalars, the values are passed directly as parameters to the methods of the PresentationOutput protocol. 
 
-If the number of parameters is large, it is better to put the values in a struct and them pass them as a parameter. In this case the conversion can take place in the init of the struct.
+If an output method has a large number of parameters, it is better to put the values into a struct and then pass that as a parameter. In this case the conversion can take place in the `init` of the struct, instead of in the method itself.
 
-When the input to the Presenter is repetitive, the Presenter holds the ViewModel structures in an array and delivers them via an indexed method call.
+When the input to the Presenter is repetitive, the Presenter holds the ViewModel structures in an array and delivers them via an indexed accessor method.
 
-When the input to the Presenter is repetitive and heterogeneous, it is a good practice to use *associated-value* `enum`s to hold the data. Although, due to syntax, I find that when an enum contains a large number of associated values, the extraction of values is painful, not to mention that every time a value is added you have to add another '_' . A better practice is to use enums whose sole associated-value is a struct. This would allow you to use `struct` field names to extract values, instead of `enum` named positions.
+When the input to the Presenter is repetitive and heterogeneous, it is a good practice to use *associated-value* `enum`s to hold the data. Although, due to syntax, I find that when an enum contains a large number of associated values, the extraction of values is painful, not to mention that every time a value is added you have to add another '_'  everywhere you read the enum. A better practice is to use enums whose sole associated-value is a struct. This would allow you to use `struct` field names to extract values, instead of `enum` named positions.
 
-### The ViewController as PresenterOutput
+Here are some examples of output coming from the UseCase and being processed by the Presenter in the role of UseCaseOutput:
+
+- Here the output methods are used to construct a contact list for display by the ViewController. When a ContactListPresentationModel is presented, it is converted to a ViewModel and appended to the list. If no Contacts are found or an error occurs, a message is appended. When `presentContactListEnd()` is finally called, the ViewController is called to show the list.
+
+```swift
+extension ContactListPresenter: ContactListViewReadyUseCaseOutput {
+    
+    func presentContactListStart() {
+        contactList = []
+    }
+    
+    func present(contact: ContactListPresentationModel) {
+        contactList.append(.contact(model:ContactListViewModel(contact)))
+    }
+
+    func presentNoContactsFound() {
+        contactList.append(.noContactsFound(message: NSLocalizedString("NoContactsFound")))
+    }
+    
+    func present(error: ErrorReason) {
+        contactList.append(.error(message: NSLocalizedString(error.rawValue)))
+    }
+
+    func presentContactListEnd() {
+        output.showContactList()
+    }
+}
+```
+
+- In the case of displaying a single Contact detail in a scene, the `present(contact:)` method calls the ViewController to show the contact details.  If an error occurs, the presenter tells the ViewController to show an error message.
+
+```swift
+extension ContactPresenter: ContactViewReadyUseCaseOutput {
+    
+    func present(contact: ContactPresentationModel) {
+        viewController.show(contact: contact)
+    }
+  
+  func present(error: ErrorReason) {
+        viewController.showError(message: NSLocalizedString(error.rawValue))
+    }
+}
+```
+
+
+
+### The ViewController in the role of PresenterOutput
 
 The ViewController's second responsibility is to assign the data, obtained from the Presenter, into the Views.  The ViewController implements the PresenterOutput protocol.
 
