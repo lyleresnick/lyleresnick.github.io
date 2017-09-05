@@ -278,6 +278,8 @@ func eventViewReady() {
 - Here the UseCase's `eventViewReady(contactId:)` method accesses a contact from the same  `ContactManager` as before. It processes and sends the contact on to the UseCaseOutput. Notice the the PresentationModels are different, since the previous list model contains different data than this model.
 
 ```swift
+var output: ContactViewReadyUseCaseOutput!
+
 func eventViewReady(contactId: String) {
   
     entityGateway.contactManager.fetch(contactId: contactId) { result in
