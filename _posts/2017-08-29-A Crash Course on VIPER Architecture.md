@@ -189,7 +189,7 @@ func eventViewReady(maxHeight: Int) {
 ```
 - The Presenter's `eventCapture(quantity:)` tries to convert the quantity parameter to an `Int`. On success it delegates the event to the UseCase with the converted data. It is up to the UseCase to determine whether the quantity is valid. On failure to convert the quantity, the event is delegated back to the ViewController. 
 
-  Note that it is entirely possible that validation could be done by a "smart" textField, whose configuration would include its format and error message. In this case, the configuration would be specified to the ViewController by the Presenter on `viewDidLoad`.  Either way, the format of the data and the text of an error message are the domain of the presenter. This is particularity due to factors such as localization and accessibility. Smart textfields would have to be used in the case of format-as-you-type phone numbers.
+  Note that it is entirely possible that validation could be done by a "smart" textField, whose configuration would include its format and error message. In this case, the configuration would be specified to the ViewController by the Presenter on `viewDidLoad`.  Either way, the format of the data and the text of the error message are the domain of the Presenter, since it is responsible for implementing localization and accessibility. When a smart textfield be used to implement format-as-you-type phone numbers, the format would be supplied by the Presenter.
 
 ```swift
 func eventCapture(quantity: String) -> Bool {
@@ -360,7 +360,7 @@ As I mentioned, the EntityGateway is a protocol. It is defined as a protocol so 
 
 The Transformer is not formally part of VIPER, but due of the number of events that a typical UseCase has  to process, I find it useful to create one Transformer for each event that changes the state of the system.  
 
-Normally the function of a Transformer would simply be rendered as a method of a UseCase. I convert the method to a *method-object* and then call it from the UseCase event method. The Transformer usually consists of a constructor and a method called `transform` . In the UseCase method, I initialize the constructor with the required EntityManagers obtained from the EntityGateway and any data required from previously run UseCases. 
+Normally the functionality of a Transformer would be rendered as a method of a UseCase. I convert the method to a *method-object* and then call it from the UseCase event method. The Transformer usually consists of a constructor and a method called `transform` . In the UseCase method, I initialize the constructor with the required EntityManagers obtained from the EntityGateway and any data required from previously run UseCases. 
 
 I pass the event parameters from UseCase to the `transform` method along with the reference to the Presenter (for output).
 
