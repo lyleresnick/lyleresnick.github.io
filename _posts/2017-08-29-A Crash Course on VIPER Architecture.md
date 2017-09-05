@@ -90,7 +90,7 @@ The ViewController sends messages to the Presenter, which in turn sends messages
 
 Each ViewController, Presenter and UseCase is called a VIP stack. In a VIPER architected system one VIP stack is created whenever a new UIViewControler is created.
 
-The UseCase uses the EntityGateway to obtain access to EntityManagers.  EntityManagers are responsible for providing access to the Entities. The EntityGateway is used by all UseCases to  access  all available EntityManagers.
+The UseCase uses an injected EntityGateway to obtain access to EntityManagers.  EntityManagers are responsible for providing access to the Entities. The EntityGateway is used by all UseCases to  access  all available EntityManagers.
 
 The Router is a VIP stack that knows about child ViewControllers. 
 
@@ -336,7 +336,7 @@ When the number of use cases that a scene supports becomes large, the number of 
 
 ### The EntityGateway and EntityManagers
 
-The UseCase uses the EntityGateway to obtain access to EntityManagers. EntityManagers are responsible for providing access to the Entities and for updating them. Entity Managers are also known as the Service Layer or Data Access Objects in other layered architectures.
+The UseCase uses an injected EntityGateway to obtain access to EntityManagers. EntityManagers are responsible for providing access to the Entities and for updating them. Entity Managers are also known as the Service Layer or Data Access Objects in other layered architectures.
 
 The EntiryManagers are outside the scope of VIPER, but they are a very important aspect of the architecture as a whole. They provide access to and transform the state of the system. They can deliver Entities originating from either local data stores (CoreData or a local file system) and from the Internet. 
 
