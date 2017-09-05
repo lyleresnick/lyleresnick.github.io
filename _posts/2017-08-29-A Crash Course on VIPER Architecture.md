@@ -312,7 +312,7 @@ func eventSave() {
       
         entityGateway.orderManager.create(userId: userId, productId: productId, quantity: quantity) { result in 
           
-            switch(result)                                                                                          
+            switch(result) {                                                                                         
             case .success(order):
                 output.present(order: OrderPresentationModel(order))
             case .failure(error):
@@ -364,9 +364,53 @@ Normally the functionality of a Transformer would be rendered as a method of a U
 
 I pass the event parameters from UseCase to the `transform` method along with the reference to the Presenter (for output).
 
-You will see that this setup makes is very easy to test the Transformer. It separates the UseCase's responsibilities from one another, making it very easy to understand the code.
+Here is an example:
 
-There are occasions when a UseCase does not use a transformer. An example of this is when the UseCase involves collecting data from multiple fields. The events would deliver individual data items to the UseCase, for validation and temporary storage. Finally, an event would cause the changes to be saved. The UseCase would then call a Transformer with the saved data as parameters. 
+```swift
+class OrderSaveUseCaseTransformer {
+
+    let orderManager: OrderManager
+    let userManager: UserManager
+  
+    init(orderManager: OrderManager, userManager: UserManager) {
+        self.orderManager = orderManager
+        self.userManager = userManager
+    }
+
+    func transform(quantity: Int?, productId: String?, output: OrderSaveUseCaseOutput) {
+
+        if let quantity = quantity, let productId = productId {
+
+            orderManager.create(userId: userManager.currentUserId, productId: productId, quantity: quantity) { result in
+
+                switch(result) {
+                    case .success(order):
+                        output.present(order: OrderPresentationModel(order))
+                    case .failure(error):
+                        output.present(error:error.reason)
+                }
+            }
+        }
+        else {
+            output.presentManditoryFieldsMissing(productId: productId == nil, quantity: quantity == nil)
+        }
+    }
+}
+```
+
+I would then implement `eventSave` as follows: 
+
+```swift
+func eventSave() {
+
+    let transformer = OrderSaveUseCaseTransformer(orderManager: entityGateway.orderManager, userManager: entityGateway.userManager)
+    transformer.transform(quantity: quantity, productId: productId, output: output)
+}
+```
+
+Note that I would still implement the UseCase's `Capture` methods in the UseCase.
+
+You will see that this setup makes is very easy to test the Transformer. It separates the UseCase's responsibilities from one another, making it very easy to understand the code. When you need to decompose a large amount of processing by implementing  private methods, you immediately know who they belong to.
 
 ### The Presenter as UseCaseOutput
 
