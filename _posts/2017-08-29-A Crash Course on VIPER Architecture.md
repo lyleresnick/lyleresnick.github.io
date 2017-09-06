@@ -155,7 +155,7 @@ func textFieldShouldReturn(_ textField: UITextField) -> Bool {
 
 ```swift
 @IBAction func saveButtonTouched(_ sender: UIButton) {
-	presenter.eventSave()
+    presenter.eventSave()
 }
 ```
 
@@ -183,7 +183,7 @@ Here are some examples of events coming from the UIViewController and being sent
 
 ```swift
 func eventViewReady(maxHeight: Int) {
-  	self.maxHeight = maxHeight
+    self.maxHeight = maxHeight
     useCase.eventViewReady()
 }
 ```
@@ -218,7 +218,7 @@ func eventSave() {
 
 ```swift
 func eventContactSelected(at row: Int) {
-  	let contactId = contactViewModels[row].id
+    let contactId = contactViewModels[row].id
     router.eventContactSelected(id: contactId)
 }
 ```
@@ -372,26 +372,26 @@ Here is an example:
 
 ```swift
 class OrderSaveUseCaseTransformer {
-
+    
     let orderManager: OrderManager
     let userManager: UserManager
-  
+    
     init(orderManager: OrderManager, userManager: UserManager) {
         self.orderManager = orderManager
         self.userManager = userManager
     }
-
+    
     func transform(quantity: Int?, productId: String?, output: OrderSaveUseCaseOutput) {
-
+        
         if let quantity = quantity, let productId = productId {
-
+            
             orderManager.create(userId: userManager.currentUserId, productId: productId, quantity: quantity) { result in
-
+                
                 switch(result) {
-                    case .success(order):
-                        output.present(order: OrderPresentationModel(order))
-                    case .failure(error):
-                        output.present(error:error.reason)
+                case .success(order):
+                    output.present(order: OrderPresentationModel(order))
+                case .failure(error):
+                    output.present(error:error.reason)
                 }
             }
         }
@@ -402,7 +402,7 @@ class OrderSaveUseCaseTransformer {
 }
 ```
 
-I would implement `eventSave` as follows: 
+I would then implement `eventSave` as follows: 
 
 ```swift
 func eventSave() {
@@ -470,7 +470,7 @@ extension ContactPresenter: ContactViewReadyUseCaseOutput {
         viewController.show(contact: contact)
     }
   
-  func present(error: ErrorReason) {
+    func present(error: ErrorReason) {
         viewController.showError(message: NSLocalizedString(error.rawValue))
     }
 }
