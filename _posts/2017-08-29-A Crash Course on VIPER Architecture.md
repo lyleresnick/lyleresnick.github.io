@@ -318,7 +318,7 @@ func eventSave() {
           
             switch(result) {                                                                                         
             case .success(order):
-                output.present(order: OrderPresentationModel(order))
+                output.present(order: OrderEntryPresentationModel(order))
             case .failure(error):
                 output.present(error:error.reason)
             }                                                                                          
@@ -381,7 +381,7 @@ class OrderSaveUseCaseTransformer {
         self.userManager = userManager
     }
     
-    func transform(quantity: Int?, productId: String?, output: OrderSaveUseCaseOutput) {
+    func transform(quantity: Int?, productId: String?, output: OrderEntrySaveUseCaseOutput) {
         
         if let quantity = quantity, let productId = productId {
             
@@ -448,11 +448,11 @@ extension ContactListPresenter: ContactListViewReadyUseCaseOutput {
     }
 
     func presentNoContactsFound() {
-        contactList.append(.noContactsFound(message: NSLocalizedString("NoContactsFound")))
+        contactList.append(.noContactsFound(message: LocalizedString("NoContactsFound")))
     }
     
     func present(error: ErrorReason) {
-        contactList.append(.error(message: NSLocalizedString(error.rawValue)))
+        contactList.append(.error(message: LocalizedString(error.rawValue)))
     }
 
     func presentContactListEnd() {
@@ -471,12 +471,41 @@ extension ContactPresenter: ContactViewReadyUseCaseOutput {
     }
   
     func present(error: ErrorReason) {
-        viewController.showError(message: NSLocalizedString(error.rawValue))
+        viewController.show(error: LocalizedString(error.rawValue))
     }
 }
 ```
 
+- Below, to present the saved state of an Order, the Presenter just delegates to the ViewController. The OrderEntryViewModel's `init` converts any data which must be localized or converted to text. 
 
+  When the user has not entered one or more mandatory fields, the Presenter prepares the output text describing the issue and then sends it to the ViewController.
+
+```swift
+extension OrderEntryPresenter: OrderEntrySaveUseCaseOutput {
+
+    func present(order: OrderEntryPresentationModel) {
+        viewController.show(order: OrderEntryViewModel(order: order))
+    }
+  
+     func present(error: ErrorReason) {
+        viewController.show(error: LocalizedString(error.rawValue)))
+    }
+
+    func presentManditoryFieldsMissing(productId: Bool, quantity: Bool) {
+
+        var productIdMessage: String?
+        var quantityMessage: String?
+
+        if productId {
+            productIdMessage = LocalizedString("Product must be Entered")
+        }
+        if quantity {
+            quantityMessage = LocalizedString("Quantity must be Entered")
+        }
+        viewController.showManditoryFieldsMissing(productId: productIdMessage, quantity: quantityMessage)
+    }
+}
+```
 
 ### The ViewController in the role of PresenterOutput
 
