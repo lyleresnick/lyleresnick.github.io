@@ -325,7 +325,7 @@ func eventSave() {
         }
       }
     else {
-        output.presentManditoryFieldsMissing(productId: productId == nil, quantity: quantity == nil)
+        output.presentMissingManditoryFields(productId: productId == nil, quantity: quantity == nil)
    }
 }
 ```
@@ -396,7 +396,7 @@ class OrderSaveUseCaseTransformer {
             }
         }
         else {
-            output.presentManditoryFieldsMissing(productId: productId == nil, quantity: quantity == nil)
+            output.presentMissingManditoryFields(productId: productId == nil, quantity: quantity == nil)
         }
     }
 }
@@ -491,7 +491,7 @@ extension OrderEntryPresenter: OrderEntrySaveUseCaseOutput {
         viewController.show(error: LocalizedString(error.rawValue)))
     }
 
-    func presentManditoryFieldsMissing(productId: Bool, quantity: Bool) {
+    func presentMissingManditoryFields(productId: Bool, quantity: Bool) {
 
         var productIdMessage: String?
         var quantityMessage: String?
@@ -518,6 +518,66 @@ In the case of non-repeating data, the ViewController obtains the ViewModel data
 In the case of repeating data, the data is acquired from the Presenter via an indexed accessor method. The methods are used by a UITableView-, UIPicker-, UICollectionView- or other DataSource. The accessor method returns a ViewModel containing the data to be displayed
 
 For the same reasons that I mentioned regarding the UseCaseOutput, it is a good practice to create one PresenterOutput protocol for each event. 
+
+Here are some examples of output coming from the Presenter and being processed by the ViewController in the role of PresenterOutput:
+
+- For the contact List example, there is only one PresentationOutput method to implement: 
+
+```swift
+func showContactList() {
+    tableView.reloadData()
+}
+```
+
+Obviously this is not the whole story. Every UITableView requires a dataSource and, optionally, a delegate. Below, the ContactListAdapter implements both a UITableViewDataSource and Delegate. It is typical and could be implemented as a generic class.
+
+```swift
+class ContactListAdapter: NSObject {
+    
+    var presenter: ContactListPresenter!
+}
+
+extension ContactListAdapter: UITableViewDataSource  {
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return presenter.rowCount
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        
+        let cell = tableView.dequeueReusableCell(withIdentifier: presenter.cellId(at: indexPath.row), for: indexPath)
+        (cell as! ContactListCell).show(row: presenter.row(at: indexPath.row))
+        return cell
+    }
+}
+
+extension ContactListAdapter: UITableViewDelegate {
+    
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return presenter.cellHeight(at: indexPath.row)
+    }
+}
+```
+
+Again, this is not the whole story. One has to implement the Presenter methods:
+
+```swift
+func cellId(at index: Int) -> String {
+    return contactList[ index ].cellId
+}
+
+func cellHeight(at index: Int) -> CGFloat {
+    return contactList[ index ].height
+}
+
+var rowCount: Int { return contactList.count }
+
+func row(at index: Int) -> ContactListViewModel { 
+    return contactList[ index ] 
+}
+```
+
+
 
 ### The Connector
 
