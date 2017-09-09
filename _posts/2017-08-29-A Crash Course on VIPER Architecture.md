@@ -529,7 +529,8 @@ func showContactList() {
 }
 ```
 
-Obviously this is not the whole story. Every UITableView requires a dataSource and, optionally, a delegate. Below, the ContactListAdapter implements both a UITableViewDataSource and Delegate. It is typical and could be implemented as a generic class.
+- Obviously this is not the whole story. The tableView requires a dataSource and, optionally, a delegate. Below, the ContactListAdapter implements a UITableViewDataSource. When you need to implement a Delegate, this would be implemented in the adapter as well. 
+
 
 ```swift
 class ContactListAdapter: NSObject {
@@ -545,31 +546,17 @@ extension ContactListAdapter: UITableViewDataSource  {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-        let cell = tableView.dequeueReusableCell(withIdentifier: presenter.cellId(at: indexPath.row), for: indexPath)
-        (cell as! ContactListCell).show(row: presenter.row(at: indexPath.row))
+        let cell = tableView.dequeueReusableCell(withIdentifier: "contactRow", for: indexPath) as! ContactListCell
+        cell.show(row: presenter.row(at: indexPath.row))
         return cell
-    }
-}
-
-extension ContactListAdapter: UITableViewDelegate {
-    
-    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return presenter.cellHeight(at: indexPath.row)
     }
 }
 ```
 
-Again, this is not the whole story. One has to implement the Presenter methods:
+- Again, this is not the whole story. One has to implement methods in the Presenter  to access the ViewModels required to create the cells:
+
 
 ```swift
-func cellId(at index: Int) -> String {
-    return contactList[ index ].cellId
-}
-
-func cellHeight(at index: Int) -> CGFloat {
-    return contactList[ index ].height
-}
-
 var rowCount: Int { return contactList.count }
 
 func row(at index: Int) -> ContactListViewModel { 
