@@ -521,16 +521,20 @@ For the same reasons that I mentioned regarding the UseCaseOutput, it is a good 
 
 Here are some examples of output coming from the Presenter and being processed by the ViewController in the role of PresenterOutput:
 
-- For the contact List example, there is only one PresentationOutput method to implement: 
+- For the contact List example, there is only one ContactListPresenterOutput method to implement.
+
+  Obviously this is not the whole story. The tableView requires a dataSource and, optionally, a delegate. Below, the ContactListAdapter implements a UITableViewDataSource. When you need a delegate, this would be implemented in the adapter as well. 
+
+  We also have to implement methods in the Presenter to access the ViewModels required to create the cells.
 
 ```swift
-func showContactList() {
-    tableView.reloadData()
+extension ContactListViewController: ContactListPresenterOutput  {
+
+  func showContactList() {
+      tableView.reloadData()
+  }
 }
 ```
-
-- Obviously this is not the whole story. The tableView requires a dataSource and, optionally, a delegate. Below, the ContactListAdapter implements a UITableViewDataSource. When you need to implement a Delegate, this would be implemented in the adapter as well. 
-
 
 ```swift
 class ContactListAdapter: NSObject {
@@ -546,17 +550,15 @@ extension ContactListAdapter: UITableViewDataSource  {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-        let cell = tableView.dequeueReusableCell(withIdentifier: "contactRow", for: indexPath) as! ContactListCell
-        cell.show(row: presenter.row(at: indexPath.row))
+        let cell = tableView.dequeueReusableCell(withIdentifier: "contactRow", for: indexPath)
+        (cell as! ContactListCell).show(row: presenter.row(at: indexPath.row))
         return cell
     }
 }
 ```
 
-- Again, this is not the whole story. One has to implement methods in the Presenter  to access the ViewModels required to create the cells:
-
-
 ```swift
+// ContactListPresenter
 var rowCount: Int { return contactList.count }
 
 func row(at index: Int) -> ContactListViewModel { 
