@@ -444,7 +444,7 @@ extension ContactListPresenter: ContactListViewReadyUseCaseOutput {
     }
     
     func present(contact: ContactListPresentationModel) {
-        contactList.append(.contact(model:ContactListViewModel(contact)))
+        contactList.append(.contact(model:ContactListDetailViewModel(contact)))
     }
 
     func presentNoContactsFound() {
@@ -523,16 +523,16 @@ Here are some examples of output coming from the Presenter and being processed b
 
 - For the contact List example, there is only one ContactListPresenterOutput method to implement.
 
-  Obviously this is not the whole story. The tableView requires a dataSource and, optionally, a delegate. Below, the ContactListAdapter implements a UITableViewDataSource. When you need a delegate, this would be implemented in the adapter as well. 
+  But, this is not the whole story. The tableView requires a dataSource and, optionally, a delegate. Below, the ContactListAdapter implements a UITableViewDataSource and  UITableViewDelegate.
 
   We also have to implement methods in the Presenter to access the ViewModels required to create the cells.
 
 ```swift
 extension ContactListViewController: ContactListPresenterOutput  {
 
-  func showContactList() {
-      tableView.reloadData()
-  }
+    func showContactList() {
+        tableView.reloadData()
+    }
 }
 ```
 
@@ -550,23 +550,90 @@ extension ContactListAdapter: UITableViewDataSource  {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-        let cell = tableView.dequeueReusableCell(withIdentifier: "contactRow", for: indexPath)
+        let cell = tableView.dequeueReusableCell(withIdentifier: presenter.cellId(at: indexPath.row), for: indexPath)
         (cell as! ContactListCell).show(row: presenter.row(at: indexPath.row))
         return cell
+    }
+}
+
+extension TransactionListAdapter: UITableViewDelegate {
+    
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return presenter.cellHeight(at: indexPath.row)
     }
 }
 ```
 
 ```swift
-// ContactListPresenter
+// in ContactListPresenter
 var rowCount: Int { return contactList.count }
 
 func row(at index: Int) -> ContactListViewModel { 
     return contactList[ index ] 
 }
+
+func cellId(at index: Int) -> String {
+    return contactList[ index ].cellId
+}
+
+func cellHeight(at index: Int) -> CGFloat {
+    return contactList[ index ].height
+}
+    
 ```
 
+```swift
+protocol ContactListCell {
+    func show(model: ContactListViewModel)
+}
 
+class ContactListDetailCell: UITableViewCell, ContactListCell {
+    
+    @IBOutlet var contactNameLabel: UILabel!
+    @IBOutlet var phoneLabel: UILabel!
+
+    func show(model: ContactListViewModel) {
+        guard case let .contact(model) = row else { fatalError("Expected: contact") }
+        
+        contactNameLabel.text = model.contactName
+        phoneLabel.text = model.phone
+    }
+}
+
+class ContactListErrorCell: UITableViewCell, ContactListCell {
+    
+    @IBOutlet var errorLabel: UILabel!
+
+    func show(model: ContactListViewModel) {
+        guard case let .error(message) = row else { fatalError("Expected: error") }
+        errorLabel.text = message
+    }
+}
+```
+
+- In the case of displaying a single Contact detail in a scene, the ViewController's `show(contact:)` method sets the contact details into their respective UIControls. Errors are presented by hiding the contactView and showing the errorView.
+
+```swift
+extension ContactViewController: ContactViewReadyPresenterOutput {
+    
+    func show(contact: ContactViewModel) {
+      	contactView.isHidden = false
+        errorView.isHidden = true
+
+        contactNameLabel.text = model.contactName
+        phoneLabel.text = model.phone
+        addressLabel.text = model.address
+        // ...
+    }
+  
+    func show(error: String) {
+      
+        contactView.isHidden = true
+        errorView.isHidden = false
+        errorLabel.text = error
+    }
+}
+```
 
 ### The Connector
 
