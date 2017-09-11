@@ -446,7 +446,7 @@ func eventSave() {
 
 Note that I would still implement the UseCase's `Capture` methods in the UseCase.
 
-You will see that this setup makes is very easy to test the Transformer. It separates the UseCase's responsibilities from one another, making it very easy to understand the code. When you need to decompose a large amount of processing by implementing  private methods, you immediately know who they belong to.
+You will see that this setup makes it very easy to test the Transformer. It separates the UseCase's responsibilities from one another, making it very easy to understand the code. When you need to decompose a large amount of processing by implementing  private methods, you immediately know who they belong to.
 
 ### The Presenter in the role of UseCaseOutput
 
