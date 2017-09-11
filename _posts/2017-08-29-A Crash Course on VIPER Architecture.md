@@ -134,9 +134,9 @@ In VIPER, the UIViewController sends <u>every</u> event coming from a UIControl 
 
 You can see in the interaction diagram that the ViewController has another role: show the output for the event. I will cover this later on in this article.
 
-#### Examples
+#### ViewController Examples
 
-Here are examples of events being captured and then being sent on to the Presenter.
+Here are examples of events being captured and immediately delegated to the Presenter.
 
 ##### Initialization
 
@@ -191,7 +191,7 @@ Examples of input conversion might be from String to Int, formatted String date 
 
 As you may have noticed in the diagram, the Presenter has another role: presenting the result of the event - again, I will cover that shortly.
 
-#### Examples
+#### Presenter Examples
 
 Here are some examples of the Presenter receiving events from the UIViewController and being sent on to the UseCase.
 
@@ -275,7 +275,7 @@ The separation of the Entities in the UseCase from the PresentationModels used b
 
 When the number of use cases that a scene supports becomes large, the number of methods on a single output protocol becomes even larger. It becomes really hard to tell at a glance which UseCaseOutput methods are used by what events. For this reason, it is a good practice to create one UseCaseOutput protocol for each event. Your code will be well organized when you place the implementation of each output protocol in its own extension. You can place reusable implementations in the general UseCaseOutput extension.
 
-#### Examples
+#### UseCase Examples
 
 Here are some examples of events coming from the Presenter and being processed by the UseCase.
 
@@ -464,7 +464,7 @@ When the input to the Presenter is repetitive, the Presenter holds the ViewModel
 
 When the input to the Presenter is repetitive and heterogeneous, it is a good practice to use *associated-value* `enum`s to hold the data. Although, due to syntax, I find that when an enum contains a large number of associated values, the extraction of values is painful, not to mention that every time a value is added you have to add another '_'  everywhere you read the enum. A better practice is to use enums whose sole associated-value is a struct. This would allow you to use `struct` field names to extract values, instead of `enum` named positions.
 
-#### Examples
+#### UseCaseOutput Examples
 
 Here are some examples of output coming from the UseCase and being processed by the Presenter in the role of UseCaseOutput.
 
@@ -559,7 +559,7 @@ In the case of repeating data, the data is acquired from the Presenter via an in
 
 For the same reasons that I mentioned regarding the UseCaseOutput, it is a good practice to create one PresenterOutput protocol for each event. 
 
-#### Examples
+#### PresenterOutput Examples
 
 Here are some examples of output coming from the Presenter and being processed by the ViewController in the role of PresenterOutput.
 
