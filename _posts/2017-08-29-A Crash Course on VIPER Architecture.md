@@ -132,9 +132,15 @@ The ViewController's main role in VIPER is to the configure the View hierarchy. 
 
 In VIPER, the UIViewController sends <u>every</u> event coming from a UIControl or lifecycle method directly to the Presenter. The ViewController does not process the event in any way, whatsoever. It simply retrieves associated data, either input as text or selected by index, and sends it with the event to the Presenter. In the case of repeating UIControls contained in a UITableView or UICollectionView, the Cell receives the event and sends it to the Presenter.  Super simple!
 
-Here are some examples of events being captured and, in most cases, sent on to the Presenter: 
+You can see in the interaction diagram that the ViewController has another role: show the output for the event. I will cover this later on in this article.
 
-- Given that all views have been configured in Interface Builder, here is a `UIViewController`  `viewDidLoad` method (the main view's height is passed in for error an zero situations):
+#### Examples
+
+Here are examples of events being captured and then being sent on to the Presenter.
+
+##### Initialization
+
+In this `UIViewController`  `viewDidLoad` method all views have been configured in Interface Builder.  The event is delegated to the Presenter. The main view's height is passed to the Presenter so it can set the height of a UITableView cell to the full screen height when showing errors other unusual states. I will discuss this more later.
 
 ```swift
 override func viewDidLoad() {
@@ -143,7 +149,9 @@ override func viewDidLoad() {
  }
 ```
 
-- Here is a typical `UITextDelegate` `textFieldShouldReturn` method:
+##### UITextFieldDelegate
+
+In this `UITextDelegate` `textFieldShouldReturn` method the text is captured as a quantity. if the Presenter finds that the text is valid, it returns true.
 
 ```swift
 func textFieldShouldReturn(_ textField: UITextField) -> Bool {
@@ -151,7 +159,11 @@ func textFieldShouldReturn(_ textField: UITextField) -> Bool {
 }
 ```
 
-- Here is a typical `@IBAction` method found in either a UIViewController or UITableViewCell :
+##### @IBAction
+
+When a button is touched, a UIViewController `@IBAction` method delegates to the Presenter. 
+
+`@IBAction` methods located in a UITableViewCell should also delegate directly to the presenter, but must also pass the index of the cell in which the button was located.
 
 ```swift
 @IBAction func saveButtonTouched(_ sender: UIButton) {
@@ -159,7 +171,9 @@ func textFieldShouldReturn(_ textField: UITextField) -> Bool {
 }
 ```
 
-- When a UITableView row is selected, the event is delegated in the `UITableViewDelegate` `didSelectRowAt` method:
+##### UITableViewDelegate
+
+When a UITableView row is selected, the event is delegated to the Presenter in the `UITableViewDelegate` `didSelectRowAt` method.
 
 ```swift
 extension ContactListAdapter: UITableViewDelegate {
@@ -169,17 +183,21 @@ extension ContactListAdapter: UITableViewDelegate {
 }
 ```
 
-You can see in the interaction diagram that the ViewController has another role: show the output for the event. I will cover this later on in this article.
-
 ### The Presenter
 
 The Presenter's role is to receive an event and route it to either the UseCase or the Router. It converts the event's parameters from external format to an internal format that can be used directly by the UseCase or the Router.   
 
 Examples of input conversion might be from String to Int, formatted String date to Date, an Int from a UIPickerView to an enum - the list goes on. 
 
-Here are some examples of events coming from the UIViewController and being sent on to the UseCase:
+As you may have noticed in the diagram, the Presenter has another role: presenting the result of the event - again, I will cover that shortly.
 
-- Here the Presenter's `eventViewReady()` method retains the `maxHeight` and then just delegates to the useCase
+#### Examples
+
+Here are some examples of the Presenter receiving events from the UIViewController and being sent on to the UseCase.
+
+##### Initialization
+
+Here the Presenter's `eventViewReady()` method retains the `maxHeight` and then just delegates to the useCase
 
 ```swift
 func eventViewReady(maxHeight: Int) {
@@ -187,9 +205,9 @@ func eventViewReady(maxHeight: Int) {
     useCase.eventViewReady()
 }
 ```
-- The Presenter's `eventCapture(quantity:)` tries to convert the quantity parameter to an `Int`. On success it delegates the event to the UseCase with the converted data. It is up to the UseCase to determine whether the quantity is valid. On failure to convert the quantity, the event is delegated back to the ViewController. 
+##### Data Capture
 
-  Note that it is entirely possible that validation could be done by a "smart" textField, whose configuration would include its format and error message. In this case, the configuration would be specified to the ViewController by the Presenter on `viewDidLoad`.  Either way, the format of the data and the text of the error message are the domain of the Presenter, since it is responsible for implementing localization and accessibility. When a smart textfield be used to implement format-as-you-type phone numbers, the format would be supplied by the Presenter.
+The Presenter's `eventCapture(quantity:)` tries to convert the quantity parameter to an `Int`. On success it delegates the event to the UseCase with the converted data. It is up to the UseCase to determine whether the quantity is valid. On failure to convert the quantity, the event is delegated back to the ViewController. 
 
 ```swift
 func eventCapture(quantity: String) -> Bool {
@@ -204,7 +222,11 @@ func eventCapture(quantity: String) -> Bool {
 }
 ```
 
-- On `eventSave()`, the Presenter just delegates to the UseCase
+Note that it is entirely possible that validation could be done by a configurable textField, whose configuration would include its format and error message. In this case, the configuration would be specified to the ViewController by the PresenterOutput resulting from a  `viewReady` message (more about this later).  Either way, the format of the data and the text of the error message are the domain of the Presenter, since it is responsible for implementing localization and accessibility. When a smart textfield is used to implement format-as-you-type phone numbers, the format would be supplied by the Presenter.
+
+##### Simple Delegation
+
+Sometimes the Presenter just delegates to the UseCase, as in this example.  
 
 ```swift
 func eventSave() {
@@ -212,9 +234,11 @@ func eventSave() {
 }
 ```
 
-- When the Presenter receives  `eventContactSelected(at row: Int)` , it gets the contactId from the ViewModel and then delegates the event  to the router to display the selected contact. Yes, you should put data in the ViewModel to support the processing of potential future events.
+##### Indexing
 
-  If the Presenter required a callback, it would send itself as a PresenterDelegate parameter to be passed on to the Presenter of the VIP Stack that the router would instantiate.
+In response to a tableView selection, the Presenter receives a  `eventContactSelected(at row: Int)` message. It gets the contactId from the ViewModel  (which we will talk about later) and then delegates the event to the router to display the selected contact. 
+
+Yes, you should put data in the ViewModel to support the processing of potential future events. 
 
 ```swift
 func eventContactSelected(at row: Int) {
@@ -223,7 +247,7 @@ func eventContactSelected(at row: Int) {
 }
 ```
 
-As you may have noticed in the diagram, the Presenter has another role: presenting the result of the event - again, I will cover that shortly.
+If the Presenter required a callback, it would send itself as a PresenterDelegate parameter to be passed on to the Presenter of the VIP Stack that the router would instantiate.
 
 ### The Router
 
@@ -243,9 +267,21 @@ Entities are never passed directly to the UseCaseOutput. PresentationModels are 
 
 A PresentationModel can be passed to the UseCaseOutput as a `struct`, as an `enum` or as simple scalars - whatever is most convenient. When a `struct` is used, a good practice is to initialize it by passing it the Entity.
 
-Here are some examples of events coming from the Presenter and being processed by the UseCase:
+Data Conversion is performed by the Presenter and the EntityGateway. This allows the code in the UseCase to be free of conversion and data validation. 
 
-- Here the UseCase's `eventViewReady()` method accesses contacts from a `ContactManager`, which is provided by the `EntityGateway` . It processes and sends each contact to the UseCaseOutput
+The separation of the Entities in the UseCase from the PresentationModels used by the Presenter makes sure that the UseCase is decoupled from the Presenter, thus promoting a reduction of shared mutable state. This way the form of Entity can change without affecting the outer layers of the system.
+
+ The UseCase has no direct dependencies - both the EntityGateway and the UseCaseOutput are protocols and are injected (by the Connector).
+
+When the number of use cases that a scene supports becomes large, the number of methods on a single output protocol becomes even larger. It becomes really hard to tell at a glance which UseCaseOutput methods are used by what events. For this reason, it is a good practice to create one UseCaseOutput protocol for each event. Your code will be well organized when you place the implementation of each output protocol in its own extension. You can place reusable implementations in the general UseCaseOutput extension.
+
+#### Examples
+
+Here are some examples of events coming from the Presenter and being processed by the UseCase.
+
+##### Initialization of a Repetitive View
+
+Here the UseCase's `eventViewReady()` method accesses contacts from a `ContactManager`, which is provided by the `EntityGateway` . It processes and sends each contact to the UseCaseOutput
 
 ```swift
 var output: ContactListViewReadyUseCaseOutput!
@@ -275,7 +311,9 @@ func eventViewReady() {
 }	
 ```
 
-- Here the UseCase's `eventViewReady(contactId:)` method accesses a contact from the same  `ContactManager` as before. It processes and sends the contact on to the UseCaseOutput. Notice the the PresentationModels are different, since the previous list model contains different data than this model.
+##### Initialization of a Singular View
+
+Here the UseCase's `eventViewReady(contactId:)` method accesses a contact from the same  `ContactManager` as before. It processes and sends the contact on to the UseCaseOutput. Notice the the PresentationModels are different, since the previous list model contains different data than this model.
 
 ```swift
 var output: ContactViewReadyUseCaseOutput!
@@ -294,9 +332,11 @@ func eventViewReady(contactId: String) {
 }	
 ```
 
-- Here the UseCase's `eventCapture(quantity:)`  and `eventCapture(productId:)` methods simply set the values  to non-nil. 
+##### Data Capture
 
-  The `eventSave()` method verifies that all mandatory fields have been entered and uses an `orderManager` to create an order. It sends the newly created order on to the UseCaseOutput. This output may include shopping and billing information.
+Here the UseCase's `eventCapture(quantity:)`  and `eventCapture(productId:)` methods simply set the values  to non-nil. 
+
+The `eventSave()` method verifies that all mandatory fields have been entered and uses an `orderManager` to create an order. It sends the newly created order on to the UseCaseOutput. This output may include shopping and billing information.
 
 ```swift
 var quantity: Int?
@@ -329,14 +369,6 @@ func eventSave() {
    }
 }
 ```
-
-Data Conversion is performed by the Presenter and the EntityGateway. This allows the code in the UseCase to be free of conversion and data validation. 
-
-The separation of the Entities in the UseCase from the PresentationModels used by the Presenter makes sure that the UseCase is decoupled from the Presenter, thus promoting a reduction of shared mutable state. This way the form of Entity can change without affecting the outer layers of the system.
-
- The UseCase has no direct dependencies - both the EntityGateway and the UseCaseOutput are protocols and are injected (by the Connector).
-
-When the number of use cases that a scene supports becomes large, the number of methods on a single output protocol becomes even larger. It becomes really hard to tell at a glance which UseCaseOutput methods are used by what events. For this reason, it is a good practice to create one UseCaseOutput protocol for each event. Your code will be well organized when you place the implementation of each output protocol in its own extension. You can place reusable implementations in the general UseCaseOutput extension.
 
 ### The EntityGateway and EntityManagers
 
@@ -432,9 +464,13 @@ When the input to the Presenter is repetitive, the Presenter holds the ViewModel
 
 When the input to the Presenter is repetitive and heterogeneous, it is a good practice to use *associated-value* `enum`s to hold the data. Although, due to syntax, I find that when an enum contains a large number of associated values, the extraction of values is painful, not to mention that every time a value is added you have to add another '_'  everywhere you read the enum. A better practice is to use enums whose sole associated-value is a struct. This would allow you to use `struct` field names to extract values, instead of `enum` named positions.
 
-Here are some examples of output coming from the UseCase and being processed by the Presenter in the role of UseCaseOutput:
+#### Examples
 
-- Here the output methods are used to construct a contact list for display by the ViewController. When a ContactListPresentationModel is presented, it is converted to a ViewModel and appended to the list. If no Contacts are found or an error occurs, a message is appended. When `presentContactListEnd()` is finally called, the ViewController is called to show the list.
+Here are some examples of output coming from the UseCase and being processed by the Presenter in the role of UseCaseOutput.
+
+##### Initialization of a Repetitive View
+
+Here the output methods are used to construct a contact list for display by the ViewController. When a ContactListPresentationModel is presented, it is converted to a ViewModel and appended to the list. If no Contacts are found or an error occurs, a message is appended. When `presentContactListEnd()` is finally called, the ViewController is called to show the list.
 
 ```swift
 extension ContactListPresenter: ContactListViewReadyUseCaseOutput {
@@ -461,7 +497,9 @@ extension ContactListPresenter: ContactListViewReadyUseCaseOutput {
 }
 ```
 
-- In the case of displaying a single Contact detail in a scene, the `present(contact:)` method calls the ViewController to show the contact details.  If an error occurs, the presenter tells the ViewController to show an error message.
+##### Initialization of a Singular View
+
+In the case of displaying a single Contact detail in a scene, the `present(contact:)` method calls the ViewController to show the contact details.  If an error occurs, the presenter tells the ViewController to show an error message.
 
 ```swift
 extension ContactPresenter: ContactViewReadyUseCaseOutput {
@@ -476,9 +514,11 @@ extension ContactPresenter: ContactViewReadyUseCaseOutput {
 }
 ```
 
-- Below, to present the saved state of an Order, the Presenter just delegates to the ViewController. The OrderEntryViewModel's `init` converts any data which must be localized or converted to text. 
+##### Data Capture
 
-  When the user has not entered one or more mandatory fields, the Presenter prepares the output text describing the issue and then sends it to the ViewController.
+Below, to present the saved state of an Order, the Presenter just delegates to the ViewController. The OrderEntryViewModel's `init` converts any data which must be localized or converted to text. 
+
+When the user has not entered one or more mandatory fields, the Presenter prepares the output text describing the issue and then sends it to the ViewController.
 
 ```swift
 extension OrderEntryPresenter: OrderEntrySaveUseCaseOutput {
@@ -519,13 +559,13 @@ In the case of repeating data, the data is acquired from the Presenter via an in
 
 For the same reasons that I mentioned regarding the UseCaseOutput, it is a good practice to create one PresenterOutput protocol for each event. 
 
-Here are some examples of output coming from the Presenter and being processed by the ViewController in the role of PresenterOutput:
+#### Examples
 
-- For the contact List example, there is only one ContactListPresenterOutput method to implement.
+Here are some examples of output coming from the Presenter and being processed by the ViewController in the role of PresenterOutput.
 
-  But, this is not the whole story. The tableView requires a dataSource and, optionally, a delegate. Below, the ContactListAdapter implements a UITableViewDataSource and  UITableViewDelegate.
+##### Initialization of a Repetitive View
 
-  We also have to implement methods in the Presenter to access the ViewModels required to create the cells.
+For the contact List example, there is only one ContactListPresenterOutput method to implement.
 
 ```swift
 extension ContactListViewController: ContactListPresenterOutput  {
@@ -534,7 +574,9 @@ extension ContactListViewController: ContactListPresenterOutput  {
         tableView.reloadData()
     }
 }
+
 ```
+But, this is not the whole story. The tableView requires a dataSource and, optionally, a delegate. Below, the ContactListAdapter implements a UITableViewDataSource and  UITableViewDelegate.
 
 ```swift
 class ContactListAdapter: NSObject {
@@ -563,7 +605,7 @@ extension TransactionListAdapter: UITableViewDelegate {
     }
 }
 ```
-
+We also have to implement methods in the Presenter to access the ViewModels required to create the cells.
 ```swift
 // in ContactListPresenter
 var rowCount: Int { return contactList.count }
@@ -581,6 +623,7 @@ func cellHeight(at index: Int) -> CGFloat {
 }
     
 ```
+And of course we have to implement the cells.
 
 ```swift
 protocol ContactListCell {
@@ -611,7 +654,9 @@ class ContactListErrorCell: UITableViewCell, ContactListCell {
 }
 ```
 
-- In the case of displaying a single Contact detail in a scene, the ViewController's `show(contact:)` method sets the contact details into their respective UIControls. Errors are presented by hiding the contactView and showing the errorView.
+##### Initialization of a Repetitive View
+
+In the case of displaying a single Contact detail in a scene, the ViewController's `show(contact:)` method sets the contact details into their respective UIControls. Errors are presented by hiding the contactView and showing the errorView.
 
 ```swift
 extension ContactViewController: ContactViewReadyPresenterOutput {
