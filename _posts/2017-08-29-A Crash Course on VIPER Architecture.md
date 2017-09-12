@@ -419,7 +419,7 @@ I pass the event parameters from UseCase to the `transform` method along with th
 Here is an example:
 
 ```swift
-class OrderSaveUseCaseTransformer {
+class OrderEntryUseCaseTransformer {
     
     let orderManager: OrderManager
     let userManager: UserManager
@@ -455,7 +455,7 @@ I would then implement `eventSave` as follows:
 ```swift
 func eventSave() {
 
-    let transformer = OrderSaveUseCaseTransformer(orderManager: entityGateway.orderManager, userManager: entityGateway.userManager)
+    let transformer = OrderEntryUseCaseTransformer(orderManager: entityGateway.orderManager, userManager: entityGateway.userManager)
     transformer.transform(quantity: quantity, productId: productId, output: output)
 }
 ```
@@ -537,7 +537,7 @@ When presenting an Order, the Presenter just sends the data to the ViewControlle
 If the user has missed entering one or more mandatory fields, the Presenter prepares the output text describing the issue and then sends it to the ViewController.
 
 ```swift
-extension OrderEntryPresenter: OrderEntrySaveUseCaseOutput {
+extension OrderEntryPresenter: OrderEntryUseCaseOutput {
 
     func present(order: OrderEntryPresentationModel) {
         viewController.show(order: OrderEntryViewModel(order: order))
@@ -558,7 +558,7 @@ extension OrderEntryPresenter: OrderEntrySaveUseCaseOutput {
         if quantity {
             quantityMessage = NSLocalizedString("Quantity must be Entered", nil)
         }
-        viewController.showManditoryFieldsMissing(productId: productIdMessage, quantity: quantityMessage)
+        viewController.showManditoryFieldsMissing(productIdMessage: productIdMessage, quantityMessage: quantityMessage)
     }
 }
 ```
@@ -695,6 +695,44 @@ class ContactListErrorCell: UITableViewCell, ContactListCell {
     }
 }
 ```
+
+##### Data Capture
+
+
+
+```swift
+extension OrderEntrySaveViewController: OrderEntrySavePresenterOutput {
+
+    func show(order: OrderEntryViewModel) {
+        
+        orderView.isHidden = false
+        errorView.isHidden = true
+      	hideErrorMessages()
+        // ...
+        itemTotalLabel.text = order.itemTotal
+        taxLabel.text = order.tax
+        orderTotalLabel.text = order.orderTotal
+	    // ...
+    }
+  
+    func showMissingManditoryFields(productIdMessage: String?, quantityMessage: String?) {
+
+        orderView.isHidden = false
+        errorView.isHidden = true
+      
+        if let productIdMessage = productIdMessage {
+            productIdMessageLabel.isHidden = false
+            productIdMessageLabel.text = productIdMessage
+        }
+        if let quantityMessage = quantityMessage {
+            quantityMessageLabel.isHidden = false
+            quantityMessageLabel.text = quantityMessage
+        }
+    }
+}
+```
+
+
 
 ### The Connector
 
