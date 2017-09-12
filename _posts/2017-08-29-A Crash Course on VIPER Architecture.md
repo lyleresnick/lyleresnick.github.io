@@ -381,7 +381,7 @@ func eventSave() {
         }
       }
     else {
-        output.presentMissingManditoryFields(productId: productId == nil, quantity: quantity == nil)
+        output.presentMissingMandatoryFields(productId: productId == nil, quantity: quantity == nil)
    }
 }
 ```
@@ -444,7 +444,7 @@ class OrderEntryUseCaseTransformer {
             }
         }
         else {
-            output.presentMissingManditoryFields(productId: productId == nil, quantity: quantity == nil)
+            output.presentMissingMandatoryFields(productId: productId == nil, quantity: quantity == nil)
         }
     }
 }
@@ -534,7 +534,7 @@ extension ContactListPresenter: ContactListViewReadyUseCaseOutput {
 
 When presenting an Order, the Presenter just sends the data to the ViewController. The OrderEntryViewModel's `init` converts any data which must be localized or converted to text. 
 
-If the user has missed entering one or more mandatory fields, the Presenter prepares the output text describing the issue and then sends it to the ViewController.
+If the user has missed entering one or more mandatory fields, the Presenter prepares the text describing the issue and then sends it to the ViewController.
 
 ```swift
 extension OrderEntryPresenter: OrderEntryUseCaseOutput {
@@ -547,7 +547,7 @@ extension OrderEntryPresenter: OrderEntryUseCaseOutput {
         viewController.show(error: NSLocalizedString(error.rawValue, nil)))
     }
 
-    func presentMissingManditoryFields(productId: Bool, quantity: Bool) {
+    func presentMissingMandatoryFields(productId: Bool, quantity: Bool) {
 
         var productIdMessage: String?
         var quantityMessage: String?
@@ -587,9 +587,8 @@ In the case of displaying a single Contact detail in a scene, the ViewController
 extension ContactViewController: ContactViewReadyPresenterOutput {
     
     func show(contact: ContactViewModel) {
-      	contactView.isHidden = false
-        errorView.isHidden = true
-
+      
+        showView(error: false)
         contactNameLabel.text = model.contactName
         phoneLabel.text = model.phone
         addressLabel.text = model.address
@@ -598,11 +597,17 @@ extension ContactViewController: ContactViewReadyPresenterOutput {
   
     func show(error: String) {
       
-        contactView.isHidden = true
-        errorView.isHidden = false
+        showView(error: true)
         errorLabel.text = error
     }
+  
+    private func showView(error: Bool) {
+        contactView.isHidden = error
+        errorView.isHidden = !error
+    }
 }
+
+
 ```
 
 ##### Initial Display of a Repetitive View
@@ -698,15 +703,14 @@ class ContactListErrorCell: UITableViewCell, ContactListCell {
 
 ##### Data Capture
 
-
+Besides showing the successfull result, the data capture PresenterOutput shows error messages for mississing mandatory fields. Note that this different than showing an error due to network failure.
 
 ```swift
-extension OrderEntrySaveViewController: OrderEntrySavePresenterOutput {
+extension OrderEntryViewController: OrderEntryPresenterOutput {
 
     func show(order: OrderEntryViewModel) {
         
-        orderView.isHidden = false
-        errorView.isHidden = true
+        showView(error: false)
       	hideErrorMessages()
         // ...
         itemTotalLabel.text = order.itemTotal
@@ -715,11 +719,10 @@ extension OrderEntrySaveViewController: OrderEntrySavePresenterOutput {
 	    // ...
     }
   
-    func showMissingManditoryFields(productIdMessage: String?, quantityMessage: String?) {
+    func showMissingMandatoryFields(productIdMessage: String?, quantityMessage: String?) {
 
-        orderView.isHidden = false
-        errorView.isHidden = true
-      
+        showView(error: true)
+
         if let productIdMessage = productIdMessage {
             productIdMessageLabel.isHidden = false
             productIdMessageLabel.text = productIdMessage
