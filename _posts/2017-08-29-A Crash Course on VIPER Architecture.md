@@ -197,7 +197,7 @@ Here are some examples of the Presenter receiving events from the UIViewControll
 
 ##### Initialization
 
-Here the Presenter's `eventViewReady()` method retains the `maxHeight` and then just delegates to the useCase
+Here the Presenter's `eventViewReady()` method retains the `maxHeight` for later use and then passes the message to the UseCase.
 
 ```swift
 func eventViewReady(maxHeight: Int) {
@@ -207,7 +207,7 @@ func eventViewReady(maxHeight: Int) {
 ```
 ##### Data Capture
 
-The Presenter's `eventCapture(quantity:)` tries to convert the quantity parameter to an `Int`. On success it delegates the event to the UseCase with the converted data. It is up to the UseCase to determine whether the quantity is valid. On failure to convert the quantity, the event is delegated back to the ViewController. 
+The Presenter's `eventCapture(quantity:)` tries to convert the quantity parameter to an `Int`. On success it sends the event to the UseCase with the converted data. It is up to the UseCase to determine whether the quantity is valid. On failure to convert the quantity, the error output is delegated back to the ViewController. 
 
 ```swift
 func eventCapture(quantity: String) -> Bool {
@@ -222,7 +222,9 @@ func eventCapture(quantity: String) -> Bool {
 }
 ```
 
-Note that it is entirely possible that validation could be done by a configurable textField, whose configuration would include its format and error message. In this case, the configuration would be specified to the ViewController by the PresenterOutput resulting from a  `viewReady` message (more about this later).  Either way, the format of the data and the text of the error message are the domain of the Presenter, since it is responsible for implementing localization and accessibility. When a smart textfield is used to implement format-as-you-type phone numbers, the format would be supplied by the Presenter.
+Note that it is possible that validation could be performed by a "smart" textField, whose configuration would include its format and error message. In this case, the configuration would be specified to the ViewController by the PresenterOutput resulting from a  `viewReady` message (more about this later).  
+
+Either way, the format of the data and the text of the error message is the domain of the Presenter, since it is responsible for implementing localization and accessibility. When a smart textfield is used to implement format-as-you-type phone numbers, the format would be supplied by the Presenter.
 
 ##### Simple Delegation
 
@@ -236,7 +238,7 @@ func eventSave() {
 
 ##### Indexing
 
-In response to a tableView selection, the Presenter receives a  `eventContactSelected(at row: Int)` message. It gets the contactId from the ViewModel  (which we will talk about later) and then delegates the event to the router to display the selected contact. 
+In response to a UITableView selection, this Presenter receives a  `eventContactSelected(at row: Int)` message. It gets the contactId from the ViewModel  (which we will talk about later) and then delegates the event to the router to display the selected contact. 
 
 Yes, you should put data in the ViewModel to support the processing of potential future events. 
 
@@ -277,11 +279,21 @@ When the number of use cases that a scene supports becomes large, the number of 
 
 #### UseCase Examples
 
-Here are some examples of events coming from the Presenter and being processed by the UseCase.
+Here are some examples of events which come from a Presenter and are processed by a UseCase. The UseCase sends its output to a UseCaseOutput protocol.
 
 ##### Initialization of a Repetitive View
 
-Here the UseCase's `eventViewReady()` method accesses contacts from a `ContactManager`, which is provided by the `EntityGateway` . It processes and sends each contact to the UseCaseOutput
+Here the UseCase's `eventViewReady()` method accesses contacts from a `ContactManager`, which is provided by the `EntityGateway` . It processes and sends each contact to the UseCaseOutput. 
+
+The array ContactEntities is not copied directly to the Presenter. 
+
+Before the contacts are sent to the Presenter, a Start message is sent. The Start message tells the Presenter to prepare for the new incoming list. You can pass any titles or non-repeating data representing the whole list as parameters to the method. 
+
+After the contacts are sent to the Presenter, an End message is sent. The End message tells the Presenter all contacts have been sent. You can pass totals or other calculated data as parameters to the method. 
+
+There are two other results of processing shown here: the error case and the zero case. both of these outcomes are processed in the same way as the non-zero cases.
+
+Note that you can pass the  contact properties as individual parameters, instead of using a PresentationModel struct.
 
 ```swift
 var output: ContactListViewReadyUseCaseOutput!
@@ -313,7 +325,7 @@ func eventViewReady() {
 
 ##### Initialization of a Singular View
 
-Here the UseCase's `eventViewReady(contactId:)` method accesses a contact from the same  `ContactManager` as before. It processes and sends the contact on to the UseCaseOutput. Notice the the PresentationModels are different, since the previous list model contains different data than this model.
+Here the UseCase's `eventViewReady(contactId:)` method accesses a contact from the same  `ContactManager` as previous. It processes and converts the contact to a PresentationModel sends it to the UseCaseOutput. This PresentationModel is not the same as the previous one in that it contains more properties.
 
 ```swift
 var output: ContactViewReadyUseCaseOutput!
@@ -334,9 +346,9 @@ func eventViewReady(contactId: String) {
 
 ##### Data Capture
 
-Here the UseCase's `eventCapture(quantity:)`  and `eventCapture(productId:)` methods simply set the values  to non-nil. 
+In this example of data capture, the UseCase's `eventCapture(quantity:)`  and `eventCapture(productId:)` methods set the values  to non-nil. 
 
-The `eventSave()` method verifies that all mandatory fields have been entered and uses an `orderManager` to create an order. It sends the newly created order on to the UseCaseOutput. This output may include shopping and billing information.
+The `eventSave()` method verifies that all mandatory fields have been entered and then uses an `orderManager` to create an order. It sends the newly created order to the UseCaseOutput. 
 
 ```swift
 var quantity: Int?
@@ -466,11 +478,11 @@ When the input to the Presenter is repetitive and heterogeneous, it is a good pr
 
 #### UseCaseOutput Examples
 
-Here are some examples of output coming from the UseCase and being processed by the Presenter in the role of UseCaseOutput.
+Here are some examples of output produced by the UseCase. The output is processed by the Presenter in the role of UseCaseOutput.
 
 ##### Initialization of a Repetitive View
 
-Here the output methods are used to construct a contact list for display by the ViewController. When a ContactListPresentationModel is presented, it is converted to a ViewModel and appended to the list. If no Contacts are found or an error occurs, a message is appended. When `presentContactListEnd()` is finally called, the ViewController is called to show the list.
+Here the output methods are used to construct a contact list for eventual display by the ViewController. When a ContactListPresentationModel is presented, it is converted to a ViewModel and appended to the list. When no Contacts are found or an error occurs, a message is appended. When `presentContactListEnd()` is finally called, the ViewController is called to show the list.
 
 ```swift
 extension ContactListPresenter: ContactListViewReadyUseCaseOutput {
@@ -484,11 +496,11 @@ extension ContactListPresenter: ContactListViewReadyUseCaseOutput {
     }
 
     func presentNoContactsFound() {
-        contactList.append(.noContactsFound(message: LocalizedString("NoContactsFound")))
+        contactList.append(.noContactsFound(message: NSLocalizedString("NoContactsFound", nil)))
     }
     
     func present(error: ErrorReason) {
-        contactList.append(.error(message: LocalizedString(error.rawValue)))
+        contactList.append(.error(message: NSLocalizedString(error.rawValue)))
     }
 
     func presentContactListEnd() {
@@ -505,18 +517,18 @@ In the case of displaying a single Contact detail in a scene, the `present(conta
 extension ContactPresenter: ContactViewReadyUseCaseOutput {
     
     func present(contact: ContactPresentationModel) {
-        viewController.show(contact: contact)
+        viewController.show(contact: ContactViewModel(contact: contact))
     }
   
     func present(error: ErrorReason) {
-        viewController.show(error: LocalizedString(error.rawValue))
+        viewController.show(error: NSLocalizedString(error.rawValue), nil)
     }
 }
 ```
 
 ##### Data Capture
 
-Below, to present the saved state of an Order, the Presenter just delegates to the ViewController. The OrderEntryViewModel's `init` converts any data which must be localized or converted to text. 
+When presenting an Order, the Presenter just sends the data to the ViewController. The OrderEntryViewModel's `init` converts any data which must be localized or converted to text. 
 
 When the user has not entered one or more mandatory fields, the Presenter prepares the output text describing the issue and then sends it to the ViewController.
 
@@ -528,7 +540,7 @@ extension OrderEntryPresenter: OrderEntrySaveUseCaseOutput {
     }
   
      func present(error: ErrorReason) {
-        viewController.show(error: LocalizedString(error.rawValue)))
+        viewController.show(error: NSLocalizedString(error.rawValueNSLocalizedString, nil))
     }
 
     func presentMissingManditoryFields(productId: Bool, quantity: Bool) {
@@ -537,10 +549,10 @@ extension OrderEntryPresenter: OrderEntrySaveUseCaseOutput {
         var quantityMessage: String?
 
         if productId {
-            productIdMessage = LocalizedString("Product must be Entered")
+            productIdMessage = NSLocalizedString("Product must be Entered", nil)
         }
         if quantity {
-            quantityMessage = LocalizedString("Quantity must be Entered")
+            quantityMessage = NSLocalizedString("Quantity must be Entered", nil)
         }
         viewController.showManditoryFieldsMissing(productId: productIdMessage, quantity: quantityMessage)
     }
@@ -561,11 +573,11 @@ For the same reasons that I mentioned regarding the UseCaseOutput, it is a good 
 
 #### PresenterOutput Examples
 
-Here are some examples of output coming from the Presenter and being processed by the ViewController in the role of PresenterOutput.
+Here are some examples the ViewController processing the output of the Presenter.
 
 ##### Initialization of a Repetitive View
 
-For the contact List example, there is only one ContactListPresenterOutput method to implement.
+For the Contact List example, there is only one ContactListPresenterOutput method to implement.
 
 ```swift
 extension ContactListViewController: ContactListPresenterOutput  {
@@ -605,7 +617,7 @@ extension TransactionListAdapter: UITableViewDelegate {
     }
 }
 ```
-We also have to implement methods in the Presenter to access the ViewModels required to create the cells.
+We also have to implement methods in the Presenter to access the ViewModels required to supply data to the cells.
 ```swift
 // in ContactListPresenter
 var rowCount: Int { return contactList.count }
