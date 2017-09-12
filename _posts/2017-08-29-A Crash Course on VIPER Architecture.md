@@ -735,8 +735,6 @@ extension OrderEntryViewController: OrderEntryPresenterOutput {
 }
 ```
 
-
-
 ### The Connector
 
 You may be wondering how each VIPER stack is created.
@@ -747,9 +745,45 @@ We do not want the ViewController to know anything about the Interactor. The Int
 
  The VIPER stack is assembled by a 3rd party class that knows about all of the classes in the stack and how they are connected together. I call this part a Connector.
 
-A Connector is created and executed by the ViewController by overriding `awakeFromNib()`, which occurs after all outlets are created.
+A Connector is created and executed by the ViewController by overriding `awakeFromNib()`, which is called after all outlets are created.
 
-The connector is also useful to set the values of the Presenter into any classes which need to know about them. This usually includes the UITableViewDataSource, UIPicker-, UICollectionView- or other DataSources.
+The connector should also set the value of the Presenter into any classes which act as proxy to the ViewController.  This includes the UITableViewDataSource, UIPicker-, UICollectionView- or other DataSources.
+
+Here is an example: 
+
+```swift
+class TransactionListConnector {
+    
+    private let viewController: TransactionListViewController
+    private let adapter: TransactionListAdapter
+    private let presenter: TransactionListPresenter
+    private let useCase: TransactionListUseCase
+    
+    init(viewController: TransactionListViewController, adapter: TransactionListAdapter, useCase: TransactionListUseCase, presenter: TransactionListPresenter) {
+        
+        self.viewController = viewController
+        self.adapter = adapter
+        self.useCase = useCase
+        self.presenter = presenter
+    }
+    
+    convenience init(viewController: TransactionListViewController, adapter: TransactionListAdapter, entityGateway: EntityGateway = EntityGatewayImpl()) {
+        
+        let useCase = TransactionListUseCase(entityGateway: entityGateway)
+        let presenter = TransactionListPresenter(useCase: useCase)
+        
+        self.init(viewController: viewController, adapter: adapter, useCase: useCase, presenter: presenter)
+    }
+    
+    func configure() {
+        viewController.presenter = presenter
+        adapter.presenter = presenter
+
+        useCase.output = presenter
+        presenter.output = viewController
+    }
+}
+```
 
 ## Summary
 
