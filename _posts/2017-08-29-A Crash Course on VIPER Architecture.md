@@ -285,7 +285,7 @@ When the number of use cases that a scene supports becomes large, the number of 
 
 Here are some examples of events which come from a Presenter and are processed by a UseCase. The UseCase sends its output to a UseCaseOutput protocol.
 
-##### Initialization of a Singular View
+##### Initialization Processing of a Singular View
 
 Here the UseCase's `eventViewReady(contactId:)` method accesses a contact from the same  `ContactManager` as previous. It processes the Contact Entity by converting it to a ContactPresentationModel and then sending it to the UseCaseOutput. 
 
@@ -306,7 +306,7 @@ func eventViewReady(contactId: String) {
 }	
 ```
 
-##### Initialization of a Repetitive View
+##### Initialization Processing of a Repetitive View
 
 Here the UseCase's `eventViewReady()` method accesses contacts from a `ContactManager`, which is provided by the `EntityGateway` . It processes each Contact entity by converting it to a ContactListPresentationModel and then sending it to the UseCaseOutput. Note that this PresentationModel is not the same as the previous one in that it contains fewer properties.
 
@@ -486,7 +486,7 @@ Here are some examples of output produced by the UseCase. The output is processe
 
 ##### Initial Presentation of a Singular View
 
-In the case of displaying a single Contact detail in a scene, the `present(contact:)` method calls the ViewController to show the contact details.  If an error occurs, the presenter tells the ViewController to show an error message.
+In the case of displaying a single Contact detail in a scene, the `present(contact:)` method calls the ViewController to show the contact's details.  If an error occurs, the presenter tells the ViewController to show an error message.
 
 ```swift
 extension ContactPresenter: ContactViewReadyUseCaseOutput {
@@ -532,9 +532,9 @@ extension ContactListPresenter: ContactListViewReadyUseCaseOutput {
 
 ##### Data Capture
 
-When presenting an Order, the Presenter just send the data to the ViewController. The OrderEntryViewModel's `init` converts any data which must be localized or converted to text. 
+When presenting an Order, the Presenter just sends the data to the ViewController. The OrderEntryViewModel's `init` converts any data which must be localized or converted to text. 
 
-When the user has not entered one or more mandatory fields, the Presenter prepares the output text describing the issue and then sends it to the ViewController.
+If the user has missed entering one or more mandatory fields, the Presenter prepares the output text describing the issue and then sends it to the ViewController.
 
 ```swift
 extension OrderEntryPresenter: OrderEntrySaveUseCaseOutput {
@@ -605,7 +605,7 @@ extension ContactViewController: ContactViewReadyPresenterOutput {
 }
 ```
 
-### Initial Display of a Repetitive View
+##### Initial Display of a Repetitive View
 
 For the contact List example, there is only one ContactListPresenterOutput method to implement.
 
