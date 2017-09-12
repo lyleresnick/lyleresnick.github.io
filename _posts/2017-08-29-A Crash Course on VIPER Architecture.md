@@ -136,11 +136,13 @@ You can see in the interaction diagram that the ViewController has another role:
 
 #### ViewController Examples
 
-Here are examples of events being captured and immediately delegated to the Presenter.
+Here are some examples of UIViewControllers, or their proxies, capturing events and then immediately delegating them to a Presenter.
 
 ##### Initialization
 
-In this `UIViewController`  `viewDidLoad` method all views have been configured in Interface Builder.  The event is delegated to the Presenter. The main view's height is passed to the Presenter so it can set the height of a UITableView cell to the full screen height when showing errors other unusual states. I will discuss this more later.
+In this UIViewController `viewDidLoad` method, all views have been configured in Interface Builder.  There is nothing to do other than delegate to the Presenter. 
+
+The main view's height is passed to the Presenter so it can set the height of a UITableView cell to the full screen height when showing errors or other unusual states. I will discuss this more later.
 
 ```swift
 override func viewDidLoad() {
@@ -151,7 +153,7 @@ override func viewDidLoad() {
 
 ##### UITextFieldDelegate
 
-In this `UITextDelegate` `textFieldShouldReturn` method the text is captured as a quantity. if the Presenter finds that the text is valid, it returns true.
+In this UITextDelegate `textFieldShouldReturn` method, the text is captured as a quantity. If the Presenter finds that the text is valid, it returns true.
 
 ```swift
 func textFieldShouldReturn(_ textField: UITextField) -> Bool {
@@ -654,7 +656,7 @@ class ContactListErrorCell: UITableViewCell, ContactListCell {
 }
 ```
 
-##### Initialization of a Repetitive View
+##### Initialization of a Singular View
 
 In the case of displaying a single Contact detail in a scene, the ViewController's `show(contact:)` method sets the contact details into their respective UIControls. Errors are presented by hiding the contactView and showing the errorView.
 
