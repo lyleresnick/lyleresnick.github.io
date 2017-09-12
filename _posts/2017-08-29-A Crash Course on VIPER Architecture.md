@@ -480,7 +480,7 @@ When the input to the Presenter is repetitive and heterogeneous, it is a good pr
 
 Here are some examples of output produced by the UseCase. The output is processed by the Presenter in the role of UseCaseOutput.
 
-##### Initialization of a Repetitive View
+##### Presentation of a Repetitive View
 
 Here the output methods are used to construct a contact list for eventual display by the ViewController. When a ContactListPresentationModel is presented, it is converted to a ViewModel and appended to the list. When no Contacts are found or an error occurs, a message is appended. When `presentContactListEnd()` is finally called, the ViewController is called to show the list.
 
@@ -496,11 +496,11 @@ extension ContactListPresenter: ContactListViewReadyUseCaseOutput {
     }
 
     func presentNoContactsFound() {
-        contactList.append(.noContactsFound(message: NSLocalizedString("NoContactsFound", nil)))
+        contactList.append(.noContactsFound(message: LocalizedString("NoContactsFound")))
     }
     
     func present(error: ErrorReason) {
-        contactList.append(.error(message: NSLocalizedString(error.rawValue)))
+        contactList.append(.error(message: LocalizedString(error.rawValue)))
     }
 
     func presentContactListEnd() {
@@ -509,7 +509,7 @@ extension ContactListPresenter: ContactListViewReadyUseCaseOutput {
 }
 ```
 
-##### Initialization of a Singular View
+##### Presentation of a Singular View
 
 In the case of displaying a single Contact detail in a scene, the `present(contact:)` method calls the ViewController to show the contact details.  If an error occurs, the presenter tells the ViewController to show an error message.
 
@@ -521,14 +521,14 @@ extension ContactPresenter: ContactViewReadyUseCaseOutput {
     }
   
     func present(error: ErrorReason) {
-        viewController.show(error: NSLocalizedString(error.rawValue), nil)
+        viewController.show(error: LocalizedString(error.rawValue))
     }
 }
 ```
 
 ##### Data Capture
 
-When presenting an Order, the Presenter just sends the data to the ViewController. The OrderEntryViewModel's `init` converts any data which must be localized or converted to text. 
+When presenting an Order, the Presenter just send the data to the ViewController. The OrderEntryViewModel's `init` converts any data which must be localized or converted to text. 
 
 When the user has not entered one or more mandatory fields, the Presenter prepares the output text describing the issue and then sends it to the ViewController.
 
@@ -540,7 +540,7 @@ extension OrderEntryPresenter: OrderEntrySaveUseCaseOutput {
     }
   
      func present(error: ErrorReason) {
-        viewController.show(error: NSLocalizedString(error.rawValueNSLocalizedString, nil))
+        viewController.show(error: LocalizedString(error.rawValue)))
     }
 
     func presentMissingManditoryFields(productId: Bool, quantity: Bool) {
@@ -549,10 +549,10 @@ extension OrderEntryPresenter: OrderEntrySaveUseCaseOutput {
         var quantityMessage: String?
 
         if productId {
-            productIdMessage = NSLocalizedString("Product must be Entered", nil)
+            productIdMessage = LocalizedString("Product must be Entered")
         }
         if quantity {
-            quantityMessage = NSLocalizedString("Quantity must be Entered", nil)
+            quantityMessage = LocalizedString("Quantity must be Entered")
         }
         viewController.showManditoryFieldsMissing(productId: productIdMessage, quantity: quantityMessage)
     }
@@ -573,11 +573,11 @@ For the same reasons that I mentioned regarding the UseCaseOutput, it is a good 
 
 #### PresenterOutput Examples
 
-Here are some examples the ViewController processing the output of the Presenter.
+Here are some examples of output coming from the Presenter and being processed by the ViewController in the role of PresenterOutput.
 
-##### Initialization of a Repetitive View
+##### Display of a Repetitive View
 
-For the Contact List example, there is only one ContactListPresenterOutput method to implement.
+For the contact List example, there is only one ContactListPresenterOutput method to implement.
 
 ```swift
 extension ContactListViewController: ContactListPresenterOutput  {
@@ -617,7 +617,7 @@ extension TransactionListAdapter: UITableViewDelegate {
     }
 }
 ```
-We also have to implement methods in the Presenter to access the ViewModels required to supply data to the cells.
+We also have to implement methods in the Presenter to access the ViewModels required to create the cells.
 ```swift
 // in ContactListPresenter
 var rowCount: Int { return contactList.count }
@@ -666,7 +666,7 @@ class ContactListErrorCell: UITableViewCell, ContactListCell {
 }
 ```
 
-##### Initialization of a Repetitive View
+##### Display of a Singular View
 
 In the case of displaying a single Contact detail in a scene, the ViewController's `show(contact:)` method sets the contact details into their respective UIControls. Errors are presented by hiding the contactView and showing the errorView.
 
