@@ -12,25 +12,27 @@ Reducing the size of a UIViewController is a notable goal, but how should it be 
 
 One common way to architect an app is to layer the app into an interface layer and a service layer. 
 
-The service layer is responsible for transferring data to and from the internet, local databases, audio and video for the use by the interface layer.  This layer may also perform other non-functional functions such as  caching, syncing, etc. 
+The service layer is responsible for transferring data between theinterface layer and the internet, local databases, or the filesystem.  This layer may also perform other non-functional duties such as  caching, syncing, etc. 
 
 The interface layer does something with all this data that is ultimately the purpose of the app.
 
-This two layer architecture is too simple. It does not account for the placement of all of the responsibilities of the so called *interface layer*. A lot of processing happens in this layer. All of this processing ends up in a UIViewController.
+This two layer architecture is too simple. It does not account for the placement of all of the responsibilities of the so called *interface layer*. A lot of processing happens in this layer. All of this processing ends up inside a UIViewController.
 
 In commercial applications, UIViewControllers get large. I've seen 2000 lines in a UIViewController.
 
 VIPER is a micro-architecture - a predefined set of classes that work together to structure a solution. VIPER is an implementation of [Bob Martin's Clean Architecture](https://8thlight.com/blog/uncle-bob/2012/08/13/the-clean-architecture.html). 
 
-In the next article, I'm going to demonstrate that the VIPER architecture can be very simple to implement and its benefits can be realized very quickly.  I'll use the requirement and solution to the Complex UITableView from the last [post]({{site.url}}/blog/2017/06/29/Solving-a-Complex-UITableView-Part-2.html) as the basis of this example. A complete app which demonstrates the refactoring to Clean Architecture can be found at [**CleanReportTableDemo**](https://github.com/lyleresnick/CleanReportTableDemo). I will be explaining this app in the next post.
+In this article I will describe the various components and responsibilites of the VIPER architecture. 
+
+In the next article, I'm going to demonstrate that the VIPER architecture can be very simple to implement and show how its benefits can be realized very quickly.  I'll use the requirement and solution to the Complex UITableView from the last [post]({{site.url}}/blog/2017/06/29/Solving-a-Complex-UITableView-Part-2.html) as the basis of this example. The app which demonstrates the refactoring to Clean Architecture can be found at [**CleanReportTableDemo**](https://github.com/lyleresnick/CleanReportTableDemo). I will be explaining this app in the next post.
 
 ## An Explanation of the VIPER Architecture 
 
 The main purpose of the VIPER architecture is to reduce the amount of code in a ViewController class. VIPER does this by allocating almost all of the responsibilities of a typical ViewController into other classes that have predefined responsibilities. You may recall that this echoes the Single Responsibility Principle. 
 
-Another purpose of the VIPER architecture is to reduce dependencies. It does this by honouring the layer boundaries, passing only values between the layers and demanding that explicit object dependencies only go in one direction.
+Another purpose of the VIPER architecture is to reduce dependencies. It does this by honouring layer boundaries, passing only values between the layers and demanding that explicit object dependencies only go in one direction.
 
-All of this makes it easier to change code which is normally contained in a UIViewController. 
+All of this makes it easier to change the code which is normally contained in a UIViewController - which is usually everything.
 
 To understand VIPER you need to understand a bit about the the Clean Architecture. 
 
@@ -136,13 +138,13 @@ You can see in the interaction diagram that the ViewController has another role:
 
 #### ViewController Examples
 
-Here are some examples of UIViewControllers, or their proxies, capturing events and then immediately delegating them to a Presenter.
+Here are some examples of UIViewControllers, or their delegate proxies, capturing events and then immediately delegating them to a Presenter.
 
 ##### Initialization
 
-In this UIViewController `viewDidLoad` method, all views have been configured in Interface Builder.  There is nothing to do other than delegate to the Presenter. 
+In this UIViewController `viewDidLoad` method, all views have been configured in Interface Builder.  There is nothing to do other than pass the message to the Presenter. 
 
-The main view's height is passed to the Presenter so it can set the height of a UITableView cell to the full screen height when showing errors or other unusual states. I will discuss this more later.
+I am passing the height of the main view to the Presenter so it can set the height of a UITableViewCell to the full screen height when showing  errors or other unusual states.
 
 ```swift
 override func viewDidLoad() {
@@ -175,7 +177,7 @@ When a button is touched, a UIViewController `@IBAction` method delegates to the
 
 ##### UITableViewDelegate
 
-When a UITableView row is selected, the event is delegated to the Presenter in the `UITableViewDelegate` `didSelectRowAt` method.
+When a UITableView row is selected, the event is delegated to the Presenter in the UITableViewDelegate `didSelectRowAt` method.
 
 ```swift
 extension ContactListAdapter: UITableViewDelegate {
@@ -218,7 +220,7 @@ func eventCapture(quantity: String) -> Bool {
         return true
     }
     else {
-          viewController.showFormatError( "Format of Quantity must be digits only")
+          viewController.showFormatError(NSLocalizeString("Format of Quantity must be digits only", nil)
           return false
     }
 }
@@ -498,11 +500,11 @@ extension ContactListPresenter: ContactListViewReadyUseCaseOutput {
     }
 
     func presentNoContactsFound() {
-        contactList.append(.noContactsFound(message: LocalizedString("NoContactsFound")))
+        contactList.append(.noContactsFound(message: NSLocalizedString("NoContactsFound", nil)))
     }
     
     func present(error: ErrorReason) {
-        contactList.append(.error(message: LocalizedString(error.rawValue)))
+        contactList.append(.error(message: NSLocalizedString(error.rawValue, nil)))
     }
 
     func presentContactListEnd() {
@@ -523,7 +525,7 @@ extension ContactPresenter: ContactViewReadyUseCaseOutput {
     }
   
     func present(error: ErrorReason) {
-        viewController.show(error: LocalizedString(error.rawValue))
+        viewController.show(error: NSLocalizedString(error.rawValue, nil))
     }
 }
 ```
@@ -542,7 +544,7 @@ extension OrderEntryPresenter: OrderEntrySaveUseCaseOutput {
     }
   
      func present(error: ErrorReason) {
-        viewController.show(error: LocalizedString(error.rawValue)))
+        viewController.show(error: NSLocalizedString(error.rawValue, nil)))
     }
 
     func presentMissingManditoryFields(productId: Bool, quantity: Bool) {
@@ -551,10 +553,10 @@ extension OrderEntryPresenter: OrderEntrySaveUseCaseOutput {
         var quantityMessage: String?
 
         if productId {
-            productIdMessage = LocalizedString("Product must be Entered")
+            productIdMessage = NSLocalizedString("Product must be Entered", nil)
         }
         if quantity {
-            quantityMessage = LocalizedString("Quantity must be Entered")
+            quantityMessage = NSLocalizedString("Quantity must be Entered", nil)
         }
         viewController.showManditoryFieldsMissing(productId: productIdMessage, quantity: quantityMessage)
     }
@@ -715,7 +717,7 @@ VIPER is easy to implement if you keep it simple.
 
 The benefit of VIPER is the organizational lever it provides for a project. Everything has a place. Each team member knows the rules and purposes of the classes in the VIPER stack. This makes everyone happy! 
 
-I think that VIPER is the perfect architecture for large codebases with frequently changing requirements. It is an effective antidote to the Massive ViewController problem.
+I think that VIPER is the perfect architecture for large codebases with frequently changing requirements. It is definately an effective tool for alleviating the Massive ViewController problem.
 
 In my next blog I will demonstrate an implementation of VIPER using the Banking Report from the last [post]({{site.url}}/blog/2017/06/29/Solving-a-Complex-UITableView-Part-2.html).
 
