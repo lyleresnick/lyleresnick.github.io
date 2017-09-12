@@ -257,7 +257,7 @@ If the Presenter required a callback, it would send itself as a PresenterDelegat
 
 ### The Router
 
-The Router is responsible for managing scene transition. A Router may be a UINavigationController,  UITabController or a custom container ViewController. 
+The Router is responsible for managing scene transition. A Router can be a UINavigationController,  UITabController or a custom container ViewController.  From my point of view, a router is simply a Container ViewController which itself is a VIP stack.
 
 I will leave the details of router implementation to a future article. 
 
@@ -285,9 +285,30 @@ When the number of use cases that a scene supports becomes large, the number of 
 
 Here are some examples of events which come from a Presenter and are processed by a UseCase. The UseCase sends its output to a UseCaseOutput protocol.
 
+##### Initialization of a Singular View
+
+Here the UseCase's `eventViewReady(contactId:)` method accesses a contact from the same  `ContactManager` as previous. It processes the Contact Entity by converting it to a ContactPresentationModel and then sending it to the UseCaseOutput. 
+
+```swift
+var output: ContactViewReadyUseCaseOutput!
+
+func eventViewReady(contactId: String) {
+  
+    entityGateway.contactManager.fetch(contactId: contactId) { result in
+        
+        switch result {
+        case .success(contact):
+             output.present(contact: ContactPresentationModel(contact: contact))
+        case .failure(error):
+            output.present(error:error.reason)
+        }
+    }
+}	
+```
+
 ##### Initialization of a Repetitive View
 
-Here the UseCase's `eventViewReady()` method accesses contacts from a `ContactManager`, which is provided by the `EntityGateway` . It processes and sends each contact to the UseCaseOutput. 
+Here the UseCase's `eventViewReady()` method accesses contacts from a `ContactManager`, which is provided by the `EntityGateway` . It processes each Contact entity by converting it to a ContactListPresentationModel and then sending it to the UseCaseOutput. Note that this PresentationModel is not the same as the previous one in that it contains fewer properties.
 
 The array ContactEntities is not copied directly to the Presenter. 
 
@@ -323,27 +344,6 @@ func eventViewReady() {
             output.present(error:error.reason)
         }
         output.presentContactListEnd()
-    }
-}	
-```
-
-##### Initialization of a Singular View
-
-Here the UseCase's `eventViewReady(contactId:)` method accesses a contact from the same  `ContactManager` as previous. It processes and converts the contact to a PresentationModel sends it to the UseCaseOutput. This PresentationModel is not the same as the previous one in that it contains more properties.
-
-```swift
-var output: ContactViewReadyUseCaseOutput!
-
-func eventViewReady(contactId: String) {
-  
-    entityGateway.contactManager.fetch(contactId: contactId) { result in
-        
-        switch result {
-        case .success(contact):
-             output.present(contact: ContactPresentationModel(contact: contact))
-        case .failure(error):
-            output.present(error:error.reason)
-        }
     }
 }	
 ```
@@ -484,9 +484,26 @@ When the input to the Presenter is repetitive and heterogeneous, it is a good pr
 
 Here are some examples of output produced by the UseCase. The output is processed by the Presenter in the role of UseCaseOutput.
 
+##### Initial Presentation of a Singular View
+
+In the case of displaying a single Contact detail in a scene, the `present(contact:)` method calls the ViewController to show the contact details.  If an error occurs, the presenter tells the ViewController to show an error message.
+
+```swift
+extension ContactPresenter: ContactViewReadyUseCaseOutput {
+    
+    func present(contact: ContactPresentationModel) {
+        viewController.show(contact: ContactViewModel(contact: contact))
+    }
+  
+    func present(error: ErrorReason) {
+        viewController.show(error: NSLocalizedString(error.rawValue, nil))
+    }
+}
+```
+
 ##### Initial Presentation of a Repetitive View
 
-Here the output methods are used to construct a contact list for eventual display by the ViewController. When a ContactListPresentationModel is presented, it is converted to a ViewModel and appended to the list. When no Contacts are found or an error occurs, a message is appended. When `presentContactListEnd()` is finally called, the ViewController is called to show the list.
+Here the output methods are used to construct a contact list for eventual display by the ViewController. When a ContactListPresentationModel is presented, it is converted to a ContactListViewModel and appended to the list. When no Contacts are found or an error occurs, a message is appended. When `presentContactListEnd()` is finally called, the ViewController is called to show the list.
 
 ```swift
 extension ContactListPresenter: ContactListViewReadyUseCaseOutput {
@@ -509,23 +526,6 @@ extension ContactListPresenter: ContactListViewReadyUseCaseOutput {
 
     func presentContactListEnd() {
         output.showContactList()
-    }
-}
-```
-
-##### Initial Presentation of a Singular View
-
-In the case of displaying a single Contact detail in a scene, the `present(contact:)` method calls the ViewController to show the contact details.  If an error occurs, the presenter tells the ViewController to show an error message.
-
-```swift
-extension ContactPresenter: ContactViewReadyUseCaseOutput {
-    
-    func present(contact: ContactPresentationModel) {
-        viewController.show(contact: ContactViewModel(contact: contact))
-    }
-  
-    func present(error: ErrorReason) {
-        viewController.show(error: NSLocalizedString(error.rawValue, nil))
     }
 }
 ```
@@ -579,7 +579,33 @@ For the same reasons that I mentioned regarding the UseCaseOutput, it is a good 
 
 Here are some examples of output coming from the Presenter and being processed by the ViewController in the role of PresenterOutput.
 
-##### Initial Display of a Repetitive View
+##### Initial Display of a Singular View
+
+In the case of displaying a single Contact detail in a scene, the ViewController's `show(contact:)` method sets the contact details into their respective UIControls. Errors are presented by hiding the contactView and showing the errorView.
+
+```swift
+extension ContactViewController: ContactViewReadyPresenterOutput {
+    
+    func show(contact: ContactViewModel) {
+      	contactView.isHidden = false
+        errorView.isHidden = true
+
+        contactNameLabel.text = model.contactName
+        phoneLabel.text = model.phone
+        addressLabel.text = model.address
+        // ...
+    }
+  
+    func show(error: String) {
+      
+        contactView.isHidden = true
+        errorView.isHidden = false
+        errorLabel.text = error
+    }
+}
+```
+
+### Initial Display of a Repetitive View
 
 For the contact List example, there is only one ContactListPresenterOutput method to implement.
 
@@ -666,31 +692,6 @@ class ContactListErrorCell: UITableViewCell, ContactListCell {
     func show(model: ContactListViewModel) {
         guard case let .error(message) = row else { fatalError("Expected: error") }
         errorLabel.text = message
-    }
-}
-```
-
-##### Initial Display of a Singular View
-In the case of displaying a single Contact detail in a scene, the ViewController's `show(contact:)` method sets the contact details into their respective UIControls. Errors are presented by hiding the contactView and showing the errorView.
-
-```swift
-extension ContactViewController: ContactViewReadyPresenterOutput {
-    
-    func show(contact: ContactViewModel) {
-      	contactView.isHidden = false
-        errorView.isHidden = true
-
-        contactNameLabel.text = model.contactName
-        phoneLabel.text = model.phone
-        addressLabel.text = model.address
-        // ...
-    }
-  
-    func show(error: String) {
-      
-        contactView.isHidden = true
-        errorView.isHidden = false
-        errorLabel.text = error
     }
 }
 ```
