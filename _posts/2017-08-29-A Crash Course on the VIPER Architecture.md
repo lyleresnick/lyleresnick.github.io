@@ -371,7 +371,7 @@ There are two other results of processing shown here: the error case and the zer
 Note that you can pass the  contact properties as individual parameters, instead of using a PresentationModel struct.
 
 ```swift
-class ContactUseCase {
+class ContactListUseCase {
   
     let entityGateway: EntityGateway
     var output: ContactListUseCaseOutput!
