@@ -419,7 +419,7 @@ I pass the event parameters from UseCase to the `transform` method along with th
 Here is an example:
 
 ```swift
-class OrderEntryUseCaseTransformer {
+class OrderEntrySaveUseCaseTransformer {
     
     let orderManager: OrderManager
     let userManager: UserManager
@@ -455,7 +455,7 @@ I would then implement `eventSave` as follows:
 ```swift
 func eventSave() {
 
-    let transformer = OrderEntryUseCaseTransformer(orderManager: entityGateway.orderManager, userManager: entityGateway.userManager)
+    let transformer = OrderEntrySaveUseCaseTransformer(orderManager: entityGateway.orderManager, userManager: entityGateway.userManager)
     transformer.transform(quantity: quantity, productId: productId, output: output)
 }
 ```
@@ -537,7 +537,7 @@ When presenting an Order, the Presenter just sends the data to the ViewControlle
 If the user has missed entering one or more mandatory fields, the Presenter prepares the text describing the issue and then sends it to the ViewController.
 
 ```swift
-extension OrderEntryPresenter: OrderEntryUseCaseOutput {
+extension OrderEntryPresenter: OrderEntrySaveUseCaseOutput {
 
     func present(order: OrderEntryPresentationModel) {
         viewController.show(order: OrderEntryViewModel(order: order))
@@ -706,7 +706,7 @@ class ContactListErrorCell: UITableViewCell, ContactListCell {
 Besides showing the successfull result, the data capture PresenterOutput shows error messages for mississing mandatory fields. Note that this different than showing an error due to network failure.
 
 ```swift
-extension OrderEntryViewController: OrderEntryPresenterOutput {
+extension OrderEntryViewController: OrderEntrySavePresenterOutput {
 
     func show(order: OrderEntryViewModel) {
         
