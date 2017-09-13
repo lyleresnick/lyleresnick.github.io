@@ -147,9 +147,14 @@ In this UIViewController `viewDidLoad` method, all views have been configured in
 I am passing the height of the main view to the Presenter so it can set the height of a UITableViewCell to the full screen height when showing  errors or other unusual states.
 
 ```swift
-override func viewDidLoad() {
-   super.viewDidLoad()
-   presenter.eventViewReady(maxHeight: view.bounds.height)
+class ContactListViewController: UIViewController {
+  
+    var presenter: ContactListPresenter!
+  
+    override func viewDidLoad() {
+       super.viewDidLoad()
+       presenter.eventViewReady(maxHeight: view.bounds.height)
+    }
 }
 ```
 
@@ -158,8 +163,13 @@ override func viewDidLoad() {
 In this UITextDelegate `textFieldShouldReturn` method, the text is captured as a quantity. If the Presenter finds that the text is valid, it returns true.
 
 ```swift
-func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-    return presenter.eventCapture(quantity: textField.text)
+class OrderEntryQuantityDelegate: UITextFieldDelegate {
+  
+    var presenter: OrderEntryPresenter!
+
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        return presenter.eventCapture(quantity: textField.text)
+    }
 }
 ```
 
@@ -170,8 +180,13 @@ When a button is touched, a UIViewController `@IBAction` method delegates to the
 `@IBAction` methods located in a UITableViewCell should also delegate directly to the presenter, but must also pass the index of the cell in which the button was located.
 
 ```swift
-@IBAction func saveButtonTouched(_ sender: UIButton) {
-    presenter.eventSave()
+class OrderEntryViewController: UIViewController {
+  
+    var presenter: OrderEntryPresenter!
+
+    @IBAction func saveButtonTouched(_ sender: UIButton) {
+        presenter.eventSave()
+    }
 }
 ```
 
@@ -180,8 +195,14 @@ When a button is touched, a UIViewController `@IBAction` method delegates to the
 When a UITableView row is selected, the event is delegated to the Presenter in the UITableViewDelegate `didSelectRowAt` method.
 
 ```swift
-func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-    presenter.eventContactSelected(at: indexPath.row)
+class ContactListAdapter: NSObject {
+    var presenter: ContactListPresenter!
+}
+extension ContactListAdapter: UITableViewDelegate {
+  
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        presenter.eventContactSelected(at: indexPath.row)
+    }
 }
 ```
 
@@ -202,9 +223,16 @@ Here are some examples of the Presenter receiving events from the UIViewControll
 Here the Presenter's `eventViewReady()` method retains the `maxHeight` for later use and then passes the message to the UseCase.
 
 ```swift
-func eventViewReady(maxHeight: Int) {
-    self.maxHeight = maxHeight
-    useCase.eventViewReady()
+class ContactListPresenter {
+  
+  	let useCase: ContactListUseCase
+    var output: ContactListPresenterOutput!
+    // init ...
+  
+    func eventViewReady(maxHeight: Int) {
+        self.maxHeight = maxHeight
+        useCase.eventViewReady()
+    }
 }
 ```
 ##### Data Capture
@@ -212,14 +240,21 @@ func eventViewReady(maxHeight: Int) {
 The Presenter's `eventCapture(quantity:)` tries to convert the quantity parameter to an `Int`. On success it sends the event to the UseCase with the converted data. It is up to the UseCase to determine whether the quantity is valid. On failure to convert the quantity, the error output is delegated back to the ViewController. 
 
 ```swift
-func eventCapture(quantity: String) -> Bool {
-    if let quantity = Int(quantity) {
-        useCase.eventCapture(quantity: quantity)
-        return true
-    }
-    else {
-          viewController.showFormatError(NSLocalizeString("Format of Quantity must be digits only", nil)
-          return false
+class OrderEntryPresenter {
+  
+    let useCase: OrderEntryUseCase
+    var output: OrderEntryPresenterOutput!
+    // init ...
+
+    func eventCapture(quantity: String) -> Bool {
+        if let quantity = Int(quantity) {
+            useCase.eventCapture(quantity: quantity)
+            return true
+        }
+        else {
+              output.showFormatError(NSLocalizeString("Format of Quantity must be digits only", nil)
+              return false
+        }
     }
 }
 ```
@@ -233,8 +268,12 @@ Either way, the format of the data and the text of the error message is the doma
 Sometimes the Presenter just delegates to the UseCase, as in this example.  
 
 ```swift
-func eventSave() {
-    useCase.eventSave()
+class OrderEntryPresenter {
+    // ...
+
+    func eventSave() {
+        useCase.eventSave()
+    }
 }
 ```
 
@@ -245,9 +284,17 @@ In response to a UITableView selection, this Presenter receives a  `eventContact
 Yes, you should put data in the ViewModel to support the processing of potential future events. 
 
 ```swift
-func eventContactSelected(at row: Int) {
-    let contactId = contactViewModels[row].id
-    router.eventContactSelected(id: contactId)
+class ContactPresenter {
+  
+    let useCase: ContactUseCase
+    var router: ContactRouter!
+    var output: ContactPresenterOutput!
+    // init ...
+  
+    func eventContactSelected(at row: Int) {
+        let contactId = contactViewModels[row].id
+        router.eventContactSelected(id: contactId)
+    }
 }
 ```
 
@@ -288,20 +335,25 @@ Here are some examples of events which come from a Presenter and are processed b
 Here the UseCase's `eventViewReady(contactId:)` method accesses a contact from the same  `ContactManager` as previous. It processes the Contact Entity by converting it to a ContactPresentationModel and then sending it to the UseCaseOutput. 
 
 ```swift
-var output: ContactViewReadyUseCaseOutput!
-
-func eventViewReady(contactId: String) {
+class ContactUseCase {
   
-    entityGateway.contactManager.fetch(contactId: contactId) { result in
-        
-        switch result {
-        case .success(contact):
-             output.present(contact: ContactPresentationModel(contact: contact))
-        case .failure(error):
-            output.present(error:error.reason)
+    let entityGateway: EntityGateWay
+    var output: ContactUseCaseOutput!
+    // init ...
+
+    func eventViewReady(contactId: String) {
+
+        entityGateway.contactManager.fetch(contactId: contactId) { result in
+
+            switch result {
+            case .success(contact):
+                 output.present(contact: ContactPresentationModel(contact: contact))
+            case .failure(error):
+                output.present(error:error.reason)
+            }
         }
     }
-}	
+}
 ```
 
 ##### Initialization Processing of a Repetitive View
@@ -319,31 +371,36 @@ There are two other results of processing shown here: the error case and the zer
 Note that you can pass the  contact properties as individual parameters, instead of using a PresentationModel struct.
 
 ```swift
-var output: ContactListViewReadyUseCaseOutput!
-
-func eventViewReady() {
+class ContactUseCase {
   
-    let currentUser = entityGateway.userManager.currentUser
-    entityGateway.contactManager.fetchAll(user: currentUser) { result in
-        
-        output.presentContactListStart()
-        switch result {
-        case .success(contacts):
-            if contacts.count > 0 {
-                for contact in contacts {
-                    output.present(contact: ContactListPresentationModel(contact: contact))
-                }
-            }
-            else {
-                output.presentNoContactsFound()
-            }
+    let entityGateway: EntityGateway
+    var output: ContactListUseCaseOutput!
+    // init ...
 
-        case .failure(error):
-            output.present(error:error.reason)
+    func eventViewReady() {
+
+        let currentUser = entityGateway.userManager.currentUser
+        entityGateway.contactManager.fetchAll(user: currentUser) { result in
+
+            output.presentContactListStart()
+            switch result {
+            case .success(contacts):
+                if contacts.count > 0 {
+                    for contact in contacts {
+                        output.present(contact: ContactListPresentationModel(contact: contact))
+                    }
+                }
+                else {
+                    output.presentNoContactsFound()
+                }
+
+            case .failure(error):
+                output.present(error:error.reason)
+            }
+            output.presentContactListEnd()
         }
-        output.presentContactListEnd()
     }
-}	
+}
 ```
 
 ##### Data Capture
@@ -353,34 +410,41 @@ In this example of data capture, the UseCase's `eventCapture(quantity:)`  and `e
 The `eventSave()` method verifies that all mandatory fields have been entered and then uses an `orderManager` to create an order. It sends the newly created order to the UseCaseOutput. 
 
 ```swift
-var quantity: Int?
-var productId: String?
-
-func eventCapture(quantity: Int) {
-    self.quantity = quantity
-}
-
-func eventCapture(productId: String) {
-    self.productId = productId
-}
-
-func eventSave() {
+class OrderEntryUseCase {
   
-    if let quantity = quantity, let productId = productId {
-      
-        entityGateway.orderManager.create(userId: userId, productId: productId, quantity: quantity) { result in 
-          
-            switch(result) {                                                                                         
-            case .success(order):
-                output.present(order: OrderEntryPresentationModel(order))
-            case .failure(error):
-                output.present(error:error.reason)
-            }                                                                                          
-        }
-      }
-    else {
-        output.presentMissingMandatoryFields(productId: productId == nil, quantity: quantity == nil)
-   }
+    let entityGateway: EntityGateway
+    var output: OrderEntryUseCaseOutput!
+    // init ...
+
+    var quantity: Int?
+    var productId: String?
+
+    func eventCapture(quantity: Int) {
+        self.quantity = quantity
+    }
+
+    func eventCapture(productId: String) {
+        self.productId = productId
+    }
+
+    func eventSave() {
+
+        if let quantity = quantity, let productId = productId {
+
+            entityGateway.orderManager.create(userId: userId, productId: productId, quantity: quantity) { result in 
+
+                switch(result) {                                                                                         
+                case .success(order):
+                    output.present(order: OrderEntryPresentationModel(order))
+                case .failure(error):
+                    output.present(error:error.reason)
+                }                                                                                          
+            }
+          }
+        else {
+            output.presentMissingMandatoryFields(productId: productId == nil, quantity: quantity == nil)
+       }
+    }
 }
 ```
 
@@ -451,14 +515,21 @@ class OrderEntrySaveUseCaseTransformer {
 I would then implement `eventSave` as follows: 
 
 ```swift
-func eventSave() {
+class OrderEntryUseCase {
+  
+    let entityGateway: EntityGateway
+    var output: OrderEntryUseCaseOutput!
+    // init ...
 
-    let transformer = OrderEntrySaveUseCaseTransformer(orderManager: entityGateway.orderManager, userManager: entityGateway.userManager)
-    transformer.transform(quantity: quantity, productId: productId, output: output)
+    func eventSave() {
+
+        let transformer = OrderEntrySaveUseCaseTransformer(orderManager: entityGateway.orderManager, userManager: entityGateway.userManager)
+        transformer.transform(quantity: quantity, productId: productId, output: output)
+    }
 }
 ```
 
-Note that I would still implement the UseCase's `Capture` methods in the UseCase.
+I still implement the UseCase's `Capture` methods in the UseCase.
 
 You will see that this setup makes it very easy to test the Transformer. It separates the UseCase's responsibilities from one another, making it very easy to understand the code. When you need to decompose a large amount of processing by implementing  private methods, you immediately know who they belong to.
 
@@ -625,7 +696,6 @@ But, this is not the whole story. The tableView requires a dataSource and, optio
 
 ```swift
 class ContactListAdapter: NSObject {
-    
     var presenter: ContactListPresenter!
 }
 
