@@ -12,7 +12,7 @@ Reducing the size of a UIViewController is a notable goal, but how should it be 
 
 One common way to architect an app is to layer the app into an interface layer and a service layer. 
 
-The service layer is responsible for transferring data between theinterface layer and the internet, local databases, or the filesystem.  This layer may also perform other non-functional duties such as  caching, syncing, etc. 
+The service layer is responsible for transferring data between the interface layer and the internet, local databases, or the filesystem.  This layer may also perform other non-functional duties such as  caching, syncing, etc. 
 
 The interface layer does something with all this data that is ultimately the purpose of the app.
 
@@ -225,7 +225,7 @@ Here the Presenter's `eventViewReady()` method retains the `maxHeight` for later
 ```swift
 class ContactListPresenter {
   
-  	let useCase: ContactListUseCase
+    let useCase: ContactListUseCase
     var output: ContactListPresenterOutput!
     // init ...
   
