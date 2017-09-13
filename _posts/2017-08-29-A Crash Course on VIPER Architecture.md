@@ -150,7 +150,7 @@ I am passing the height of the main view to the Presenter so it can set the heig
 override func viewDidLoad() {
    super.viewDidLoad()
    presenter.eventViewReady(maxHeight: view.bounds.height)
- }
+}
 ```
 
 ##### UITextFieldDelegate
@@ -180,16 +180,14 @@ When a button is touched, a UIViewController `@IBAction` method delegates to the
 When a UITableView row is selected, the event is delegated to the Presenter in the UITableViewDelegate `didSelectRowAt` method.
 
 ```swift
-extension ContactListAdapter: UITableViewDelegate {
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-      presenter.eventContactSelected(at: indexPath.row)
-    }
+func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+    presenter.eventContactSelected(at: indexPath.row)
 }
 ```
 
 ### The Presenter
 
-The Presenter's role is to receive an event and route it to either the UseCase or the Router. It converts the event's parameters from external format to an internal format that can be used directly by the UseCase or the Router.   
+The Presenter's role is to receive an event from the ViewController and pass it to either the UseCase or the Router. It converts the event's parameters from external format to an internal format that can be used directly by the UseCase or the Router.   
 
 Examples of input conversion might be from String to Int, formatted String date to Date, an Int from a UIPickerView to an enum - the list goes on. 
 
