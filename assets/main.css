@@ -1,0 +1,46 @@
+/*
+Error: Invalid CSS after "... site.theme }}"": expected "{", was ";"
+        on line 3 of main.scss
+
+1: ---
+2: ---
+3: @import  "{{ site.theme }}";
+4: 
+5: table.data-block {
+6: 	margin-top: 2px;
+7: 	margin-bottom: 20px;
+8: 	width: 100%;
+
+Backtrace:
+main.scss:3
+/Users/LyleResnick/.rvm/gems/ruby-2.4.0@global/gems/sass-3.4.23/lib/sass/scss/parser.rb:1207:in `expected'
+/Users/LyleResnick/.rvm/gems/ruby-2.4.0@global/gems/sass-3.4.23/lib/sass/scss/parser.rb:1137:in `expected'
+/Users/LyleResnick/.rvm/gems/ruby-2.4.0@global/gems/sass-3.4.23/lib/sass/scss/parser.rb:1132:in `tok!'
+/Users/LyleResnick/.rvm/gems/ruby-2.4.0@global/gems/sass-3.4.23/lib/sass/scss/parser.rb:665:in `block'
+/Users/LyleResnick/.rvm/gems/ruby-2.4.0@global/gems/sass-3.4.23/lib/sass/scss/parser.rb:658:in `ruleset'
+/Users/LyleResnick/.rvm/gems/ruby-2.4.0@global/gems/sass-3.4.23/lib/sass/scss/parser.rb:684:in `block_child'
+/Users/LyleResnick/.rvm/gems/ruby-2.4.0@global/gems/sass-3.4.23/lib/sass/scss/parser.rb:674:in `block_contents'
+/Users/LyleResnick/.rvm/gems/ruby-2.4.0@global/gems/sass-3.4.23/lib/sass/scss/parser.rb:125:in `stylesheet'
+/Users/LyleResnick/.rvm/gems/ruby-2.4.0@global/gems/sass-3.4.23/lib/sass/scss/parser.rb:41:in `parse'
+/Users/LyleResnick/.rvm/gems/ruby-2.4.0@global/gems/sass-3.4.23/lib/sass/engine.rb:406:in `_to_tree'
+/Users/LyleResnick/.rvm/gems/ruby-2.4.0@global/gems/sass-3.4.23/lib/sass/engine.rb:381:in `_render_with_sourcemap'
+/Users/LyleResnick/.rvm/gems/ruby-2.4.0@global/gems/sass-3.4.23/lib/sass/engine.rb:298:in `render_with_sourcemap'
+/Users/LyleResnick/.rvm/gems/ruby-2.4.0@global/gems/sass-3.4.23/lib/sass/plugin/compiler.rb:492:in `update_stylesheet'
+/Users/LyleResnick/.rvm/gems/ruby-2.4.0@global/gems/sass-3.4.23/lib/sass/plugin/compiler.rb:215:in `block in update_stylesheets'
+/Users/LyleResnick/.rvm/gems/ruby-2.4.0@global/gems/sass-3.4.23/lib/sass/plugin/compiler.rb:209:in `each'
+/Users/LyleResnick/.rvm/gems/ruby-2.4.0@global/gems/sass-3.4.23/lib/sass/plugin/compiler.rb:209:in `update_stylesheets'
+/Users/LyleResnick/.rvm/gems/ruby-2.4.0@global/gems/sass-3.4.23/lib/sass/plugin.rb:82:in `update_stylesheets'
+/Users/LyleResnick/.rvm/gems/ruby-2.4.0@global/gems/sass-3.4.23/lib/sass/exec/sass_scss.rb:340:in `watch_or_update'
+/Users/LyleResnick/.rvm/gems/ruby-2.4.0@global/gems/sass-3.4.23/lib/sass/exec/sass_scss.rb:51:in `process_result'
+/Users/LyleResnick/.rvm/gems/ruby-2.4.0@global/gems/sass-3.4.23/lib/sass/exec/base.rb:52:in `parse'
+/Users/LyleResnick/.rvm/gems/ruby-2.4.0@global/gems/sass-3.4.23/lib/sass/exec/base.rb:19:in `parse!'
+/Users/LyleResnick/.rvm/gems/ruby-2.4.0@global/gems/sass-3.4.23/bin/scss:13:in `<top (required)>'
+/Users/LyleResnick/.rvm/gems/ruby-2.4.0/bin/scss:22:in `load'
+/Users/LyleResnick/.rvm/gems/ruby-2.4.0/bin/scss:22:in `<main>'
+/Users/LyleResnick/.rvm/gems/ruby-2.4.0/bin/ruby_executable_hooks:15:in `eval'
+/Users/LyleResnick/.rvm/gems/ruby-2.4.0/bin/ruby_executable_hooks:15:in `<main>'
+*/
+body:before {
+  white-space: pre;
+  font-family: monospace;
+  content: "Error: Invalid CSS after \"... site.theme }}\"\": expected \"{\", was \";\"\A         on line 3 of main.scss\A \A 1: ---\A 2: ---\A 3: @import  \"{{ site.theme }}\";\A 4: \A 5: table.data-block {\A 6: 	margin-top: 2px;\A 7: 	margin-bottom: 20px;\A 8: 	width: 100%;"; }

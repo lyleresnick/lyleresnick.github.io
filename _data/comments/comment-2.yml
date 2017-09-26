@@ -1,0 +1,4 @@
+name: Lyle Resnick2
+email: lyle@fjfjg.com2
+message: The biggest change is that the responsibility for creation and storage of the ViewModels has been moved from the table __Adapter__ to the UseCaseOutput, A.K.A. the Presenter. The Adapter is now solely responsible for attaching the TableView to the Presenter
+date: 2017-09-25-2

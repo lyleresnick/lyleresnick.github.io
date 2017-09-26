@@ -1,0 +1,20 @@
+<div class="comments">
+    {% assign comments = site.data.comments | sort %}
+
+    {% for comment_hash in comments reversed %}
+    {% assign comment = comment_hash[1]  %}
+
+    <article class="comment">
+        <div class="name">
+            {{ comment.name }}
+        </div>
+        <div class="date">
+            {{ comment.date }}
+        </div>
+
+        <div class="message">
+            <p> {{ comment.message | markdownify }}</p>
+        </div>
+    </article>
+    {% endfor %}
+</div>
