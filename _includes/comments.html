@@ -1,5 +1,5 @@
 <div class="comments">
-    {% assign comments = site.data.comments | sort %}
+    {% assign comments = site.data.comments[page.slug] | sort %}
 
     {% for comment_hash in comments reversed %}
     {% assign comment = comment_hash[1]  %}

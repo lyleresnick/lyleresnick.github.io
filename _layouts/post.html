@@ -20,12 +20,13 @@ layout: default
   </div>
 
   <div class="post-content">
-    {% assign commentCount = site.data.comments | size %}
-    {% if commentCount == 0 %}
-      <h2> Comments</h2>
-    {% else %}
-      <h2> {{ commentCount }} Comments</h2>
-    {% endif %}
-
+      {% assign commentCount = site.data.comments[page.slug] | size %}
+      {% if commentCount == 0 %}
+         <h2> Comments</h2>
+      {% else %}
+         <h2> {{ commentCount }} Comments</h2>
       {% include comments.html %}
+
+      {% endif %}
+
   </div>
