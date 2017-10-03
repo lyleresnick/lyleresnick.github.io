@@ -59,3 +59,45 @@ code { font-family: 'Source Code Pro'; }
 	}
 
 }
+
+fieldset {
+	border-width:0;
+}
+
+
+
+#comment-form {
+	display: block;
+	#comment-form-message {
+		width: 100%;
+	}
+	#comment-form-name {
+		margin: 12px 0px;
+		width: 100%;
+	}
+	#comment-form-email {
+		margin: 12px 0px;
+		width: 100%;
+	}
+
+	#comment-form-submit {
+		margin:1em 0;
+
+		display: inline-block;
+		padding: .5em 1em;
+		border:0;
+		border-radius: .25em;
+
+		background-color: #000000;
+		color: #fff;
+
+		line-height: 1.5;
+		text-align: center;
+
+		font-weight: 700;
+		text-decoration: none;
+		text-transform: none;
+	}
+
+
+}
