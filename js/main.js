@@ -12,7 +12,7 @@
             data: $(this).serialize(),
             contentType: 'application/x-www-form-urlencoded',
             success: function (data) {
-                showModal('Comment submitted', 'Thanks for your comment! It will show on the site once it has been approved. You can see the pull request <a href="https://github.com/lyleresnick/lyleresnick.github.io/pulls">here</a>.');
+                showModal('Comment submitted', 'Thanks for your comment! It will show on the site once it has been approved.');
                 $(form).removeClass('form--loading');
             },
             error: function (err) {
