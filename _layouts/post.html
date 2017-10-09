@@ -22,11 +22,11 @@ layout: default
   <div class="post-content">
       {% assign commentCount = site.data.comments[page.slug] | size %}
       {% if commentCount == 0 %}
-         <h2> Comments</h2>
+          <h2> Comments</h2>
       {% else %}
-         <h2> {{ commentCount }} Comments</h2>
-      {% include comments.html %}
-
+          <h2> {{ commentCount }} Comments</h2>
+          {% include comments.html %}
+         {% include modal.html %}
       {% endif %}
 
   </div>
