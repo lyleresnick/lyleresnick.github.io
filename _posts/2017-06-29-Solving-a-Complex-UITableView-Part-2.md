@@ -12,7 +12,7 @@ In [part 1]({{site.url}}/blog/2017/05/13/Solving-a-Complex-UITableView.html) of 
 - take advantage of a few key Swift features, namely failable enum initializers, enums with associated values, and extensions and
 - redistribute the code which converts the input and output data.
 
-The complete app which demonstrates this refactoring can be found at [**ReportTableDemo**](https://github.com/lyleresnick/ReportTableDemo). The app which I will be refactoring can be found at [**ReportTableAdapterDemo**](https://github.com/lyleresnick/ReportTableAdapterDemo).
+The complete app which demonstrates the result of the refactoring can be found at [**ReportTableDemo**](https://github.com/lyleresnick/ReportTableDemo). The original app which I will be refactoring can be found at [**ReportTableAdapterDemo**](https://github.com/lyleresnick/ReportTableAdapterDemo).
 
 
 ## Responsibilities of the ViewController 
