@@ -9,7 +9,7 @@
             {{ comment.name }}
         </div>
         <div class="date">
-            {{ comment.date }}
+            {{ comment.date | date_to_long_string }}
         </div>
 
         <div class="message">
