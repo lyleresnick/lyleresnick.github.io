@@ -16,6 +16,7 @@
             <input type="email" id="comment-form-email" name="fields[email]" required spellcheck="false">
         </fieldset>
         <fieldset class="hidden" style="display: none;">
+            <input type="hidden" id="comment-post-id" name="options[slug]" value="{{ page.slug }}">
             <label for="comment-form-address">Leave blank if you are a human</label>
             <input type="text" id="comment-form-address" name="fields[address]" autocomplete="off">
         </fieldset>
