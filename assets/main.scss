@@ -1,6 +1,7 @@
 ---
 ---
 @import  "{{ site.theme }}";
+@import  "{{ site.url }}/assets/modal.css";
 
 table.data-block {
 	margin-top: 2px;
@@ -42,3 +43,67 @@ code { font-family: 'Source Code Pro'; }
 .highlight .p { color: #000000;  font-weight: normal } /* Punctuation */
 .highlight .c1 { color: #984203; font-style: italic; } /* Comment.Single */
 .highlight .kc { color: #42349f; font-weight: normal } /* Keyword.Constant */
+
+.comment {
+  	.name {
+	  font-size: 24px;
+	  margin-bottom: 6px;
+	}
+	.date {
+	  font-size: 14px;
+	  margin-bottom: 10px;
+	}
+	.message {
+		font-size: 16px;
+	  	margin-bottom: 12px;
+
+	}
+
+}
+
+fieldset {
+	border-width:0;
+}
+
+
+
+#comment-form {
+	display: block;
+
+	fieldset {
+		padding-left: 0;
+		padding-right: 0;
+	}
+	#comment-form-message {
+		width: 100%;
+	}
+	#comment-form-name {
+		margin: 12px 0px;
+		width: 100%;
+	}
+	#comment-form-email {
+		margin: 12px 0px;
+		width: 100%;
+	}
+
+	#comment-form-submit {
+		margin:1em 0;
+
+		display: inline-block;
+		padding: .5em 1em;
+		border:0;
+		border-radius: .25em;
+
+		background-color: #000000;
+		color: #fff;
+
+		line-height: 1.5;
+		text-align: center;
+
+		font-weight: 700;
+		text-decoration: none;
+		text-transform: none;
+	}
+
+
+}
