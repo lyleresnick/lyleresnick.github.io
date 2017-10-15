@@ -86,10 +86,10 @@ I will demonstrate this in a demo app that you can find at [**ReportTableAdapter
 
 In order to satisfy the requirements for the demo, we can break down the app into a number of tasks 
 
-1. Represent the the input data for the demo
-2. Visualize the output stream data
-3. Transform the transaction rows into a form that can be easily displayed
-4. Display the rows in a tableview through a datasource 
+1. represent the the input data for the demo
+2. visualize the output stream data
+3. transform the transaction rows into a form that can be easily displayed
+4. display the rows in a tableview through a datasource 
 
 
 
@@ -109,7 +109,7 @@ struct TransactionModel {
 }
 ```
 
-The `TransactionModel` represents the data model that a service layer would deliver to the viewController. The data is not delivered exactly as it should be - we will revisit this in a future post. It does not matter that the data is coming from two different sources. What matters is that the data can be coerced to the same format, which allows the processing for the two sources to be identical - think: protocols.
+The `TransactionModel` represents the data model that a service layer would deliver to the viewController. The data is not delivered exactly as it should be - I will revisit this in the next post. It does not matter that the data is coming from two different sources. What matters is that the data can be coerced to the same format, which allows the processing for the two sources to be identical - think: protocols.
 
 I have created data to represent the two input streams: `authorizedData` and `postedData`. Both streams are simply arrays of `TransactionModel`s. Each transaction looks similar to this: 
 
@@ -122,7 +122,7 @@ You can view the whole input stream [**here**](https://github.com/lyleresnick/Re
 
 ## Designing the View
 
-The next thing i want to do is design the rows I'm going to "print" . I do this first, visually, with IB and then think about the code to generate the lines. 
+Next, I want to design the rows I'm going to "print" . I do this first, visually, with IB and then think about the code to generate the lines. 
 
 I have specified a cell for each type of row  that is required to be displayed. There are 7 cell types, corresponding to:
 
@@ -150,9 +150,9 @@ Part of my solution strategy is to avoid computation wherever possible. Even tho
 - The grandfooter cell background is always blue. 
 - The static title text is different  
 
-By separating out the behaviour by type, it will be easy to change either of the two row styles, without affecting the other, if a design change is required.
+By separating out the behaviour by type, it will be easy to change either of the two row styles, without affecting the other, when a design change is required.
 
-In the same way, I could have designed the *detail* cell so that it would change its height dynamically, depending on whether it was the last row in a group, I chose not to. I would have to introduce a boolean to record the actual type that the cell should be. I decided to introduce a subfooter cell just to take up the space below the last detail.  It is highlighted in the screen shot above.
+In the same way, I could have designed the *detail* cell so that it would change its height dynamically, depending on whether it was the last row in a group. I chose not to do that. I would have to introduce a boolean to implicitly record the actual type that the cell should be. I decided to introduce a *subfooter* cell just to take up the space below the last detail.  It is highlighted in the screen shot above.
 
 ## Generating the Rows
 
@@ -229,13 +229,13 @@ private func appendSection(transactions: [TransactionModel]?, title: String) {
 }
 ```
 
-`appendSection` transforms the input `TransactionModel`s to an output stream defined by the `TransactionListTransformerOutput` protocol. Given the requirement that the input streams come from two different sources, a `TransactionModel` could also be an abstract protocol, representing two different concrete models.
+`appendSection` transforms the input `TransactionModel`s to an output stream defined by the `TransactionListTransformerOutput` protocol. Given the requirement that the input streams come from two different sources, a `TransactionModel` could also be implemented as an abstract protocol, representing two different concrete models.
 
-The transformer assumes that the transactions are ordered by date. The code is organized so that 
+The transformer assumes that the transactions are sorted by date. The code is organized so that 
 
 1. the input is a stream of transactions terminated by `nil`
 2. there is an iteration for each Date. 
-3. within the Date iteration there is an iteration for each Detail having the same date.
+3. within the Date iteration there is an iteration for each Detail that has the same date.
 4. at the appropriate times, rows are appended to the output stream
 
 The first point is implemented by this idiom: 
@@ -255,21 +255,21 @@ In the inner iteration the data is transformed and added to the section total. A
 
 Data is sent to the output stream as it is produced. 
 
-By the way: the structure for the transformer was derived systematically from the output requirement using a technique that I will discuss in a future article.
+By the way, the structure for the transformer was derived systematically from the output requirement using a technique called *Data directed Design*, which I will discuss in a future article.
 
-## The Adapter
+## The TableView Adapter
 
-From the break down of the tasks listed above, it seems like we need two major objects (at least), one to transform the input data stream and one to supply the output of the transformation to the tableView as a dataSource.
+From the break down of the tasks listed above, it seems like we need (at least) two major classes: one to transform the input data stream and one to supply the output of the transformation to the tableView as a dataSource.
 
 ### Massive View Controllers
 
-There is a lot of talk these days about the the problems associated with the Massive View Controller (MVC). The problem with MVCs is that they are hard to understand because of large scope and hard to change due to coupling. 
+There is a lot of talk these days about the problems associated with the Massive ViewController (MVC). The problem with MVCs is that they are hard to understand because of large scope and they are hard to change due to coupling. 
 
-One simple to implement best practice, which will allow you to avoid MVCs that contain a tableView is to create a separate class to act as the datasource for a tableView. I acknowledge that almost every demonstration, by Apple or otherwise, implements the dataSource as part of the viewController. Once you get used to separating them, you will see that VC implemented dataSources are an anti-pattern leading to code bloat. You can read more about this in [**Lighter View Controllers**](https://www.objc.io/issues/1-view-controllers/lighter-view-controllers/).
+One simple-to-implement best practice, which will allow you to avoid MVCs that contain a tableView is to create a separate class to act as the datasource for a tableView. I acknowledge that almost every demonstration, by Apple or otherwise, implements the dataSource as part of the viewController. Once you get used to separating them, you will see that implementing a dataSource in a ViewController is an anti-pattern leading to code bloat. You can read more about this in [**Lighter View Controllers**](https://www.objc.io/issues/1-view-controllers/lighter-view-controllers/).
 
 By moving the the task of collecting the TransformerOutput to another class, the Adapter, we neatly split the application into two major components. The viewController generates the rows and the adapter collects the rows. 
 
-I want to point out that both the viewController and the Adapter have other responsibilities . The viewController is also responsible for managing its views and and the adapter is responsible for producing cells for the table in its role as a tableViewDataSource. That being said, separating out the adapter from the viewcontroller is a good start to separating responsibilities and I will leave the resolution of the other conflicting responsibilities to a future article.
+I want to point out that both the viewController and the Adapter have other responsibilities . The viewController is also responsible for managing its views and and the adapter is responsible for producing cells for the table in its role as a tableViewDataSource. That being said, separating out the adapter from the viewcontroller is a good start to separating responsibilities. I will leave the resolution of the other conflicting responsibilities to a future article.
 
 ### Three Protocols
 
