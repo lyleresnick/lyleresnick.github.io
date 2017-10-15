@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Solving a Complex UITableView"
+title: "Solving a Complex UITableView using Swift"
 date: 2017-05-13
 ---
 
