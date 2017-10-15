@@ -14,17 +14,17 @@ One common way to architect an app is to layer the app into an interface layer a
 
 The service layer is responsible for transferring data between the interface layer and the internet, local databases, or the filesystem.  This layer may also perform other non-functional duties such as  caching, syncing, etc. 
 
-The interface layer does something with all this data that is ultimately the purpose of the app.
+The interface layer does something with all this data - which is ultimately the purpose of the app.
 
-This two layer architecture is too simple. It does not account for the placement of all of the responsibilities of the so called *interface layer*. A lot of processing happens in this layer. All of this processing ends up inside a UIViewController.
+This two layer architecture is too simple. It does not account for the placement of all of the responsibilities of the so called *interface layer*. A lot of processing happens in this layer. Many times, all of this processing ends up inside a UIViewController.
 
 In commercial applications, UIViewControllers get large. I've seen 2000 lines in a UIViewController.
 
 VIPER is a micro-architecture - a predefined set of classes that work together to structure a solution. VIPER is an implementation of [Bob Martin's Clean Architecture](https://8thlight.com/blog/uncle-bob/2012/08/13/the-clean-architecture.html). 
 
-In this article I will describe the various components and responsibilites of the VIPER architecture. 
+In this article I will describe the various components and responsibilities of the VIPER architecture. 
 
-In the next article, I'm going to demonstrate that the VIPER architecture can be very simple to implement and show how its benefits can be realized very quickly.  I'll use the requirement and solution to the Complex UITableView from the last [post]({{site.url}}/blog/2017/06/29/Solving-a-Complex-UITableView-Part-2.html) as the basis of this example. The app which demonstrates the refactoring to Clean Architecture can be found at [**CleanReportTableDemo**](https://github.com/lyleresnick/CleanReportTableDemo). I will be explaining this app in the next post.
+In the next article, I'm going to demonstrate that the VIPER architecture can be very simple to implement and show how its benefits can be realized very quickly.  I'll use the requirement and solution to [Solving a Complex UITableView Even More Swiftly]({{site.url}}/blog/2017/06/29/Solving-a-Complex-UITableView-Even-More-Swiftly.html) as the basis of this example. The app which demonstrates the refactoring to Clean Architecture can be found at [**CleanReportTableDemo**](https://github.com/lyleresnick/CleanReportTableDemo). I will be explaining this app in the next post.
 
 ## An Explanation of the VIPER Architecture 
 
@@ -50,11 +50,11 @@ As Uncle Bob's diagram shows, a Clean System is separated into layers:
 
 ### Object Dependencies should point Towards the Centre 
 
-In the Clean Architecture, object dependencies can only be explicit in one direction - towards the centre. This is shown in the diagram by the dependency arrow pointing inward. A class in a layer closer to the center cannot know the name of a class in a layer closer to the outside. All dependencies going in a direction away from the centre must be implemented as a dependency inversion, which means a protocol (in Swift, interface, in Java) must be used. 
+In the Clean Architecture, object dependencies can only be explicit in one direction - towards the centre. This is shown in the diagram by the dependency arrow pointing inward. A class in a layer closer to the centre is not allowed know the name of a class in a layer closer to the outside. 
 
-All dependencies going in a direction away from the centre must be implemented as a dependency inversion. The inversion is implemented as a protocol and the object has to be injected into the layer. This works great for testing. 
+All dependencies going in a direction away from the centre must be implemented as a dependency inversion. The inversion is implemented as a protocol and the dependent object must to be injected into the layer. This is great for testing. 
 
-The *Flow of control* diagram, on the right, shows the implementation of a dependency inversion where the Presenter implements the UseCaseOutput, which is produced by the UseCase. This makes it so that the UseCase has no idea who where it is sending its output. The relationship between the UI and the PresenterOutput is analogous.
+The *Flow of control* diagram, on the right, shows the implementation of a dependency inversion where the Presenter implements the UseCaseOutput, which is produced by the UseCase. This implementation makes it so that the UseCase has no idea who where it is sending its output. The relationship between the UI and the PresenterOutput is analogous.
 
 ### Copy Data Values
 
@@ -863,7 +863,7 @@ The benefit of VIPER is the organizational lever it provides for a project. Ever
 
 I think that VIPER is the perfect architecture for large codebases with frequently changing requirements. It is definately an effective tool for alleviating the Massive ViewController problem.
 
-In my next blog I will demonstrate an implementation of VIPER using the Banking Report from the last [post]({{site.url}}/blog/2017/06/29/Solving-a-Complex-UITableView-Part-2.html).
+In my next blog I will demonstrate an implementation of VIPER using the Banking Report from the last [post]({{site.url}}/blog/2017/06/29/Solving-a-Complex-UITableView-Even-More-Swiftly.html).
 
 
 

@@ -4,16 +4,15 @@ title: Who am I
 ---
 
 {: .blurb}
-# Hi there, I'm Lyle Resnick!
+# I'm Lyle Resnick
 
-These days I develop iOS and Android mobile applications. 
-My current primary interest is *Clean Mobile Architecture* and *Test Driven Mobile Development*. 
+I develop iOS and Android mobile applications. I think software code quality is very important. 
 
-I think software code quality is very important, and I really like how these two techniques contribute to creating software that easy to change and is free of bugs.
+Currently, my primary interests are *Clean Mobile Architecture* and *Test Driven Development*. My experience has shown me that these two techniques work well together to produce software that is easy to change and free of bugs.
 
-I have over thirty years of software experience.  Some of my major technical accomplishments include the development of commercial compilers, window systems, and forms libraries for both desktop & mobile. 
+I have over thirty years of software experience.  Some of my major technical accomplishments include the development of commercial compilers, window systems, and forms frameworks for both desktop & mobile. 
 
-I have written a lot of software.  In Mobile development, I have acted as development lead and developer of apps for:
+I have written a lot of software. In Mobile development, I have acted as development lead and developer of apps for:
 
 - Social Networking
 - Banking
