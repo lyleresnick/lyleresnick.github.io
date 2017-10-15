@@ -6,7 +6,7 @@ date: 2017-06-29
 
 ## Introduction
 
-In [part 1]({{site.url}}/blog/2017/05/13/Solving-a-Complex-UITableView-using-Swift.html) of this article, I introduced a solution for solving a complex UITableView. In this article, I want to improve the solution by refactoring the code in three ways:
+In [Solving a Complex UITableView using Swift]({{site.url}}/blog/2017/05/13/Solving-a-Complex-UITableView-using-Swift.html), I introduced a solution for solving a complex UITableView. In this article, I want to improve the solution by refactoring the code in three ways:
 
 - remove even more responsibilities from the ViewController and distribute them into new or existing classes
 - take advantage of a few key Swift features, namely failable enum initializers, enums with associated values, and extensions and
@@ -29,7 +29,7 @@ As you may have heard before, this is kind of viewController is known as a *Mass
 
 ## Introducing the Transformer Class
 
-In part 1, the [`TransactionListViewController`](https://github.com/lyleresnick/ReportTableAdapterDemo/blob/master/ReportTableAdapterDemo/TransactionListViewController.swift) implemented a function named `transformFromTwoSources`. I have moved the implementation of this function to a class, `TransactionListTwoSourceTransformer`.
+In the last article, the [`TransactionListViewController`](https://github.com/lyleresnick/ReportTableAdapterDemo/blob/master/ReportTableAdapterDemo/TransactionListViewController.swift) implemented a function named `transformFromTwoSources`. I have moved the implementation of this function to a class, `TransactionListTwoSourceTransformer`.
 
 The viewController now looks like this: 
 

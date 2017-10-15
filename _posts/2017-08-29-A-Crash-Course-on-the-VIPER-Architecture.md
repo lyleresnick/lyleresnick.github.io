@@ -24,7 +24,7 @@ VIPER is a micro-architecture - a predefined set of classes that work together t
 
 In this article I will describe the various components and responsibilites of the VIPER architecture. 
 
-In the next article, I'm going to demonstrate that the VIPER architecture can be very simple to implement and show how its benefits can be realized very quickly.  I'll use the requirement and solution to the Complex UITableView from the last [post]({{site.url}}/blog/2017/06/29/Solving-a-Complex-UITableView-Even-More-Swiftly.html) as the basis of this example. The app which demonstrates the refactoring to Clean Architecture can be found at [**CleanReportTableDemo**](https://github.com/lyleresnick/CleanReportTableDemo). I will be explaining this app in the next post.
+In the next article, I'm going to demonstrate that the VIPER architecture can be very simple to implement and show how its benefits can be realized very quickly.  I'll use the requirement and solution to [Solving a Complex UITableView Even More Swiftly]({{site.url}}/blog/2017/06/29/Solving-a-Complex-UITableView-Even-More-Swiftly.html) as the basis of this example. The app which demonstrates the refactoring to Clean Architecture can be found at [**CleanReportTableDemo**](https://github.com/lyleresnick/CleanReportTableDemo). I will be explaining this app in the next post.
 
 ## An Explanation of the VIPER Architecture 
 
