@@ -32,19 +32,19 @@ Over time, new requirements will present themselves. Unless this code is refacto
 
 ## UITableView Sections
 
-Occasionally, a more complicated requirement comes along, such as having to create a table view that displays many kinds of cells, where the cells repeat in regular cycles. An example of this would be a report which has repeating groups, where each group consists of a Header, followed by a repetition of Detail Rows, followed by a Footer. The Headers display a date, location or type; they may even contain a button. The Footer displays a total for the section. The Details display all of the other data from the input dataset. There may be more than one kind of Detail - some might display a button and some might not.
+Occasionally, a more complicated requirement comes along, such as having to create a UITableView that displays many kinds of cells, where the cells repeat in regular cycles. An example of this would be a report which has repeating groups, where each group consists of a Header, followed by a repetition of Detail Rows, followed by a Footer. The Header might display a date, location or type; it might contain a button. The Footer might display a total for the section. The Details display all of the other data from the input dataset. There may be more than one kind of Detail - some might display a button and some might not.
 
 One solution for this kind of requirement is to use UITableView sections. Tableview sections directly support the display of section header and footer views. The tableView can use indexPaths containing a section index and a row index to access each section and each section's associated data. 
 
-When using sections you have to organize the input data into groups to represent the sections. Sometimes, by chance, the input data is already structured into groups, but, most of the  time you will have to structure it yourself. Usually the structure is an array of arrays of the input dataset.
+When using sections you need to organize the input data into groups to represent the sections. Sometimes, by chance, the input data is already structured into groups, but, most of the  time you will have to structure it yourself. Usually the structure will be an array of structures containing precalculated header and footer data and an array containing the related portion of the input dataset.
 
 ## A Complex Requirement
 
-Things get more complicated when you have a requirement to display repeating groups that themselves contain repeating groups. It is more complicated because UITableViews do not directly  support this kind of structure.
+Things get more complicated when you have to produce a display containing repeating groups that themselves contain repeating groups. One reason it is more complicated is because UITableViews do not directly  support this kind of structure.
 
-Suppose there are two simple input streams of credit card transactions: one Posted, and the other Authorized. Posted are those that are due for payment; Authorized are those that are recent and not due. The input data streams are not identical in format, but each one contains identical data. Each transaction record consists of a Date, a Description, an Amount,  and a Debit indicator. The input streams are sorted by Date.
+Suppose there are two simple input streams of credit card transactions: one Posted, and the other Authorized. Posted Transactions are those that are due for payment; Authorized Transactions are those that are recent and not due. The input data streams are not identical in format, but each one contains identical data. Each transaction record consists of a Date, a Description, an Amount,  and a Debit indicator. The input streams are sorted by Date.
 
-The requirement is two create a display where Transactions will be displayed in two groups. Posted Transactions will be displayed first, followed by Authorized Transactions. The Transaction type, Posted or Authorized will be displayed as a Header at the beginning each group. The total of each Transaction Group will be displayed as a Footer at the end of each group. Transaction rows will be further grouped and displayed by Date. 
+The requirement is to create a display where the Transactions will be displayed in two groups. Posted Transactions will be displayed first, followed by Authorized Transactions. The Transaction type, Posted or Authorized will be displayed as a Header at the beginning each group. The total of each Transaction Group will be displayed as a Footer at the end of each group. Transaction rows will be further grouped and displayed by Date. 
 
 The Date will be displayed in a Subheader before each group of Details having the same date. Each Date group and Total row will to be banded with alternating colours. There is also a requirement that the margin before the Date SubHeader is the same as the margin after the last Detail in each row - imagine a box containing the Date followed by the Details with equal top and bottom margins.
 
@@ -52,7 +52,7 @@ Each Detail row will contain the Description, and Amount of the Transaction. Deb
 
 The last row will contain the total of all of the displayed transactions.
 
-When data is not available for any of the transaction streams, you are required to display the Header as usual with an error message, without sub-headers, sub-footers or a footer.
+When data is not available for any of the transaction streams, you are required to display the Header as usual with an error message, without Subheaders, Subfooters or a Footer.
 
 Here are screen shots of what the display should look like. Here is the top:
 
@@ -74,13 +74,13 @@ And here is the bottom:
 
 You can see that the output has repetitions of Transaction Type Groups and each of those has repetitions of Date groups.  You cannot map the original data set, by index, with the data to be displayed by the tableView. There are more rows in the display than in the original data streams. 
 
-You cannot rely on a function of the index to determine the cell type for any given index and you cannot rely on the builtin section support, because you have to implement section headers, subheaders, subfooters and footers.
+You cannot rely on a function of the index to determine the cell type for a given index and you cannot rely on the builtin section support, because you have to implement section Headers, Subheaders, Subfooters and Footers.
 
-When things get this complex, a different solution is mandated. By the way,  Android ListViews and RecyclerViews do not have builtin support for sections.
+When things get this complex, a different kind of solution is necessary. 
 
 ## A Different Perspective
 
-Another way to think about the task is this: you are going to transform the input data stream to an output stream and then print it on paper, or at least on a web page, of whatever length you require. The trick is to not commit to the actual output - its just an abstraction. Once you have created the output data stream,  you just have to collect it in such a way that the tableView can easily display the output.
+Another way to think about the task is this: you are going to transform the input data stream to an output stream and then print it on paper, or at least on a web page, of whatever length you require. The trick is to not commit to the actual output styling - its just an abstraction. Once you have created the output data stream,  you just have to collect it in such a way that the tableView can easily display the output.
 
 I will demonstrate this in a demo app that you can find at [**ReportTableAdapterDemo**](https://github.com/lyleresnick/ReportTableAdapterDemo).
 
@@ -88,8 +88,8 @@ In order to satisfy the requirements for the demo, we can break down the app int
 
 1. Represent the the input data for the demo
 2. Visualize the output stream data
-3. transform the transaction rows into a form that can be easily displayed
-4. display the rows in a tableView through a datasource 
+3. Transform the transaction rows into a form that can be easily displayed
+4. Display the rows in a tableview through a datasource 
 
 
 
@@ -585,5 +585,7 @@ You can imagine if I implemented all 3 of the protocols in the ViewController. A
 I could have moved the Cells and Rows into files of their own, except that the Rows would have to be internal scope, not private, because they are used by the Cells. It's not that I mind the internal scoping, so much as I mind that the Row names are too general for the increased scope. Sometimes it is just better to use better names to make things safe than to use private access and I'll attend to that shortly, in the next article.
 
  It is extremely easy to extend this pattern with further cell and row types. I didn't think twice about how to add the extra space in the banded block.
+
+By the way, in Android, ListViews and RecyclerViews do not have builtin support for sections, so I use the kind of solution presented here even when the requirement is only for single repeating sections. In iOS, I never use UITableView section support unless I need to display floating headers - I find it easier to use the presented solution.
 
 I will show in the next instalment how enums can be used to replace structs to simplify the code even further.
