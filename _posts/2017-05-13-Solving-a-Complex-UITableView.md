@@ -269,7 +269,7 @@ One simple-to-implement best practice, which will allow you to avoid MVCs that c
 
 By moving the the task of collecting the TransformerOutput to another class, the Adapter, we neatly split the application into two major components. The viewController generates the rows and the adapter collects the rows. 
 
-I want to point out that both the viewController and the Adapter have other responsibilities . The viewController is also responsible for managing its views and and the adapter is responsible for producing cells for the table in its role as a tableViewDataSource. That being said, separating out the adapter from the viewcontroller is a good start to separating responsibilities. I will leave the resolution of the other conflicting responsibilities to a future article.
+I want to point out that both the viewController and the Adapter have other responsibilities . The viewController is also responsible for managing its views and and the adapter is responsible for producing cells for the table in its role as a tableViewDataSource. That being said, separating out the adapter from the viewController is a good start to separating responsibilities. I will leave the resolution of the other conflicting responsibilities to a future article.
 
 ### Three Protocols
 
@@ -287,7 +287,7 @@ class TransactionListAdapter: NSObject {
 
 ### The TransformerOutput Implementation
 
-The `TransactionListTransformerOutput` protocol describes the output of the Transformer, but it is also the input to the Adapter. The naming scheme suggests that the rows will be appended to the output. The response to each message of the protocol is to append a row to the `rowList`. 
+Although the `TransactionListTransformerOutput` protocol describes the output of the Transformer, it is also describes the input to the Adapter. The naming scheme suggests that the rows will be appended to the output. The response to each message of the protocol is to append a row to the `rowList`. 
 
 ```swift
 extension TransactionListAdapter: TransactionListTransformerOutput {
@@ -339,7 +339,7 @@ The band colour has been captured by the *odd* property of the row. I could have
 
 ### Storage of the Rows
 
-The Rows are implemented  as `structs`. I had to write less code to implement the Rows using structs instead of classes, mostly because I did not have to specify a constructor. In the future, I also want to compare the rows and Swift directly supports equality comparison of structs (of scalars).  
+The Rows are implemented  as `structs`. I was able to write less code to implement the Rows using structs instead of classes, mostly because I did not have to specify a constructor. In the future, I also want to compare the rows and Swift directly supports equality comparison of structs (of scalars).  
 
 Each row type implements the `Row`  protocol.  
 
@@ -424,7 +424,7 @@ private struct MessageRow: Row {
 
 The Rows are pretty simple. They contain precisely the data needed for display; no further conversions are necessary. The result is that the Rows are pure ViewModels, having no behaviour. 
 
-The choice of where to put data conversion is interesting because there are many choices of where to place it: in the cell binding function, in the initializer for the ViewModel, in the transformer output function (the appender), or in the transformer itself. For now I've put most of the conversions in either the transformer or in the transformer output, but I think there is a better placement strategy. I will discuss this choice again in a future article. 
+The choice of where to put data conversion is interesting because there are many choices of where to place it: in the cell binding function, in the initializer for the ViewModel, in the transformer output function (the appender), or in the transformer itself. For now I've put most of the conversions in either the transformer or in the transformer output, but I think there is a better placement strategy. I will discuss this choice again in a the next post. 
 
 ### The Cells
 
@@ -447,9 +447,9 @@ private extension TransactionCell where Self: UITableViewCell {
 }
 ```
 
-Extensions are a great place to put reusable methods that usually end up in a base class. I could have created another protocol just for the `setBackgroundColour(odd:)` method so as to not include it where is was not required, but its usage is pretty much coupled to the implementation of bind(row:), so placing it in the `TransactionCell` protocol seems to be the right place. 
+Protocol Extensions are a great place to put reusable methods that usually end up in a base class. I could have created another protocol just for the `setBackgroundColour(odd:)` method so as to not include it where is was not required, but its usage is pretty much coupled to the implementation of bind(row:), so placing it in the `TransactionCell` protocol seems to be the right place. 
 
-I would have preferred to place the cell classes in the scope of the  `TransactionListAdapter`  or at least make them private to the file, but IB does not seem to be able to find them in either of these situation, so i settled for private IBOutlets.
+I would have preferred to place the cell classes in the scope of the  `TransactionListAdapter`  or at least make them private to the file, but Interface Builder does not seem to be able to find them in either of these situations, so I settled for private IBOutlets.
 
 There is not much left to do in the implementation of the `bind` methods - just cast, then set a few controls and the background colour.
 
@@ -538,7 +538,7 @@ class MessageCell: UITableViewCell, TransactionCell {
 
 ### The UITableViewDataSource Implementation
 
-Last but not least  we can move on to the implementation of the `UITableViewDataSource` and `UITableViewDelegate`.  
+At last we can move on to the implementation of the `UITableViewDataSource` and `UITableViewDelegate`.  
 
 ```swift
 extension TransactionListAdapter: UITableViewDataSource {
@@ -568,7 +568,7 @@ As you can see `tableView(_:numberOfRowsInSection:)` is trivial.
 
 `tableView(_:cellForRowAt:)` is more interesting in that it is also fairly simple: just access the row, dequeue the cell for the row's type (cellId), bind the row data to the cell and return the cell. How simple is that.
 
-`tableView(_:heightForRowAt:)` simply returns the height given by the row. This seem like it should be a property of the cell, but since the cell is not in scope in the method, it is easier to access via the row.
+`tableView(_:heightForRowAt:)` simply returns the height given by the row. The height seems like it should be a property of the cell, but the cell, and therefore the cell's type, is not directly accessible in the scope of the method. It is therefore easier to access the height via the row.
 
 It is interesting how trivial the implementation of `tableView(_:cellForRowAt:)` is. All of the usual work of deciding which cell is being setup is being handled automatically via Swift's protocol polymorphism - no switch statements required. All of the usual control assignments are relegated to the Cell classes that own the controls. 
 
@@ -582,9 +582,9 @@ I mentioned earlier I avoid doing calculations to dynamically determine types , 
 
 You can imagine if I implemented all 3 of the protocols in the ViewController. All 325 lines of code would have been in one file. You might also imagine that it might be easier to test that the Transformation is working correctly when classes are more specific in their responsibilities.
 
-I could have moved the Cells and Rows into files of their own, except that the Rows would have to be internal scope, not private, because they are used by the Cells. It's not that I mind the internal scoping, so much as I mind that the Row names are too general for the increased scope. Sometimes it is just better to use better names to make things safe than to use private access and I'll attend to that shortly, in the next article.
+I could have moved the Cells and Rows into files of their own, except that the Rows would have to be internal scope, not private, because they are used by the Cells. It's not that I mind the internal scoping, so much as I mind that the Row names are too general for the increased scope. Sometimes it is just better to use better names to make things safe than to use private access. I'll discuss this further, in the next blog article.
 
- It is extremely easy to extend this pattern with further cell and row types. I didn't think twice about how to add the extra space in the banded block.
+It is extremely easy to extend this pattern further with new cell and row types. I didn't think twice about how to add the extra space in the banded block.
 
 By the way, in Android, ListViews and RecyclerViews do not have builtin support for sections, so I use the kind of solution presented here even when the requirement is only for single repeating sections. In iOS, I never use UITableView section support unless I need to display floating headers - I find it easier to use the presented solution.
 
