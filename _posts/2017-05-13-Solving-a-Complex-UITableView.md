@@ -6,29 +6,29 @@ date: 2017-05-13
 
 ## Introduction
 
-In this article I want to present a technique for solving a complex UITableView. By complex, I mean a UITableView that is required to display more rows than occurs in the original data set.  At the same time I will present simple technique to reduce the size of the UIViewController that owns the UITableView.
+In this article I want to present a technique for solving a complex UITableView. By complex, I mean a tableView which is required to display more rows than occurs in the original data set.  At the same time I will present simple technique to reduce the size of the UIViewController that owns the tableView.
 
 ## Dynamic Display
 
-We often get requirements to create UITableView that displays more than one kind of row. Maybe the rows are alternately coloured and there is a refresh button or a total at the end of the table. Maybe in one state, a cell has a particular arrangement of views, but in another state, it has another arrangement.a 
+It is not unusual that one has to produce a UITableView which will display more than one kind of row. Maybe the rows are alternately coloured and there is a refresh button or a total at the end of the table. Maybe in one state, a cell has a particular arrangement of views, but in another state, it has another arrangement. 
 
-Usually, this kind of requirement can be solved by using the cell index, as given via `cellForRowAt` , to access the item at the same index in the input data set. At the time that `cellForRowAt` is called, you can determine: 
+This kind of tableview display can be created by using the cell index, as given via `cellForRowAt` , to access the item in the input data set. When `cellForRowAt` is called, you can determine: 
 
 - the cell colour from the index position, 
 - when to display the refresh button cell or total cell, instead of a regular cell, based on the size of the dataset,
-- the cell type with view arrangement based the input data item,
+- the cell type with a particular view arrangement based the input data item,
 - the total from the all items in the dataset, 
 - the data to display for the current row.
 
 The first three items are concerned with configuration and the others are concerned with assignment of data to the views. These are the two general responsibilities of `cellForRowAt`
 
-A `cellForRowAt` method which implements all of the above *dynamically* will be very long and full of `if`s, `switch`es, `&&`s and nested `if`s, most of which are required just to determine the type of the cell. Once the cell type is known, it is easy to make the assignments. 
+A `cellForRowAt` method which implements all of the above responsibilities *dynamically* will be very long and full of `if`s, `switch`es, `&&`s and nested `if`s, most of which are required just to determine the type of the cell. Once the cell type is known, it is easy to make the assignments. 
 
-When the assignment code is entangled in the code responsible for determination of type, it becomes very hard to understand and change. Whenever I begin to write code like this, I repeatedly feel like the code is asking "why am I here" and I just know there are  hidden classes begging to be found.
+I refer to the code in `cellForRowAt` as *dynamic*, because the type of the cell has to be determined and then processed each time that `cellForRowAt` is called. This is in contrast to a *static* technique, where the  type of  the cell is predetermined and the processing is done once, before `cellForRowAt` is ever called.
+
+When the assignment code is entangled in the code responsible for determination of type, it becomes very hard to understand and change. Whenever I begin to write code like this, I repeatedly feel like the code is asking "why am I here" and I know there are  hidden classes begging to be found.
 
 Over time, new requirements will present themselves. Unless this code is refactored so it is extensible and understandable, changes made by various developers will further obscure its intent.
-
-I refer to the activity in `cellForRowAt` as *dynamic*, because the class of the cell has to be determined over and over, each time that `cellForRowAt` is called. This is in contrast to a *static* technique, where the  type of  the cell is predetermined, once, before `cellForRowAt` is ever called.
 
 ## UITableView Sections
 
