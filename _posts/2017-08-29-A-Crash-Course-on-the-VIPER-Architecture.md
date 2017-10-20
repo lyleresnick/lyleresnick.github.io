@@ -6,31 +6,31 @@ date: 2017-08-29
 
 ## Introduction
 
-I've been exploring and using the VIPER architecture now for about 2 years. I think it is a really sensible solution for organizing and reducing the size of a massive View Controller. 
+I've been exploring and using the VIPER architecture now for about 2 years. I think it is a really sensible solution for organizing and reducing the size of a Massive View Controller. 
 
 Reducing the size of a UIViewController is a notable goal, but how should it be done? 
 
-One common way to architect an app is to layer the app into an interface layer and a service layer. 
+One common way to architect an app is to layer the app into an User Interface layer and a Service layer. 
 
-The service layer is responsible for transferring data between the interface layer and the internet, local databases, or the filesystem.  This layer may also perform other non-functional duties such as  caching, syncing, etc. 
+The Service layer is responsible for transferring data between the User Interface layer and either the internet, a local database, or the filesystem.  This layer may also perform other non-functional duties such as caching, syncing, etc. 
 
-The interface layer does something with all this data - which is ultimately the purpose of the app.
+The User Interface layer does something useful with this data - which is ultimately the purpose of the app.
 
-This two layer architecture is too simple. It does not account for the placement of all of the responsibilities of the so called *interface layer*. A lot of processing happens in this layer. Many times, all of this processing ends up inside a UIViewController.
+This two layer architecture is too simple. It does not account for the placement of all of the responsibilities of the so called *User Interface layer*. A lot of processing happens in this layer. Many times, all of this processing ends up inside a UIViewController.
 
 In commercial applications, UIViewControllers get large. I've seen 2000 lines in a UIViewController.
 
 VIPER is a micro-architecture - a predefined set of classes that work together to structure a solution. VIPER is an implementation of [Bob Martin's Clean Architecture](https://8thlight.com/blog/uncle-bob/2012/08/13/the-clean-architecture.html). 
 
-In this article I will describe the various components and responsibilities of the VIPER architecture. 
+In this post I will describe the various components and responsibilities of the VIPER architecture. 
 
-In the next article, I'm going to demonstrate that the VIPER architecture can be very simple to implement and show how its benefits can be realized very quickly.  I'll use the requirement and solution to [Solving a Complex UITableView Even More Swiftly]({{site.url}}/blog/2017/06/29/Solving-a-Complex-UITableView-Even-More-Swiftly.html) as the basis of this example. The app which demonstrates the refactoring to Clean Architecture can be found at [**CleanReportTableDemo**](https://github.com/lyleresnick/CleanReportTableDemo). I will be explaining this app in the next post.
+In the next post, I’ll demonstrate that the VIPER architecture can be very simple to implement and show how its benefits can be quickly realized.  I'll use the requirement and solution to [Solving a Complex UITableView Even More Swiftly]({{site.url}}/blog/2017/06/29/Solving-a-Complex-UITableView-Even-More-Swiftly.html) as the basis of this example. The app which demonstrates the refactoring to Clean Architecture can be found at [**CleanReportTableDemo**](https://github.com/lyleresnick/CleanReportTableDemo). I will be explaining this app in the next post.
 
 ## An Explanation of the VIPER Architecture 
 
-The main purpose of the VIPER architecture is to reduce the amount of code in a ViewController class. VIPER does this by allocating almost all of the responsibilities of a typical ViewController into other classes that have predefined responsibilities. You may recall that this echoes the Single Responsibility Principle. 
+The main purpose of the VIPER architecture is to reduce the amount of code contained in a ViewController. VIPER does this by allocating almost all of the responsibilities of a typical ViewController into other classes that have predefined responsibilities. You may recall that this echoes the Single Responsibility Principle. 
 
-Another purpose of the VIPER architecture is to reduce dependencies. It does this by honouring layer boundaries, passing only values between the layers and demanding that explicit object dependencies only go in one direction.
+Another purpose of the VIPER architecture is to reduce dependencies. It does this by honouring layer boundaries, passing only values between the layers and demanding that explicit object dependencies point only in one direction.
 
 All of this makes it easier to change the code which is normally contained in a UIViewController - which is usually everything.
 
@@ -42,27 +42,27 @@ To understand VIPER you need to understand a bit about the the Clean Architectur
 
 As Uncle Bob's diagram shows, a Clean System is separated into layers:
 
-- the User Interface is in the outermost layer of the  system 
+- the User Interface is in the outermost layer of the system 
 - the Entities are at the centre of the system and are the results of applying Enterprise Business Rules. 
 - the Application Business Rules reside in the layer which surrounds the Entities
 - the Data Store and Network, which provide the entities, are in the outermost layer
-- the Interface Adapters, and in particular the Presenters and Gateways are placed in a layer between the User Interface and Application Business logic layers
+- the Interface Adapters, and in particular, the Presenters and Gateways are placed in a layer between the User Interface and Application Business logic layers
 
 ### Object Dependencies should point Towards the Centre 
 
 In the Clean Architecture, object dependencies can only be explicit in one direction - towards the centre. This is shown in the diagram by the dependency arrow pointing inward. A class in a layer closer to the centre is not allowed know the name of a class in a layer closer to the outside. 
 
-All dependencies going in a direction away from the centre must be implemented as a dependency inversion. The inversion is implemented as a protocol and the dependent object must to be injected into the layer. This is great for testing. 
+All dependencies going in a direction away from the centre must be implemented as a dependency inversion. The inversion is implemented as a protocol and the dependent object must to be injected into the layer. You will find this is an advantage when writing tests. 
 
-The *Flow of control* diagram, on the right, shows the implementation of a dependency inversion where the Presenter implements the UseCaseOutput, which is produced by the UseCase. This implementation makes it so that the UseCase has no idea who where it is sending its output. The relationship between the UI and the PresenterOutput is analogous.
+The *Flow of control* diagram, on the right, shows the implementation of a dependency inversion where the Presenter implements the UseCaseOutput, which is produced by the UseCase. This implementation allows the UseCase to remain naive as to where it is actually sending its output. The relationship between the UI and the PresenterOutput is analogous.
 
 ### Copy Data Values
 
-Another requirement of the Clean Architecture is that data must be copied from layer to layer. This means that we can't pass the same data or data structure from one layer to the next: we can only pass copies. 
+Another requirement of the Clean Architecture is that data must be copied from layer to layer. This means that we cannot pass the same data or data structure from one layer to the next: we can only pass copies. 
 
 In Swift we can pass singular values, `struct`s of values or `enum`s with values as parameters and they will be copied automatically. 
 
-Copying data between layers by passing values, instead of objects prevents implementation changes in one layer accidentally affecting other layers. It also prevents errors due to implementation of concurrency.
+Copying data between layers by passing values, instead of objects prevents implementation changes in one layer accidentally affecting other layers. It also helps reduce  concurrent access errors.
 
 ### Honour The Layer Boundaries
 
@@ -86,31 +86,30 @@ This diagram shows the relationships between the VIPER classes.
 
 ![Diagram of VIPER classes]({{ site.url }}/assets/VIPER Class Diagram.png)
 
-The ViewController owns a Presenter, which in turn owns an Interactor.  The presenter has a one-way relationship with the Router. The Router owns and has a one-way relationship with child ViewControllers that it creates and manages
+The ViewController owns a Presenter, which in turn owns an Interactor.  The presenter has a one-way relationship with the Router. The Router owns and has a one-way relationship with child ViewControllers that it creates and manages.
 
 The ViewController sends messages to the Presenter, which in turn sends messages to the UseCase or the Router. 
 
-Each ViewController, Presenter and UseCase is called a VIP stack. In a VIPER architected system one VIP stack is created whenever a new UIViewControler is created.
+Each ViewController, Presenter and UseCase is called a VIP stack. In a VIPER architected system, one VIP stack is created whenever a new UIViewControler is created.
 
-The UseCase uses an injected EntityGateway to obtain access to EntityManagers.  EntityManagers are responsible for providing access to the Entities. The EntityGateway is used by all UseCases to  access  all available EntityManagers.
+The UseCase uses an injected EntityGateway to obtain access to EntityManagers. EntityManagers are responsible for providing access to the Entities. The EntityGateway is used by all UseCases to access all available EntityManagers.
 
-The Router is a VIP stack that knows about child ViewControllers. 
+The Router is a VIP stack that knows about child ViewControllers. This is a very important notion.
 
 ### Communication Between the Classes
 
-Since VIPER is an implementation of the Clean Architecture, there a few rules to follow: 
+Since VIPER is an implementation of the Clean Architecture, there are a few rules to follow: 
 
-1. Dependencies can only be explicit in one direction, towards the centre.
-2. Data must be copied from layer to layer via values or structs of values
+1. Dependencies can only be explicit in one direction: towards the centre.
+2. Data must be copied from layer to layer as values or structs of values
 
-
-Entities are at the centre. In order to access the entities, the EntityGateway must be injected into the Use Case. In order to remove the explicit dependency of the UseCase on the EntityGateway, the gateway is implemented as a protocol.
+Entities are at the centre. In order to access the Entities, the EntityGateway must be injected into the Use Case. In order to remove the explicit dependency of the UseCase on the EntityGateway, the gateway is implemented as a protocol.
 
 In order to transmit the results of the UseCase to the ViewController, they must be first sent to the Presenter. The Presenter sends its converted results to the ViewController. Since these messages are moving away from the centre, the target classes are specified as protocols. 
 
 The output of the UseCase is a protocol called the UseCaseOutput and the output of the Presenter is a protocol called the PresenterOutput. The ViewController implements the PresenterOutput protocol and the Presenter implements the UseCaseOutput protocol.
 
-Although outside the scope of this blog, I want to mention that the EntityManagers, that the EntityGateway provides, should also be implemented as protocols.
+Although outside the scope of this blog, I want to mention that the EntityManagers, which the EntityGateway provides, should also be implemented as protocols.
 
 ## The VIPER Pipeline
 
@@ -124,7 +123,7 @@ The diagram shows that a user or device initiates a sequence by sending an event
 
 The event is passed to the ViewController as usual. 
 
-In the case of repeating touchable areas displayed by UITable and UICollectionViews, a touch event should be sent to the UITable- or UICollectionViewCell, respectively. The index can be accessed from the cell's collection and then sent with the event.
+In the case of repeating touchable areas displayed by UITable and UICollectionViews, a touch event should be sent to the UITable- or UICollectionViewCell, respectively.
 
 It is useful think of the arrows as if they all pointed to the right as if in a waterfall. This promotes the idea that data flows in one direction only.
 
@@ -134,7 +133,7 @@ The ViewController's main role in VIPER is to the configure the View hierarchy. 
 
 In VIPER, the UIViewController sends <u>every</u> event coming from a UIControl or lifecycle method directly to the Presenter. The ViewController does not process the event in any way, whatsoever. It simply retrieves associated data, either input as text or selected by index, and sends it with the event to the Presenter. In the case of repeating UIControls contained in a UITableView or UICollectionView, the Cell receives the event and sends it to the Presenter.  Super simple!
 
-You can see in the interaction diagram that the ViewController has another role: show the output for the event. I will cover this later on in this article.
+You can see in the interaction diagram that the ViewController has another role: show the output for the event. I will discuss this later in this post.
 
 #### ViewController Examples
 
@@ -142,7 +141,7 @@ Here are some examples of UIViewControllers, or their delegate proxies, capturin
 
 ##### Initialization
 
-In this UIViewController `viewDidLoad` method, all views have been configured in Interface Builder.  There is nothing to do other than pass the message to the Presenter. 
+In this UIViewController `viewDidLoad` method, all views have been configured in Interface Builder. There is nothing to do other than pass the message to the Presenter. 
 
 I am passing the height of the main view to the Presenter so it can set the height of a UITableViewCell to the full screen height when showing  errors or other unusual states.
 
@@ -205,6 +204,8 @@ extension ContactListAdapter: UITableViewDelegate {
     }
 }
 ```
+
+When an event is generated in a cell by a control, the index should be injected into the cell so it can be sent with the event.
 
 ### The Presenter
 
