@@ -6,9 +6,9 @@ date: 2017-08-29
 
 ## Introduction
 
-I've been exploring and using the VIPER architecture now for about 2 years. I think it is a really sensible solution for organizing and reducing the size of a Massive View Controller. 
+I've been exploring and using the VIPER architecture now for about 2 years. I think it is a really sensible solution for organizing and reducing the size of a Massive ViewController. 
 
-Reducing the size of a UIViewController is a notable goal, but how should it be done? 
+Reducing the size of a ViewController is a notable goal, but how should it be done? 
 
 One common way to architect an app is to layer the app into an User Interface layer and a Service layer. 
 
@@ -92,7 +92,7 @@ The ViewController sends messages to the Presenter, which in turn sends messages
 
 Each ViewController, Presenter and UseCase is called a VIP stack. In a VIPER architected system, one VIP stack is created whenever a new UIViewControler is created.
 
-The UseCase uses an injected EntityGateway to obtain access to EntityManagers. EntityManagers are responsible for providing access to the Entities. The EntityGateway is used by all UseCases to access all available EntityManagers.
+The UseCase uses an EntityGateway to obtain access to EntityManagers. EntityManagers are responsible for providing access to the Entities. The EntityGateway is used by all UseCases to access all available EntityManagers.
 
 The Router is a VIP stack that knows about child ViewControllers. This is a very important notion.
 
@@ -103,7 +103,7 @@ Since VIPER is an implementation of the Clean Architecture, there are a few rule
 1. Dependencies can only be explicit in one direction: towards the centre.
 2. Data must be copied from layer to layer as values or structs of values
 
-Entities are at the centre. In order to access the Entities, the EntityGateway must be injected into the Use Case. In order to remove the explicit dependency of the UseCase on the EntityGateway, the gateway is implemented as a protocol.
+Entities are at the centre of the diagram. In order to access the Entities, the EntityGateway must be injected into the Use Case. In order to remove the explicit dependency of the UseCase on the EntityGateway, the gateway is implemented as a protocol.
 
 In order to transmit the results of the UseCase to the ViewController, they must be first sent to the Presenter. The Presenter sends its converted results to the ViewController. Since these messages are moving away from the centre, the target classes are specified as protocols. 
 
@@ -133,7 +133,7 @@ The ViewController's main role in VIPER is to the configure the View hierarchy. 
 
 In VIPER, the UIViewController sends <u>every</u> event coming from a UIControl or lifecycle method directly to the Presenter. The ViewController does not process the event in any way, whatsoever. It simply retrieves associated data, either input as text or selected by index, and sends it with the event to the Presenter. In the case of repeating UIControls contained in a UITableView or UICollectionView, the Cell receives the event and sends it to the Presenter.  Super simple!
 
-You can see in the interaction diagram that the ViewController has another role: show the output for the event. I will discuss this later in this post.
+You can see in the interaction diagram that the ViewController has another role: show the output for the event. I will discuss this role, below.
 
 #### ViewController Examples
 
@@ -213,11 +213,11 @@ The Presenter's role is to receive an event from the ViewController and pass it 
 
 Examples of input conversion might be from String to Int, formatted String date to Date, an Int from a UIPickerView to an enum - the list goes on. 
 
-As you may have noticed in the diagram, the Presenter has another role: presenting the result of the event - again, I will cover that shortly.
+As you may have noticed in the diagram, the Presenter has another role: present the result of the event. I will discuss this role, below.
 
 #### Presenter Examples
 
-Here are some examples of the Presenter receiving events from the UIViewController and being sent on to the UseCase.
+Here are some examples of the Presenter receiving events from the UIViewController and then sending them on to the UseCase.
 
 ##### Initialization
 
@@ -236,9 +236,11 @@ class ContactListPresenter {
     }
 }
 ```
+Note that capturing a value, like `maxHeight`, for later use by the Presenter is fine, but only in `viewReady`, and only if it remains constant. When the value is specific to an event, you should pass it through to the UseCase.
+
 ##### Data Capture
 
-The Presenter's `eventCapture(quantity:)` tries to convert the quantity parameter to an `Int`. On success it sends the event to the UseCase with the converted data. It is up to the UseCase to determine whether the quantity is valid. On failure to convert the quantity, the error output is delegated back to the ViewController. 
+In this example, the Presenter's `eventCapture(quantity:)` tries to convert the quantity parameter to an `Int`. On success it sends the event to the UseCase with the converted data. It is up to the UseCase to determine whether the quantity is valid. On failure to convert the quantity, the error output is delegated back to the ViewController. 
 
 ```swift
 class OrderEntryPresenter {
@@ -262,7 +264,7 @@ class OrderEntryPresenter {
 
 Note that it is possible that validation could be performed by a "smart" textField, whose configuration would include its format and error message. In this case, the configuration would be specified to the ViewController by the PresenterOutput resulting from a  `viewReady` message (more about this later).  
 
-Either way, the format of the data and the text of the error message is the domain of the Presenter, since it is responsible for implementing localization and accessibility. When a smart textfield is used to implement format-as-you-type phone numbers, the format would be supplied by the Presenter.
+Either way, the format of the data and the text of the error message is the domain of the Presenter, since it is responsible for implementing localization and accessibility. When a smart textfield is used, say, to implement format-as-you-type phone numbers, the format would be supplied by the Presenter.
 
 ##### Simple Delegation
 
@@ -299,7 +301,7 @@ class ContactPresenter {
 }
 ```
 
-If the Presenter required a callback, it would send itself as a PresenterDelegate parameter to be passed on to the Presenter of the VIP Stack that the router would instantiate.
+If the Presenter required a callback, it would send itself as a delegate to be passed on to the Presenter of the VIP Stack that the router would instantiate.
 
 ### The Router
 
