@@ -236,11 +236,11 @@ class ContactListPresenter {
     }
 }
 ```
-Note that capturing a value, like `maxHeight`, for later use by the Presenter is fine, but only in `viewReady`, and only if it remains constant. When the value is specific to an event, you should pass it through to the UseCase.
+Capturing a value, like `maxHeight`, for later use by the Presenter is fine, but only in `viewReady`, and only if it remains constant. When the value is specific to an event, you should pass it through to the UseCase.
 
 ##### Data Capture
 
-In this example, the Presenter's `eventCapture(quantity:)` tries to convert the quantity parameter to an `Int`. On success it sends the event to the UseCase with the converted data. It is up to the UseCase to determine whether the quantity is valid. On failure to convert the quantity, the error output is delegated back to the ViewController. 
+In this example, the Presenter's `eventCapture(quantity:)` tries to convert the quantity parameter into an `Int`. On success it sends the event to the UseCase with the converted data. It is up to the UseCase to determine whether the quantity is valid. On failure to convert the quantity, the error output is sent back to the ViewController. 
 
 ```swift
 class OrderEntryPresenter {
@@ -255,14 +255,14 @@ class OrderEntryPresenter {
             return true
         }
         else {
-              output.showFormatError(NSLocalizeString("Format of Quantity must be digits only", nil)
-              return false
+            output.showFormatError(NSLocalizeString("Format of Quantity must be digits only", nil)
+            return false
         }
     }
 }
 ```
 
-Note that it is possible that validation could be performed by a "smart" textField, whose configuration would include its format and error message. In this case, the configuration would be specified to the ViewController by the PresenterOutput resulting from a  `viewReady` message (more about this later).  
+Note that validation could be performed by a "smart" textField, whose configuration would include its format and error message. In this case, the configuration would be specified to the ViewController by the PresenterOutput resulting from a  `viewReady` message (more about this later).  
 
 Either way, the format of the data and the text of the error message is the domain of the Presenter, since it is responsible for implementing localization and accessibility. When a smart textfield is used, say, to implement format-as-you-type phone numbers, the format would be supplied by the Presenter.
 
@@ -292,6 +292,9 @@ class ContactPresenter {
     let useCase: ContactUseCase
     var router: ContactRouter!
     var output: ContactPresenterOutput!
+  
+    var contactViewModels = [ContactViewModel]()
+
     // init ...
   
     func eventContactSelected(at row: Int) {
@@ -305,29 +308,29 @@ If the Presenter required a callback, it would send itself as a delegate to be p
 
 ### The Router
 
-The Router is responsible for managing scene transition. A Router can be a UINavigationController,  UITabController or a custom container ViewController.  From my point of view, a router is simply a Container ViewController which itself is a VIP stack.
+The Router is responsible for managing scene transition. A Router can be a UINavigationController,  a UITabController or a custom container ViewController.  From my point of view, a router is simply a Container ViewController which itself is a VIP stack.
 
-I will leave the details of router implementation to a future article. 
+I will leave the details of router implementation to a future post. 
 
 ### The UseCase
 
-The UseCase has one responsibility: execute the application business requirement. The only code that belongs in a UseCase is that which implements the application business rules. The UseCase should not contain data conversion or external format validation - these are both the domain of the Presenter or the EntityManagers.
+The UseCase has one responsibility: execute the application business requirement. The only code that belongs in a UseCase is the code which implements the application business rules. The UseCase should not contain data conversion or external format validation - these are both the domain of the Presenter or the EntityManagers.
 
-The UseCase typically uses the EntityGateway to access the system state in the form of Entities, processes the Entities against the incoming parameters, and updates the system state via the EntityGateway. It may do this over the course of responding to more than one event. One event may cause the entities to be accessed and output in some order and the next event may select one of the entities and the UseCase will update it in some way.
+The UseCase uses the EntityGateway to access the EntityManagers. The UseCase then uses the  EntityManagers to access the system state in the form of Entities. It processes the Entities using the incoming parameters, and updates the system state via the EntityGateway. It may do this over the course of responding to more than one event. One event may cause the UseCase to access the Entities and output them in some order and the next event may select one of the entities and have the UseCase update it in some way.
 
 The results of executing the UseCase are passed as parameters to the UseCaseOutput protocol in a form known as the PresentationModel. 
 
-Entities are never passed directly to the UseCaseOutput. PresentationModels are created from Entities, even when the Entity does not require much processing. The PresentationModel  contains only the data that is required for the output. The UseCase does not convert data for output - it does not know anything about the output format, localization or target view. Output via PresentationModels is kind of like logging without any descriptive text.
+Entities are never passed directly to the UseCaseOutput. PresentationModels are created from Entities, even when the Entity does not require much processing. The PresentationModel contains only the data which is required to create the output. The UseCase does not convert data for output - it does not know anything about the output format, localization or target views. Creating output via PresentationModels is kind of like logging without any descriptive text.
 
 A PresentationModel can be passed to the UseCaseOutput as a `struct`, as an `enum` or as simple scalars - whatever is most convenient. When a `struct` is used, a good practice is to initialize it by passing it the Entity.
 
-Data Conversion is performed by the Presenter and the EntityGateway. This allows the code in the UseCase to be free of conversion and data validation. 
+Data Conversion is performed by the Presenter and the EntityManagers. This allows the code in the UseCase to be free of the responsibilities of conversion and data validation. 
 
-The separation of the Entities in the UseCase from the PresentationModels used by the Presenter makes sure that the UseCase is decoupled from the Presenter, thus promoting a reduction of shared mutable state. This way the form of Entity can change without affecting the outer layers of the system.
+The separation of the Entities in the UseCase from the PresentationModels used by the Presenter makes sure that the UseCase is decoupled from the Presenter, thus promoting a reduction of shared mutable state. This allows the form of Entity to be changed without affecting the outer layers of the system.
 
  The UseCase has no direct dependencies - both the EntityGateway and the UseCaseOutput are protocols and are injected (by the Connector).
 
-When the number of use cases that a scene supports becomes large, the number of methods on a single output protocol becomes even larger. It becomes really hard to tell at a glance which UseCaseOutput methods are used by what events. For this reason, it is a good practice to create one UseCaseOutput protocol for each event. Your code will be well organized when you place the implementation of each output protocol in its own extension. You can place reusable implementations in the general UseCaseOutput extension.
+When the number of events that a scene supports becomes large, the number of methods on a single output protocol becomes even larger. It becomes really hard to tell at a glance which UseCaseOutput methods are used by what events. For this reason, it is a good practice to create one UseCaseOutput protocol for each event. The general UseCaseOutput protocol will extend all event specific UseCaseOutput protocols. Your code will be well organized when you place the implementation of each output protocol in its own extension. You can place reusable implementations in the general UseCaseOutput extension.
 
 #### UseCase Examples
 
@@ -349,9 +352,9 @@ class ContactUseCase {
         entityGateway.contactManager.fetch(contactId: contactId) { result in
 
             switch result {
-            case .success(contact):
+            case let .success(contact):
                  output.present(contact: ContactPresentationModel(contact: contact))
-            case .failure(error):
+            case let .failure(error):
                 output.present(error:error.reason)
             }
         }
@@ -363,15 +366,15 @@ class ContactUseCase {
 
 Here the UseCase's `eventViewReady()` method accesses contacts from a `ContactManager`, which is provided by the `EntityGateway` . It processes each Contact entity by converting it to a ContactListPresentationModel and then sending it to the UseCaseOutput. Note that this PresentationModel is not the same as the previous one in that it contains fewer properties.
 
-The array ContactEntities is not copied directly to the Presenter. 
+The array of ContactEntities is not copied directly to the Presenter. Each Entity is sent one at a time.
 
-Before the contacts are sent to the Presenter, a Start message is sent. The Start message tells the Presenter to prepare for the new incoming list. You can pass any titles or non-repeating data representing the whole list as parameters to the method. 
+Before the contacts are sent to the Presenter as UseCaseOutput, a Start message is sent. The Start message tells the UseCaseOutput to prepare for the new incoming list. You can pass titles or other non-repeating data which describes the whole list, as parameters to the method. 
 
 After the contacts are sent to the Presenter, an End message is sent. The End message tells the Presenter all contacts have been sent. You can pass totals or other calculated data as parameters to the method. 
 
-There are two other results of processing shown here: the error case and the zero case. both of these outcomes are processed in the same way as the non-zero cases.
+Two other results of processing shown here: the error case and the zero case.
 
-Note that you can pass the  contact properties as individual parameters, instead of using a PresentationModel struct.
+Note that you can opt to pass the Contact properties as individual parameters to the UseCaseOutput methods, instead of using a PresentationModel struct.
 
 ```swift
 class ContactListUseCase {
@@ -387,7 +390,7 @@ class ContactListUseCase {
 
             output.presentContactListStart()
             switch result {
-            case .success(contacts):
+            case let .success(contacts):
                 if contacts.count > 0 {
                     for contact in contacts {
                         output.present(contact: ContactListPresentationModel(contact: contact))
@@ -397,8 +400,8 @@ class ContactListUseCase {
                     output.presentNoContactsFound()
                 }
 
-            case .failure(error):
-                output.present(error:error.reason)
+            case let .failure(error):
+                output.present(error: error.reason)
             }
             output.presentContactListEnd()
         }
@@ -408,7 +411,7 @@ class ContactListUseCase {
 
 ##### Data Capture
 
-In this example of data capture, the UseCase's `eventCapture(quantity:)`  and `eventCapture(productId:)` methods set the values  to non-nil. 
+In this example of data capture, the UseCase's `eventCapture(quantity:)`  and `eventCapture(productId:)` methods set the values to non-nil. 
 
 The `eventSave()` method verifies that all mandatory fields have been entered and then uses an `orderManager` to create an order. It sends the newly created order to the UseCaseOutput. 
 
@@ -437,9 +440,9 @@ class OrderEntryUseCase {
             entityGateway.orderManager.create(userId: userId, productId: productId, quantity: quantity) { result in 
 
                 switch(result) {                                                                                         
-                case .success(order):
+                case let .success(order):
                     output.present(order: OrderEntryPresentationModel(order))
-                case .failure(error):
+                case let .failure(error):
                     output.present(error:error.reason)
                 }                                                                                          
             }
@@ -455,7 +458,7 @@ class OrderEntryUseCase {
 
 The UseCase uses an injected EntityGateway to obtain access to EntityManagers. EntityManagers are responsible for providing access to the Entities and for updating them. Entity Managers are also known as the Service Layer or Data Access Objects in other layered architectures.
 
-The EntiryManagers are outside the scope of VIPER, but they are a very important aspect of the architecture as a whole. They provide access to and transform the state of the system. They can deliver Entities originating from either local data stores (CoreData or a local file system) and from the Internet. 
+The EntiryManagers are outside the scope of VIPER, but they are a very important aspect of the architecture as a whole. They provide access to and transform the state of the system. They deliver Entities originating from either local data stores (CoreData or a local file system) and from the Internet. 
 
 It is a good practice to create an EntityManager for each type of Entity that has its own lifecycle. 
 
@@ -475,7 +478,7 @@ As I mentioned, the EntityGateway is a protocol. It is defined as a protocol so 
 
 ### The Transformer
 
-The Transformer is not formally part of VIPER, but due of the number of events that a typical UseCase has  to process, I find it useful to create one Transformer for each event that changes the state of the system.  
+The Transformer is not formally part of VIPER, but due of the number of events that a typical UseCase has  to process, I find it useful to create one Transformer class for each event that changes the state of the system.  
 
 Normally the functionality of a Transformer would be rendered as a method of a UseCase. I convert the method to a *method-object* and then call it from the UseCase event method. The Transformer usually consists of a constructor and a method called `transform` . In the UseCase method, I initialize the constructor with the required EntityManagers obtained from the EntityGateway and any data required from previously run UseCases. 
 
@@ -534,7 +537,7 @@ class OrderEntryUseCase {
 
 I still implement the UseCase's `Capture` methods in the UseCase.
 
-You will see that this setup makes it very easy to test the Transformer. It separates the UseCase's responsibilities from one another, making it very easy to understand the code. When you need to decompose a large amount of processing by implementing  private methods, you immediately know who they belong to.
+You will see that this setup makes it very easy to test the Transformer. It separates the UseCase's responsibilities from one another, making it very easy to understand the code. When you need to decompose a large amount of processing by implementing private methods, it is easy to ascertain the scope of the methods.
 
 ### The Presenter in the role of UseCaseOutput
 
@@ -542,7 +545,7 @@ The Presenter's second responsibility is to convert the data received a Presenta
 
 The role of the Presenter as UseCaseOutput is to format the data received in the PresentationModel into a format that can be used directly by the ViewController. The formatted output is called a ViewModel. This usually means Strings, but depending on the requirements of the output controls, it may be an `enum` or a `Bool`.
 
-If data must be localized, made accessible, or otherwise converted in any way, the process of conversion is done by the Presenter acting in the role UseCaseOutput.
+If data must be localized, made accessible, or otherwise converted in any way, the process of conversion is done by the Presenter acting in the role of UseCaseOutput.
 
  A ViewModel can be implemented as an immutable struct or as a set of scalars, whichever is easier. When implemented as scalars, the values are passed directly as parameters to the methods of the PresentationOutput protocol. 
 
@@ -550,7 +553,9 @@ If an output method has a large number of parameters, it is better to put the va
 
 When the input to the Presenter is repetitive, the Presenter holds the ViewModel structures in an array and delivers them via an indexed accessor method.
 
-When the input to the Presenter is repetitive and heterogeneous, it is a good practice to use *associated-value* `enum`s to hold the data. Although, due to syntax, I find that when an enum contains a large number of associated values, the extraction of values is painful, not to mention that every time a value is added you have to add another '_'  everywhere you read the enum. A better practice is to use enums whose sole associated-value is a struct. This would allow you to use `struct` field names to extract values, instead of `enum` named positions.
+When the input to the Presenter is repetitive and heterogeneous, it is a good practice to use *associated-value* `enum`s to hold the data. Although, due to syntax, I find that when an enum contains a large number of associated values, the extraction of values is painful, not to mention that every time a value is added you have to add another '_'  everywhere you read the enum. 
+
+A better practice is to extract a single value from the enum. This value is a name for a tuple. You can then use the field names defined by the enum to access the individual values stored in the enum. 
 
 #### UseCaseOutput Examples
 
@@ -810,9 +815,9 @@ extension OrderEntryViewController: OrderEntrySavePresenterOutput {
 
 You may be wondering how each VIPER stack is created.
 
-A ViewController is normally defined via Interface Builder, so we cannot use its init. Usually the ViewController allocates everything it needs, but: 
+A ViewController is normally defined via Interface Builder, so we cannot use its `init`. Usually the ViewController allocates everything it needs, but: 
 
-We do not want the ViewController to know anything about the Interactor. The Interactor must exist before the presenter can  own it. The Presenter must exist before the ViewController can own it.
+We do not want the ViewController to know anything about the Interactor. The Interactor must exist before the presenter can own it. The Presenter must exist before the ViewController can own it.
 
  The VIPER stack is assembled by a 3rd party class that knows about all of the classes in the stack and how they are connected together. I call this part a Connector.
 
