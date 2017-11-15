@@ -17,7 +17,13 @@ When ? is added to the end of a variable type, it means that it's value may be n
 
 In practice, this means that the value that a variable represents should be optional due to its definition in the app requirement.
 
-If the value is not optional in the requirement, the variable type should not be optional. You must make sure this is the case as you will be checking it many times over for absolutely no reason.
+Every variable that is optional must be routinely checked for nil via `if let`, `while let`, etc or the ? operator.
+
+Although the ? operator can make the app safe by not preventing it from  crashing, it can lead to many hard to track bugs.
+We will come back to this later.
+
+If the value is not optional in the app requirement, the variable type should not be optional. You must make sure this is the case as you will be writing code to check it for nil many times over for absolutely no reason.
+
 
 You should expect
 that an Optional value may be assigned to nil after it has already been assigned to a value.
