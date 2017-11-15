@@ -4,8 +4,8 @@
 There is a lot of confusion surrounding the proper use of swift optionals. This confusion surrounds
 
 1. the use of ? and ! as either 
-	- operators or 
 	- type modifiers
+	- operators or 
 2. when it is appropriate to fail and especially
 3. when is it appropriate for a value to be optional
 
@@ -13,33 +13,33 @@ There is a lot of confusion surrounding the proper use of swift optionals. This 
 
 ### Use of the ? Modifier
 
-When ? is added to the end of a variable type, it means that it's value may be nil.
+When `?` is added to the end of a variable type, it means that it's value may be nil.
 
-In practice, this means that the value that a variable represents should be optional due to its definition in the app requirement.
+In practice, this means that the value represented by the variable should be optional due to its definition in the app requirement.
 
-Every variable that is optional must be routinely checked for nil via `if let`, `while let`, etc or the ? operator.
+Every Optional variable must be routinely checked for nil via `if let`, `while let`, etc statements or the `?` operator.
 
-Although the ? operator can make the app ‘safe’ by preventing it from  crashing, it can lead to many hard to track bugs.
+Although these statement and operator can make the app ‘safe’ by preventing it from  crashing, it can lead to many hard to track bugs.
 We will come back to this later.
 
-If the value is not optional in the app requirement, the variable type should not be optional. You must make sure of this, as you will be writing code to check it for nil many times over for absolutely no reason.
+If the value is not optional in the app requirement, the variable type should not be optional. You must make sure of this, as you will be writing code to check for nil many times over - for absolutely no reason.
 
 You should expect that an Optional value may be assigned to nil after it has already been assigned to a value.
 
-#### Examples of ?
-A simple example is a Person class that contains an age property. The property cannot possibly be nil, since every person has an age.
+#### Examples of `?`
+A simple example is a Person class that contains an age property. This property cannot possibly be nil, since every person has an age.
 
 Another example is a function that requires a non-nil value for a parameter in order to continue processing.
 The parameter should not
 be made optional just because a caller of the function may want to pass an optional. The caller must check the optional before calling the function with an `if let`.
 
-### Use of the ! Modifier
+### Use of the `!` Modifier
 
-When ! is added to the end of a type name, it means that the value may not be nil when it is accessed, but it will be nil when it is declared.
+When `!` is added to the end of a type name, it means that the value may not be nil when it is accessed, but it will be nil when it is declared.
 
-In practice, this means that the value that a variable represents is not optional in its requirement.
+In practice, this means that the value that an implicitly unwrapped optional variable represents is not optional in its requirement.
 
-An Implicitly Unwrapped Optional value should not be assigned to nil. If you find you need to do this, use a ?.
+An Implicitly Unwrapped Optional value should not be assigned to nil. If you find you need to do this, use a `?`.
 
 ## To Fail or not to Fail
 
@@ -51,11 +51,6 @@ The way in which one uses optionals has a lot to with what group you are in.
 
 An simple example of incorrect app behavior is this: a value must be displayed but upon determining that the value does not exist the code either does nothing or
 displays an incorrect value. This kind of bad behavior will only serve to confuse the user and ultimately will cause the user to mistrust the app.
-
-
-
-
-
 
 In the following code a client Id is passed to viewController so that the view controller can fetch the details of the client.
 
