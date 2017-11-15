@@ -19,14 +19,13 @@ In practice, this means that the value that a variable represents should be opti
 
 Every variable that is optional must be routinely checked for nil via `if let`, `while let`, etc or the ? operator.
 
-Although the ? operator can make the app safe by not preventing it from  crashing, it can lead to many hard to track bugs.
+Although the ? operator can make the app ‘safe’ by preventing it from  crashing, it can lead to many hard to track bugs.
 We will come back to this later.
 
-If the value is not optional in the app requirement, the variable type should not be optional. You must make sure this is the case as you will be writing code to check it for nil many times over for absolutely no reason.
+If the value is not optional in the app requirement, the variable type should not be optional. You must make sure of this, as you will be writing code to check it for nil many times over for absolutely no reason.
 
+You should expect that an Optional value may be assigned to nil after it has already been assigned to a value.
 
-You should expect
-that an Optional value may be assigned to nil after it has already been assigned to a value.
 #### Examples of ?
 A simple example is a Person class that contains an age property. The property cannot possibly be nil, since every person has an age.
 
