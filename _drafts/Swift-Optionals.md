@@ -16,14 +16,14 @@ The optional type modifiers are used at variable declaration, rather than when t
 
 When `?` is added to the end of a variable type, it means that it's value may be nil.
 
-In practice, this means that the value represented by the variable should be optional due to its definition in the app requirement.
+In practice, this means that the value represented by the variable should be optional due to its definition in the app requirement. A variable's optionality should not due to an artifact, such as a variable in a struct returned from a service layer that should not be optional or an injected property that should be an IUO.
 
 Every Optional variable must be routinely checked for nil via `if let`, `while let`, etc statements or the `?` operator.
 
 Although these statements and the operator can make the app ‘safe’ by preventing it from  crashing, it can lead to many hard to track bugs.
 We will come back to this later.
 
-If the value is not optional in the app requirement, the variable type should not be optional. You must make sure of this, as you will be writing code to check for nil many times over - for absolutely no reason.
+If the value is not optional in the app requirement, the variable's type should not be optional. You must make sure of this, as you will be writing code to check for nil many times over - for absolutely no reason.
 
 You should expect that an Optional value may be assigned to nil after it has already been assigned to a value.
 
@@ -36,11 +36,16 @@ be made optional just because a caller of the function may want to pass an optio
 
 ### Use of the `!` Modifier
 
-When `!` is added to the end of a type name, it means that the value may not be nil when it is accessed, but it will be nil when it is declared.
+When `!` is added to the end of a property's type, it means that the property's value may not be nil when it is accessed, but it will be nil when it is declared.
+This is a contract that you are making with the compiler.
 
 In practice, this means that the value that an Implicitly Unwrapped Optional (IUO) variable represents is not optional in its requirement.
 
 An IUO value should not be assigned to nil. If you find you need to do this, use a `?`.
+
+### Examples of the `!` Modifier
+
+The best example of the when to use the `!` modifier is an IBOutlet.
 
 ## Use of Optional Type Operators
 
