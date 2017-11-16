@@ -3,15 +3,16 @@
 ## Introduction
 There is a lot of confusion surrounding the proper use of swift optionals. This confusion surrounds
 
-1. the use of ? and ! as either 
+1. the use of `?` and `!` as either 
 	- type modifiers
 	- operators or 
 2. when it is appropriate to fail and especially
 3. when is it appropriate for a value to be optional
 
 ## Use of Optional Type Modifiers
+The optional type modifiers are used at variable declaration, rather than when the variables are used.
 
-### Use of the ? Modifier
+### Use of the `?` Modifier
 
 When `?` is added to the end of a variable type, it means that it's value may be nil.
 
@@ -19,7 +20,7 @@ In practice, this means that the value represented by the variable should be opt
 
 Every Optional variable must be routinely checked for nil via `if let`, `while let`, etc statements or the `?` operator.
 
-Although these statement and operator can make the app ‘safe’ by preventing it from  crashing, it can lead to many hard to track bugs.
+Although these statements and the operator can make the app ‘safe’ by preventing it from  crashing, it can lead to many hard to track bugs.
 We will come back to this later.
 
 If the value is not optional in the app requirement, the variable type should not be optional. You must make sure of this, as you will be writing code to check for nil many times over - for absolutely no reason.
@@ -37,10 +38,20 @@ be made optional just because a caller of the function may want to pass an optio
 
 When `!` is added to the end of a type name, it means that the value may not be nil when it is accessed, but it will be nil when it is declared.
 
-In practice, this means that the value that an implicitly unwrapped optional variable represents is not optional in its requirement.
+In practice, this means that the value that an Implicitly Unwrapped Optional (IUO) variable represents is not optional in its requirement.
 
-An Implicitly Unwrapped Optional value should not be assigned to nil. If you find you need to do this, use a `?`.
+An IUO value should not be assigned to nil. If you find you need to do this, use a `?`.
 
+## Use of Optional Type Operators
+
+The optional type operators are used at variable usage, rather than at declaration.
+
+### Use of the `?` Operator
+The 
+
+
+### Use of the `!` Operator
+The forced unwrap operator
 ## To Fail or not to Fail
 
 When it comes to App failure, there are clearly two groups of thought. One group believes that code should be written to prevent an app from failing even if the app behaves incorrectly.
