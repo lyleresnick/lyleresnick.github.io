@@ -61,11 +61,13 @@ If this contract is not met, it is entirely correct that the runtime system shou
 It is not OK to check if the property is not nil and then take no action if it is nil. This is a bug, plain and simple. 
 Running the app under this condition should produce a crash at the position where the invalid access occurred, so the problem can be easily identified and solved.
 
+Just as a non-private `?` modifier specifies that  it's ok not to set a value, `!` specifies that it's not ok to leave a value unset.
 
+Most private `!` modifiers are usually a code smell. We will look at this later.
 
 ## Use of Optional Type Operators
 
-The optional type operators are used at variable usage, rather than at declaration.
+The optional type operators are used at variable access, rather than at declaration.
 
 ### Use of the `?` Operator
 The 
