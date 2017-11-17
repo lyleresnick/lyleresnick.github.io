@@ -28,6 +28,7 @@ If the value is not optional in the app requirement, the variable's type should 
 You should expect that an Optional value may be assigned to nil after it has already been assigned to a value.
 
 #### Examples of `?`
+
 A simple example is a Person class that contains an age property. This property cannot possibly be nil, since every person has an age.
 
 Another example is a function that requires a non-nil value for a parameter in order to continue processing.
@@ -45,7 +46,22 @@ An IUO value should not be assigned to nil. If you find you need to do this, use
 
 ### Examples of the `!` Modifier
 
-The best example of the when to use the `!` modifier is an IBOutlet.
+The best example of when to use the `!` modifier is an IBOutlet. 
+Although it is always preferable to initialize a property via `init`. An IBOutlet represents a typical situation where, for some reason, a property cannot be initialized directly by `init`. 
+
+In the case of IBOutlets, init is called in a standard manner by IB and IB passes a parameter to `init`  which contains the information required to complete the injections of the views.
+
+Properties like these are never intended to be
+optional. They are intended to be initialized either by some external entity or by the class itself when further information comes along.
+
+All IUO must be initialized to non-nil before they are used. This is precisely what the `!` modifier means. If the property is not private, the modifier is a contract with the instantiator of the class.
+ 
+If this contract is not met, it is entirely correct that the runtime system should abort the app. This is the correct action to take because, if the property is not initialized, the class is not being used correctly and the code must be fixed. 
+
+It is not OK to check if the property is not nil and then take no action if it is nil. This is a bug, plain and simple. 
+Running the app under this condition should produce a crash at the position where the invalid access occurred, so the problem can be easily identified and solved.
+
+
 
 ## Use of Optional Type Operators
 
