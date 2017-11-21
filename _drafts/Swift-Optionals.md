@@ -65,16 +65,31 @@ Just as a non-private `?` modifier specifies that  it's ok not to set a value, `
 
 Most private `!` modifiers are usually a code smell. We will look at this later.
 
+If a private resource is expensive to create, use a lazy assignment.
+
 ## Use of Optional Type Operators
 
 The optional type operators are used at variable access, rather than at declaration.
 
-### Use of the `?` Operator
-The 
+### Use of the `?`  (nil-coalescing) Operator
 
+The ? operator allows a property of an optional type to be accessed regardless of whether the object is nil or not. The operator will return nil, if the value of the property is nil, otherwise it will return the value of the property. In either case the type of the returned value will be optional.
+
+If you need to use ? operator more than once in a code block, use an unwrap statement for clarity instead.
 
 ### Use of the `!` Operator
-The forced unwrap operator
+
+The force unwrap operator is generally used to unwrap an optional value that is known to be non-nil.
+
+This the most
+misunderstood aspect of optionality.
+
+This operator will cause a runtime error if the value is nil. This is exactly the correct behavior. Tests should be used to prove that the code will not fail.
+If the code is not supposed to fail, that is a nil may be expected, a conditional statement should
+be used to check for nil and an alternative code
+path must be supplied. The alternative should not be a fail, as that is a waste of the readers and dev debuggers  time.
+
+
 ## To Fail or not to Fail
 
 When it comes to App failure, there are clearly two groups of thought. One group believes that code should be written to prevent an app from failing even if the app behaves incorrectly.
@@ -129,6 +144,8 @@ At this point it becomes obvious that the clientId should simply be declared as 
 
 The clientId was never really optional in the first place.
 
+`maybe your not testing
+your code!` 
 
 
 ```
@@ -150,3 +167,10 @@ The clientId was never really optional in the first place.
 	* use of !
 		* Bad examples of using guard instead of exclamation
 		* just bad examples  of guarding
+
+
+if you change an api interface you need
+to retest the app 
+if it blows
+up you need to fix it
+not jut do nothing 
