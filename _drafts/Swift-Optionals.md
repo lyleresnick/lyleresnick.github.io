@@ -1,13 +1,35 @@
 # Swift Optionals
 
 ## Introduction
-There is a lot of confusion surrounding the proper use of swift optionals. This confusion surrounds
+There is a lot of confusion surrounding the proper use of swift optionals. This confusion stems from misunderstandings about:
 
 1. the use of `?` and `!` as either 
-	- type modifiers
-	- operators or 
-2. when it is appropriate to fail and especially
-3. when is it appropriate for a value to be optional
+	- type modifiers or
+	- operators
+2. when it is appropriate for a value to be optional and most importantly
+3. when it is appropriate to fail and 
+
+
+## What is safety anyway?
+
+Is safety defined as not allowing an app to fail?
+
+Apple, in its book The Swift Programming Language defines type safety as
+
+> “Type safety helps you catch and fix errors as early as possible in the development process.”
+
+
+## To Fail or not to Fail
+
+Let's cover point 3 first, as it sets up the context for the rest of this article.
+When it comes to App failure, there are clearly two groups of thought. One group believes that code should be written to prevent an app from failing even if the app behaves incorrectly.
+The other group believes that an app should
+fail if it behaves incorrectly.
+
+The way in which one uses optionals has a lot to with what group you are in.
+
+An simple example of incorrect app behavior is this: a value must be displayed but upon determining that the value does not exist the code either does nothing or
+displays an incorrect value. This kind of bad behavior will only serve to confuse the user and ultimately will cause the user to mistrust the app.
 
 ## Use of Optional Type Modifiers
 The optional type modifiers are used at variable declaration, rather than when the variables are used.
@@ -90,16 +112,9 @@ be used to check for nil and an alternative code
 path must be supplied. The alternative should not be a fail, as that is a waste of the readers and dev debuggers  time.
 
 
-## To Fail or not to Fail
 
-When it comes to App failure, there are clearly two groups of thought. One group believes that code should be written to prevent an app from failing even if the app behaves incorrectly.
-The other group believes that an app should
-fail if it behaves incorrectly.
-
-The way in which one uses optionals has a lot to with what group you are in.
-
-An simple example of incorrect app behavior is this: a value must be displayed but upon determining that the value does not exist the code either does nothing or
-displays an incorrect value. This kind of bad behavior will only serve to confuse the user and ultimately will cause the user to mistrust the app.
+## TODO Failing code
+examples
 
 In the following code a client Id is passed to viewController so that the view controller can fetch the details of the client.
 
