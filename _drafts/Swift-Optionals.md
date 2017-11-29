@@ -6,32 +6,59 @@ There is a lot of confusion surrounding the proper use of swift optionals. This 
 1. the use of `?` and `!` as either 
 	- type modifiers or
 	- operators
-2. when it is appropriate for a value to be optional and most importantly
-3. when it is appropriate to fail and 
-
-
-## What is safety anyway?
-
-Is safety defined as not allowing an app to fail?
-
-Apple, in its book The Swift Programming Language defines type safety as
-
-> “Type safety helps you catch and fix errors as early as possible in the development process.”
-
+2. when is it appropriate for a value to be optional and, most importantly
+3. when is it appropriate to fail
 
 ## To Fail or not to Fail
 
 Let's cover point 3 first, as it sets up the context for the rest of this article.
-When it comes to App failure, there are clearly two groups of thought. One group believes that code should be written to prevent an app from failing even if the app behaves incorrectly.
-The other group believes that an app should
-fail if it behaves incorrectly.
+When it comes to App failure, there are clearly two streams of thought. 
 
-The way in which one uses optionals has a lot to with what group you are in.
+The first stream thinks that code should be written to prevent an app from failing even if the app behaves incorrectly.Many times this could mean doing nothing when an incorrect state is encountered. Either way the user will be confused. This is just a bad coding practice.
+When it is determined
+that the behavior is a
+bug - usually  by some one other than the developer - it is really hard to debug and must be analyzed to be fixed. 
 
-An simple example of incorrect app behavior is this: a value must be displayed but upon determining that the value does not exist the code either does nothing or
-displays an incorrect value. This kind of bad behavior will only serve to confuse the user and ultimately will cause the user to mistrust the app.
+The other stream thinks that an app should
+fail if it behaves incorrectly. Assuming testing is being performed, this makes it easy to find the source of bugs, since use of the stack trace will ultimately show where the bug is. 
+
+If you don't test, either automatically or manually, you're just letting the user do your testing.
+
+The way in which one uses optionals has a lot to with which stream you identify with.
+
+An simple example of incorrect app behavior is this: a value must be displayed, but upon determining that the value does not exist, the code either does nothing or displays an incorrect value. This kind of improper app behavior will only serve to confuse the user and ultimately will cause the user to mistrust the app.
+
+The real issue here is why is the value nil when it should never
+be nil. In Swift a value like this should
+never be optional, whereas in Obj-C there was, previously, no way to specify this.
+
+In Obj-C, we would  check for nil object parameters, to verify that there is a value - we don't need to do that anymore in swift - just don't make them optional.
+
+If a value is to be displayed, it should always have a value, which means it should be declared as a non-optional parameter, variable or private property or an implicitly unwrapped non-private property. This way the compiler or the runtime can make sure that the value is never nil and code does not have to be written to check for nil. 
+
+Only if the value is truly supposed to be optional, such as an optional second street address Sting, should a value be declared optional.
+
+## What is safety anyway?
+
+Is safety defined as not allowing an app to fail so it is *safe* for an app user or is safety
+about a language that does not allow a developer to unknowingly make make an app fail?
+
+Apple, in its book The Swift Programming Language defines type safety as follows
+
+> “... type safety prevents you from accidentally passing an optional String to a piece of code that requires a nonoptional String. Type safety helps you catch and fix errors as early as possible in the development process.”
+
+There are many other references to safety in
+the book - all alluding
+to the fact that Swift is a language that
+makes it easy to write code that won't fail due to common coding
+errors. 
+
+The book does not say that safety means that an app should not fail if it has a bug. 
+
+An app that has a bug should fail quickly under test and the code should surface that bug so that can easily be removed when debugged.
 
 ## Use of Optional Type Modifiers
+
 The optional type modifiers are used at variable declaration, rather than when the variables are used.
 
 ### Use of the `?` Modifier
