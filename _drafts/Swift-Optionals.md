@@ -14,17 +14,31 @@ There is a lot of confusion surrounding the proper use of swift optionals. This 
 Let's cover point 3 first, as it sets up the context for the rest of this article.
 When it comes to App failure, there are clearly two streams of thought. 
 
-The first stream thinks that code should be written to prevent an app from failing even if the app behaves incorrectly.Many times this could mean doing nothing when an incorrect state is encountered. Either way the user will be confused. This is just a bad coding practice.
-When it is determined
-that the behavior is a
-bug - usually  by some one other than the developer - it is really hard to debug and must be analyzed to be fixed. 
+The first stream feels that code should be written to prevent an app from failing even if the app behaves incorrectly. Many times this could mean doing nothing when an incorrect state is encountered. 
 
 The other stream thinks that an app should
-fail if it behaves incorrectly. Assuming testing is being performed, this makes it easy to find the source of bugs, since use of the stack trace will ultimately show where the bug is. 
-
-If you don't test, either automatically or manually, you're just letting the user do your testing.
+fail if it behaves incorrectly. 
 
 The way in which one uses optionals has a lot to with which stream you identify with.
+
+### Incorrect App Behavior
+When an app behaves incorrectly, delivering
+incorrect data to the user, the user becomes
+confused. 
+
+By the time it is determined that the behavior is a bug - usually  by someone other than the developer - it is really hard to debug and must be analyzed to be fixed. 
+Writing code to prevent outright app failure seems like a noble cause, but it just circumvents writing code that behaves properly. It is just a bad coding practice. 
+
+### Allowing an App to Fail
+
+
+Assuming testing is taking place, making provision for an app to fail makes it easier to find bugs during development when variables are not initialized properly or improper values are encountered.
+The use of the stack trace will ultimately show where the bug is.
+ 
+TODO: show example of string to end switch
+
+If you don't test, either automatically or manually, you're just letting the user do your testing.
+ 
 
 An simple example of incorrect app behavior is this: a value must be displayed, but upon determining that the value does not exist, the code either does nothing or displays an incorrect value. This kind of improper app behavior will only serve to confuse the user and ultimately will cause the user to mistrust the app.
 
