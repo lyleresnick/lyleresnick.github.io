@@ -1,11 +1,15 @@
-# Swift Optionals
+---
+layout: post
+title: "Swift Optionals"
+date: 2017-12-04
+---
 
 ## Introduction
 There is a lot of confusion surrounding the proper use of swift optionals. This confusion stems from misunderstandings about:
 
 1. the use of `?` and `!` as either 
-	- type modifiers or
-	- operators
+  - type modifiers or
+  - operators
 2. when is it appropriate for a value to be optional and, most importantly
 3. when is it appropriate to fail
 
@@ -34,11 +38,11 @@ Writing code to prevent outright app failure seems like a noble cause, but it ju
 
 Assuming testing is taking place, making provision for an app to fail makes it easier to find bugs during development when variables are not initialized properly or improper values are encountered.
 The use of the stack trace will ultimately show where the bug is.
- 
+
 TODO: show example of string to end switch
 
 If you don't test, either automatically or manually, you're just letting the user do your testing.
- 
+
 
 An simple example of incorrect app behavior is this: a value must be displayed, but upon determining that the value does not exist, the code either does nothing or displays an incorrect value. This kind of improper app behavior will only serve to confuse the user and ultimately will cause the user to mistrust the app.
 
@@ -118,7 +122,7 @@ Properties like these are never intended to be
 optional. They are intended to be initialized either by some external entity or by the class itself when further information comes along.
 
 All IUO must be initialized to non-nil before they are used. This is precisely what the `!` modifier means. If the property is not private, the modifier is a contract with the instantiator of the class.
- 
+
 If this contract is not met, it is entirely correct that the runtime system should abort the app. This is the correct action to take because, if the property is not initialized, the class is not being used correctly and the code must be fixed. 
 
 It is not OK to check if the property is not nil and then take no action if it is nil. This is a bug, plain and simple. 
@@ -215,14 +219,14 @@ your code!`
 ```
 
 * domain oriented
-	* you just don’t get one for free
-	* finish the entity (from core data or network) 
-		* just because it’s optional in deserializer doesn’t mean its optional in the domain
-		* if you dont finish every one who uses it will have to finish it
-	* use of ? vs let 
-	* use of !
-		* Bad examples of using guard instead of exclamation
-		* just bad examples  of guarding
+  * you just don’t get one for free
+  * finish the entity (from core data or network) 
+    * just because it’s optional in deserializer doesn’t mean its optional in the domain
+    * if you dont finish every one who uses it will have to finish it
+  * use of ? vs let 
+  * use of !
+    * Bad examples of using guard instead of exclamation
+    * just bad examples  of guarding
 
 
 if you change an api interface you need
