@@ -6,7 +6,26 @@ date: 2017-12-04
 
 ## Introduction
 
-There is a lot of confusion surrounding the proper use of swift optionals. This confusion stems from misunderstandings about what it means to be optional from a class interface point of view.
+There is a lot of confusion around the proper use of swift optionals. This confusion stems from misunderstandings about
+
+1. when is it appropriate for a value to be optional,
+2. the use of `?` and `!` as either 
+   - type modifiers or
+   - operators
+3.  the implications for the  class or struct  interface, and most importantly
+4. when is it appropriate to fail
+
+
+
+## When is it appropriate for a value to be optional ?
+
+In general, a value should not be optional. When a value is not optional, the Swift compiler can help you to minimize bugs. When a value is optional, you are on your own. 
+
+Of couse there are many reasons for a value to be optional. It is definitely fine for a value to be optional due when its domain definition says its optional. For example, a String representing a second address line, or a middle name could be optional, When values are required by their domain definition, such as a first name or a credit card number they should never be marked optional.
+
+You <u>must</u> always check an optional value for nil - either via `if let` or `?` - before you access it and do the approrate action if it is nil. There is no free lunch here. The compiler does not just take care of it.
+
+
 
 Remember that there is no such thing as a local IUO, you can only force an optional value to be not optional and then you should be using exceptions if you control the code (null returns from objc excepted here)
 
