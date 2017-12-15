@@ -21,7 +21,9 @@ There is a lot of confusion around the proper use of swift optionals. This confu
 
 In general, a value should not be optional. When a value is not optional, the Swift compiler can help you to minimize bugs. When a value is optional, you are on your own. 
 
-Of couse there are many reasons for a value to be optional. It is definitely fine for a value to be optional due when its domain definition says its optional. For example, a String representing a second address line, or a middle name could be optional, When values are required by their domain definition, such as a first name or a credit card number they should never be marked optional.
+There is only one good reason for a value to be typed as an Optional and that is when its domain definition states that its optional. For example, a String representing a second address line, or a middle name could be optional. When values are required by their domain definition, such as a first name or a credit card number they should never be marked optional. 
+
+There are very few reasons for a value to be typed as an Implicitly Unwrapped Optional (IUO) - but its fine to use them when necessary - usually as public properties.
 
 You <u>must</u> always check an optional value for nil - either via `if let` or `?` - before you access it and do the approrate action if it is nil. There is no free lunch here. The compiler does not just take care of it.
 
