@@ -12,16 +12,16 @@ There is a lot of confusion around the proper use of swift optionals. This confu
 2. the use of `?` and `!` as either 
    - type modifiers or
    - operators
-3.  the implications for the  class or struct  interface, and most importantly
+3. the implications for the  class or struct  interface, and most importantly
 4. when is it appropriate to fail
 
 
 
 ## When is it appropriate for a value to be optional ?
 
-In general, a value should not be optional. When a value is not optional, the Swift compiler can help you to minimize bugs. When a value is optional, you are on your own. 
+In general, a value should not be optional, because this is the safest, bug minimizing situation. When a value is optional, you open yourself up for bugs. All kinds of decisions must be made about how to process Optionals. You should do everything you can to convert an optional to non-optional.
 
-There is only one good reason for a value to be typed as an Optional and that is when its domain definition states that its optional. For example, a String representing a second address line, or a middle name could be optional. When values are required by their domain definition, such as a first name or a credit card number they should never be marked optional. 
+There is only one good reason for a value to be typed as an Optional and that is when its domain definition states that its optional. For example, in a structure, a String representing a second address line, or a middle name might be optional. When values are required by their domain definition, such as a first name or a credit card number they should never be marked optional. 
 
 There are very few reasons for a value to be typed as an Implicitly Unwrapped Optional (IUO) - but its fine to use them when necessary - usually as public properties.
 
