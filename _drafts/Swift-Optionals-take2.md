@@ -19,7 +19,11 @@ There is a lot of confusion around the proper use of swift optionals. This confu
 
 ## When is it appropriate for a value to be optional ?
 
-In general, a value should not be optional, because this is the safest, bug minimizing situation. When a value is optional, you open yourself up for bugs. Many decisions must be made regarding how to process an Optional. You should do everything you can to convert an optional to non-optional as early as possible.
+In general, a value should not be optional, because this is the safest, bug minimizing situation. 
+
+Properties should be initialized at construction. The only exception to this is when you have no control over the instantiation, because you are building a subclass, as is typical with viewControllers.
+
+When a value is optional, you open yourself up for bugs. Many decisions must be made regarding how to process an Optional. You should do everything you can to convert an optional to non-optional as early as possible.
 
 There is only one good reason for a value to be typed as an Optional and that is when its functional domain definition states that its optional. For example, in a structure, a String representing a second address line, or a middle name might be optional. When values are required by their domain definition, such as a first name or a credit card number they should never be marked optional.
 
