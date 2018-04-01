@@ -26,16 +26,20 @@ class TransactionListViewController: UIViewController {
 
     var presenter: TransactionListPresenter!
     @IBOutlet fileprivate weak var tableView: UITableView!
-    @IBOutlet private weak var adapter: TransactionListAdapter!
+    private var adapter: TransactionListAdapter!
 
     override func awakeFromNib() {
         super.awakeFromNib()
         
-        TransactionListConnector(viewController: self, adapter: adapter).configure()
+        TransactionListConnector(viewController: self).configure()
+        adapter = TransactionListAdapter(presenter: presenter)
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        tableView.delegate = adapter
+        tableView.dataSource = adapter
         
         presenter.eventViewReady()
     }
@@ -72,30 +76,26 @@ This is why the Connector has to do the injection of the EntityGateway into the 
 class TransactionListConnector {
     
     private let viewController: TransactionListViewController
-    private let adapter: TransactionListAdapter
     private let presenter: TransactionListPresenter
-    private var useCase: TransactionListUseCase
+    private let useCase: TransactionListUseCase
     
-    init(viewController: TransactionListViewController, adapter: TransactionListAdapter, useCase: TransactionListUseCase, presenter: TransactionListPresenter) {
+    init(viewController: TransactionListViewController, useCase: TransactionListUseCase, presenter: TransactionListPresenter) {
         
         self.viewController = viewController
-        self.adapter = adapter
         self.useCase = useCase
         self.presenter = presenter
     }
     
-    convenience init(viewController: TransactionListViewController, adapter: TransactionListAdapter, entityGateway: EntityGateway = EntityGatewayImpl()) {
+    convenience init(viewController: TransactionListViewController, entityGateway: EntityGateway = EntityGatewayImpl()) {
         
         let useCase = TransactionListUseCase(entityGateway: entityGateway)
         let presenter = TransactionListPresenter(useCase: useCase)
         
-        self.init(viewController: viewController, adapter: adapter, useCase: useCase, presenter: presenter)
+        self.init(viewController: viewController, useCase: useCase, presenter: presenter)
     }
     
     func configure() {
         viewController.presenter = presenter
-        adapter.presenter = presenter
-
         useCase.output = presenter
         presenter.output = viewController
     }
@@ -457,7 +457,11 @@ The size of the Adapter is now as small as possible. It's only responsibility is
 ```swift
 class TransactionListAdapter: NSObject {
     
-    var presenter: TransactionListPresenter!
+    let presenter: TransactionListPresenter
+    
+    init(presenter: TransactionListPresenter) {
+        self.presenter = presenter
+    }
 }
 
 extension TransactionListAdapter: UITableViewDataSource  {
