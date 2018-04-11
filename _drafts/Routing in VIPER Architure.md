@@ -55,17 +55,15 @@ The Presenter should instantiate state data models that will be injected into al
 
 #### The UseCase
 
-The Router's UseCase initializes data that will be shared by all child UseCases. Usually this happens when the viewLoaded event is recieved.  In the majority of cases, the Router does not need to implement a UseCase.
+The Router's UseCase initializes data that will be shared by all child UseCases. Usually this happens when the viewLoaded event is received.  In the majority of cases, the Router does not need to implement a UseCase.
 
-### Why are Router Messages implemented by the Router's Presenter
+#### Why are Router Messages implemented by the Router's Presenter?
 
-There are cases where the Router must contact its UseCase to make a decision based on a system state.
+Given that the first rule of VIPER states that all user events received by a ViewController must be sent to the Presenter simply leads to the fact that if the Router's ViewController implemented the router messages, those messages would all be sent directly to the Presenter anyway.
 
+Notwithstanding that, there are cases where the Router must refer to its UseCase to make a decision based on system state - this would mean that the message would have to be sent through two layers just to make a decision. Remember that is si the presenter that is responsible for making the decisions regarding whether messages are forwarded to the Router, UseCase or ViewController.
 
-
-In many cases the result of a child VIPER stack has to be presented by the parent. it is much simpler to send  
-
-because you may have to send back presentation models that the presenter must convert to view models (see TodoListPresenter.eventItemSelected())
+It turns out in practice, that implementing the routing messages in the Presenter is the right choice. 
 
 ## Challenges
 
@@ -85,7 +83,11 @@ Normally fresh data comes from the entity gateway which is only known by the int
 
 #### Allocating class responsibilities appropriately
 
-#### Alternative to the view controller delegate pattern
+#### Responses from other Scenes (Alternative to the view controller delegate pattern)
+
+There are also cases where a presentation model must be prepared for an older sibling that the presenter must convert to view models (see TodoListPresenter.eventItemSelected())
+
+## 
 
 #### Additional behaviour for the Nav controller subclass 
 
