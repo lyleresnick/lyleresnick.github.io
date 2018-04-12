@@ -18,6 +18,8 @@ This functionality is provided in iOS by specialized ViewControllers, such as Na
 
 The secondary function of a router is pass system state between scenes.
 
+The difference between a VIPER Router and a UIKit router is is that the routing code is located where it is supposed to be: in the Router - not the child view controllers
+
 ## Routers in VIPER
 
 When using VIPER, each scene is implemented with a ViewController, a Presenter and a UseCase. This is known as a VIP stack or module. A router is simply another module - one that knows how to display child scenes by stacking, tabbing, paging, menu-ing or some custom sequence. 
@@ -38,10 +40,15 @@ A router has its own VIP stack: A ViewController, a Presenter and a UseCase. All
 
 #### The ViewController 
 
-The role of a Router’s ViewController is the same it would be without VIPER: to change scenes by changing the visible ViewController in some way. 
-In VIPER, a custom Router will send all UI events to the Presenter. If the ViewController is a subclass of a NavigationController or TabBarController, the events from the UI are already consumed by the controller's implementation, so their delegates are used to pick up events. 
+The role of a Router's ViewController is the same it would be without VIPER: to do the work of changing scenes. 
 
-In the case of UIKit supplied Routers, the delegates are used to initialize the child view controllers after they are instantiated. In the case of custom ViewControllers Routers, the child ViewControllers are instantiated by the custom ViewController.
+When the Router's ViewController is a subclass of a NavigationController or TabBarController, the events from the UI are already consumed by the controller itself, so their delegates must be used to monitor events. In particular, the router injects its Presenter into the child view controllers in the delegate before they are displayed.
+
+When a Navigation- or TabBarController is associated with a storyboard, the child's perform(segue:) calls are called from the parents implementation and the prepareFor(segue:) override is implemented as an extension within the NavigationController's file. This override is just a dance because the Navigation Controller actually implements the Segue.
+
+In the case of a custom Routing ViewController , child ViewControllers are instantiated by the custom ViewController as normal, and the perform(segue:) and prepareFor(segue:) are implemented by the custom ViewController
+
+In VIPER, a custom Router will send all UI events to the Presenter,  as usual.
 
 #### The Presenter
 
