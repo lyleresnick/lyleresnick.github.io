@@ -32,7 +32,7 @@ A Router ViewController can be inherited from a NavigationController, a TabBarCo
 
 A major rule of VIPER is that any event received by a ViewController must be forwarded directly to its Presenter. The Presenter forwards the event to either its Use Case or its Router. 
 
-When the output is received by the Presenter from the Use Case, it may also send the output to the Router instead of the ViewController. An example of this is when a scene exits.
+When the output is received by the Presenter from the Use Case, it might send the output to the Router instead of the ViewController. An example of this is when a scene exits.
 
 The result is that a ViewController never communicates with a router, only the presenter does.
 
@@ -77,6 +77,8 @@ It turns out in practice, that implementing the routing messages in the Presente
 ## Challenges
 
 ### Maintaining the Utility of Storyboards
+
+Storyboards provide a number of advantages besides alleviating hand coding of view configurations, which a Nib can also mostly provide. Storyboards provide documentation about how scenes work together and provide for calling the ViewController's `awakeFromNib()`  which is used to configure the VIP stack and perform injections. 
 
 ### Passing Data between Controllers
 
