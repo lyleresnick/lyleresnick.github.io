@@ -12,27 +12,29 @@ Blalflf
 
 ## The Function of a Router
 
-The primary function of a Router is to manage the display of scenes according to a set of behaviours such as stacking, direct access or serial access. 
+The primary function of a Router is to manage the display of a set of scenes using a pattern such as stacking, direct access or serial access. 
 
-This functionality is provided in iOS by specialized ViewControllers, such as NavigationControllers, TabBarControllers and PageViewControllers. Each of these manages the display and life cycle of a set of child ViewControllers.
+Router functionality is provided in iOS by specialized ViewControllers, such as Navigation-, TabBar- and PageView-Controllers. Each of these manages the display and life cycle of a set of child ViewControllers. There is also the possibility of creating custom Routers which implement other useage patterns such as menu or custom tab access, or a domain-defined sequence.
 
-The secondary function of a router is pass system state between scenes.
+Another function of a Router is to maintain system state for child modules.
 
-The difference between a VIPER Router and a UIKit router is is that the routing code is located where it is supposed to be: in the Router - not the child view controllers
+The main difference between a VIPER Router and a UIKit router is that the routing code is located where it is supposed to be: in the Router - not the child view controllers
 
 ## Routers in VIPER
 
-When using VIPER, each scene is implemented with a ViewController, a Presenter and a UseCase. This is known as a VIP stack or module. A router is simply another module - one that knows how to display child scenes by stacking, tabbing, paging, menu-ing or some custom sequence. 
+In VIPER, a Router is just another VIP-stack, and is implemented with a ViewController, a Presenter and a UseCase.  A router is simply another module - one that knows how to display child scenes using a pattern. 
 
 A module's router is not another class of the module - it is the parent module. 
 
-A Router in VIPER is simply a NavigationController, a TabbarController, a PageViewController, or any other custom ViewController that knows how to manage the display of their VIPER children.
+A Router ViewController can be inherited from a NavigationController, a TabBarController, or a  PageViewController. A Custom Router will inherit from a plain ViewController to create a *container*  ViewController.
 
 ### The Presenter Communicates with the Router
 
-The first rule of VIPER is that all events received by a view controller must be passed directly to its presenter. The presenter then makes the decision to communicate with its Use Case or its Router. When the event is received by the presenter from the Use Case, it also has to make the decision to send the event to the ViewController or to the Router.
+A major rule of VIPER is that any event received by a ViewController must be forwarded directly to its Presenter. The Presenter forwards the event to either its Use Case or its Router. 
 
-In VIPER, The ViewController never communicates with its router, only the presenter does. The ViewController never changes a scene directly unless it is, itself, a Router changing scenes of its child ViewControllers.
+When the output is received by the Presenter from the Use Case, it may also send the output to the Router instead of the ViewController. An example of this is when a scene exits.
+
+The result is that a ViewController never communicates with a router, only the presenter does.
 
 ### The Router's VIP Stack
 
@@ -44,7 +46,7 @@ The role of a Router's ViewController is the same it would be without VIPER: to 
 
 When the Router's ViewController is a subclass of a NavigationController or TabBarController, the events from the UI are already consumed by the controller itself, so their delegates must be used to monitor events. In particular, the router injects its Presenter into the child view controllers in the delegate before they are displayed.
 
-When a Navigation- or TabBarController is associated with a storyboard, the child's perform(segue:) calls are called from the parents implementation and the prepareFor(segue:) override is implemented as an extension within the NavigationController's file. This override is just a dance because the Navigation Controller actually implements the Segue.
+When a Navigation- or TabBarController is associated with a storyboard, the child's `perform(segue:)` calls are called from the parents implementation and the `prepareFor(segue:)` override is implemented as an extension within the NavigationController's file. This override is just a dance because the Navigation Controller actually implements the Segue.
 
 In the case of a custom Routing ViewController , child ViewControllers are instantiated by the custom ViewController as normal, and the perform(segue:) and prepareFor(segue:) are implemented by the custom ViewController
 
@@ -58,17 +60,17 @@ The majority of the messages which the Presenter responds to are routing message
 
 The Presenter may simply translate the message and send it to its output or it can pass the message to the Router's UseCase. 
 
-The Presenter should instantiate state data models that will be injected into all child UseCases.
+The Presenter might instantiate state data models that will be injected into all child UseCases.
 
 #### The UseCase
 
-The Router's UseCase initializes data that will be shared by all child UseCases. Usually this happens when the viewLoaded event is received.  In the majority of cases, the Router does not need to implement a UseCase.
+The Router's UseCase initializes data that will be shared by all child UseCases. Usually this occurs when the viewLoaded event is received.  Most of the time, the Router does not need to implement a UseCase.
 
 #### Why are Router Messages implemented by the Router's Presenter?
 
-Given that the first rule of VIPER states that all user events received by a ViewController must be sent to the Presenter simply leads to the fact that if the Router's ViewController implemented the router messages, those messages would all be sent directly to the Presenter anyway.
+Given that all events received by a ViewController must be sent to the Presenter, all Router messages would all be sent to the Presenter anyway.
 
-Notwithstanding that, there are cases where the Router must refer to its UseCase to make a decision based on system state - this would mean that the message would have to be sent through two layers just to make a decision. Remember that is si the presenter that is responsible for making the decisions regarding whether messages are forwarded to the Router, UseCase or ViewController.
+There are cases where the Router must refer to its UseCase to make a decision based on system state - this would mean that the message would have to be sent through two layers just to make a decision. Remember that the presenter that is responsible for making the decisions regarding whether messages are forwarded to the Router, UseCase or ViewController.
 
 It turns out in practice, that implementing the routing messages in the Presenter is the right choice. 
 
