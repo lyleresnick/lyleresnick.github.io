@@ -68,17 +68,21 @@ The Router's UseCase initializes data that will be shared by all child UseCases.
 
 #### Why are Router Messages implemented by the Router's Presenter?
 
-Given that all events received by a ViewController must be sent to the Presenter, all Router messages would all be sent to the Presenter anyway.
+The ViewController in VIPER only forwards inbound events and Displays the results of those events.
 
-There are cases where the Router must refer to its UseCase to make a decision based on system state - this would mean that the message would have to be sent through two layers just to make a decision. Remember that the presenter that is responsible for making the decisions regarding whether messages are forwarded to the Router, UseCase or ViewController.
+Router messages start as events in a child ViewController. All events received by a ViewController are forwarded to it's Presenter, so all Router messages are sent to the Presenter anyway.
 
-It turns out in practice, that implementing the routing messages in the Presenter is the right choice. 
+In some cases the Router must refer to its UseCase to make a decision based on system state - a message would have to be sent through two layers just to get to the UseCase. 
+
+In practice, implementing the routing messages in the Presenter is the right choice. 
 
 ## Challenges
 
 ### Maintaining the Utility of Storyboards
 
-Storyboards provide a number of advantages besides alleviating hand coding of view configurations, which a Nib can also mostly provide. Storyboards provide documentation about how scenes work together and provide for calling the ViewController's `awakeFromNib()`  which is used to configure the VIP stack and perform injections. 
+Storyboards provide a number of advantages other than simply reducing the need to hand-code view configurations. Storyboards document application flow and view associations. Instantiating from a storyboard causes  `awakeFromNib()`  to be called, which is used to configure the VIP stack and can perform post-IB injections. 
+
+In most cases, the use of Storyboards is not counter to the architecture of VIPER Routers. The only unusual situation is when using NavigationControllers. Using Segue, a child ViewController of a NavigationController can by-pass the parent when initating a sibling - or so it seems. The Segue ultimately calls the Nav's `pushViewController(_:animated:)` 
 
 ### Passing Data between Controllers
 
