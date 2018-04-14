@@ -76,13 +76,21 @@ In some cases the Router must refer to its UseCase to make a decision based on s
 
 In practice, implementing the routing messages in the Presenter is the right choice. 
 
-## Challenges
+## Changing Scenes 
 
-### Maintaining the Utility of Storyboards
+### Storyboards
 
-Storyboards provide a number of advantages other than simply reducing the need to hand-code view configurations. Storyboards document application flow and view associations. Instantiating from a storyboard causes  `awakeFromNib()`  to be called, which is used to configure the VIP stack and can perform post-IB injections. 
+Storyboards provide a number of advantages other than simply reducing the need to hand-code view layouts. Storyboards document the layout and flow of the app. When a Segue instantiates a ViewController, it calls `awakeFromNib()`, which is used to configure the VIP stack and can perform post-IB injections. 
 
-In most cases, the use of Storyboards is not counter to the architecture of VIPER Routers. The only unusual situation is when using NavigationControllers. Using Segue, a child ViewController of a NavigationController can by-pass the parent when initating a sibling - or so it seems. The Segue ultimately calls the Nav's `pushViewController(_:animated:)` 
+In most cases, using Storyboards is not counter to the architecture of a VIPER Router. The only unusual situation is when using NavigationControllers. Using Segue, a child ViewController of a NavigationController can by-pass the parent when initating a sibling - or so it seems. The Segue ultimately calls the NavigationController's `pushViewController(_:animated:)` . 
+
+
+
+
+
+In order to accomodate this 
+
+
 
 ### Passing Data between Controllers
 
