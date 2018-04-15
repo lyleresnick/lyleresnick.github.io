@@ -78,17 +78,54 @@ In practice, implementing the routing messages in the Presenter is the right cho
 
 ## Changing Scenes 
 
+### Who's Responsibility
+
+In VIPER, initiation of a scene change is the responsibility of the parent (just like in Android). iOS has an opinion about how scene change should be initiated. 
+
+In iOS, a ViewController is given access to its parent via one of the navigation-, tabBar- or splitView-Controller properties. This allows the child to know about and to control the behaviour of parent. In the case of navigation or splitView, the control is used to push a new controller on top. This leads to dependency issues, since this added responsibility ties the child to a predetermined environment defined by presentation-style or system state. 
+
+iOS tries to overcome this problem for navigation and splitView by introducing the `show(:sender:)` and `showDetail(:sender:)` methods. At least these methods allow a child of parent to not be concerned about which stacking environment they are in. 
+
+In a VIPER architecture child ViewControllers make no assumptions about their environment and as such are available for use in any role, whether defined by presentation-style or system state.
+
 ### Storyboards
 
 Storyboards provide a number of advantages other than simply reducing the need to hand-code view layouts. Storyboards document the layout and flow of the app. When a Segue instantiates a ViewController, it calls `awakeFromNib()`, which is used to configure the VIP stack and can perform post-IB injections. 
 
-In most cases, using Storyboards is not counter to the architecture of a VIPER Router. The only unusual situation is when using NavigationControllers. Using Segue, a child ViewController of a NavigationController can by-pass the parent when initating a sibling - or so it seems. The Segue ultimately calls the NavigationController's `pushViewController(_:animated:)` . 
+In most cases, using Storyboards is not counter to the architecture of a VIPER Router. The only unusual situation is when using NavigationControllers. 
 
+#### NavigationControllers
 
+In a Storyboard, the "relationship" Segue from a parent points to its first-displayed child. In the case of Navigation- or SplitView-Controllers, the next Segue points to the next-displayed sibling scene. 
 
+Using a Segue and in turn the `show*(:sender:)` methods, a child ViewController of a Navigation- or SplitView-Controller by-passes the parent when initiating a sibling scene - or so it seems. The Segue actually calls the parent controller's `pushViewController(_:animated:)` method.
 
+The problem for a VIPER Router implementation is that a Segue's source ViewController is the previous sibling, not the parent, so the parent's `prepareFor(segue:)` is not called - but the previous sibling's is called.
 
-In order to accomodate this 
+The solution to this is to create a extension in the parent ViewController's file and override `prepareFor(segue:)` there. Here the NavController's `showItem(id: String)` initates a Segue on the topmost child with an `id` parameter. The `prepare(for segue: UIStoryboardSegue, sender: Any?)`  of the child is used to inject the `id` into the child's sibling.
+
+```Swift
+extension SomeRouterNavController: SomeRouterPresenterOutput {
+        
+    func showItem(id: String) {
+
+        let identifier = SomeRouterSegue.showSome.rawValue
+        viewControllers.first?.performSegue(withIdentifier: identifier, sender: id)
+    }
+}
+```
+
+```Swift
+extension SomeListViewController {
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        
+        let viewController = segue.destination as! SomeItemViewController
+        let id = sender as! String
+        viewController.id = id
+    }
+}
+```
 
 
 
