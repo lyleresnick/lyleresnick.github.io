@@ -129,9 +129,12 @@ extension SomeListViewController {
 
 
 
-### Passing Data between Controllers
+### Passing Data Forward between Scenes
+There are two kinds of data which can passed between scenes: data which is used to initiate a new process and data which represents the accumulation of process state.
+#### Initiating a new Process
 
-#### Data Selected by another View Controller
+Data Selected by another View Controller
+
 
 #### Connecting the Presenter to the Router
 
