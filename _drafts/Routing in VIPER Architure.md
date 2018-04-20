@@ -127,8 +127,6 @@ extension SomeListViewController {
 }
 ```
 
-
-
 ### Passing Data between Controllers
 
 #### Data Selected by another View Controller
