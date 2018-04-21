@@ -129,18 +129,33 @@ extension SomeListViewController {
 
 
 
-### Passing Data Forward between Scenes
-There are two kinds of data which can passed between scenes: data which is used to initiate a new process and data which represents the accumulation of process state.
-#### Initiating a new Process
 
-Data Selected by another View Controller
+### Passing Data to the Next Scene
+There are two kinds of data that can passed between scenes: 
+
+1. data that originates from the view
+2. data that originates in the use case (as a result of user processing state).
+
+#### Passing Data that originates from the View
+
+
+
+ which is not representing the system state 
+
+New processes are initiated by 
+
+
+
+#### Passing Data that originates from the Use Case
+
+#### Accumulation of User Process State
+
+Normally fresh data comes from the entity gateway which is only known by the interactor. But how should data be passed from interactor to interactor?
 
 
 #### Connecting the Presenter to the Router
 
-#### Data Shared By Multiple View Controllers
 
-Normally fresh data comes from the entity gateway which is only known by the interactor. But how should data be passed from interactor to interactor?
 
 ### Going against the grain
 
