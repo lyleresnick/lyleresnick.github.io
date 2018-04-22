@@ -130,10 +130,10 @@ extension SomeListViewController {
 
 
 
-### Passing Data to the Next Scene
+### Passing Data between Scenes
 There are two kinds of data that can passed between scenes: 
 
-1. data that originates from the view
+1. data that originates from an event in the view
 2. data that originates in the use case (as a result of user processing state).
 
 #### Passing Data that originates from the View
