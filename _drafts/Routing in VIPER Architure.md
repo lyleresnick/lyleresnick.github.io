@@ -6,7 +6,7 @@ date: 2018-03-28
 
 ## Introduction
 
-Blalflf  
+The Reason that VIPER uses a Rout is so that VIP stacks can be rendered independently of their containers. For example, a ViewController that is part of a sequence governed by a Navigation controller can also be reused in a modal situation.
 
 
 
@@ -131,22 +131,86 @@ extension SomeListViewController {
 
 
 ### Passing Data between Scenes
-There are two kinds of data that can passed between scenes: 
+The router is responsible for passing local data between scenes. 
 
-1. data that originates from an event in the view
-2. data that originates in the use case (as a result of user processing state).
+There are 3 kinds of local data that can passed between scenes: 
 
-#### Passing Data that originates from the View
+1. data originating in a View
+2. data shared among collaborating UseCases (representing all or part of the system state).
+3. data originating in a younger sibling scene's UseCase   
+
+#### Passing Data Originating in a View
+
+Data originates in a View when a user initiates an action. Normally, when a ViewController instantiates another ViewController, data is passed to the new ViewController by injection. It is no different in VIPER, except that the injector is always a Router. In VIPER, data must be passed to the Router before it can be passed to the new ViewController.
+
+Not all data should be passed in this way. Recall that in VIPER, entities are never passed as output to the ViewController, only PresentationModels and in turn, ViewModels. Data sent to a Router can be translated by the Presenter, if necessary.  This often occurs when a selection is made in a table and the index is translated to an `id` supplied by a ViewModel as is shown in this snippet of a Presenter:
+
+```Swift
+func eventItemSelected(index: Int) {
+    
+    router.routeDisplayItem(id: viewModelList[index].id)
+}
+```
+
+#### Passing Data Among Collaborating UseCases
+
+ It is not uncommon for multiple scenes to collaborate in order to complete real world *Use Case*. 
+
+Shared Entities that a UseCase manipulates should not be retrieved from the UseCase by the Presenter and then passed on to the Router only to be passed to the next ViewController, Presenter and UseCase. This would be quite tedious and is against the ruls tha the ViewController should not be concerned with Entities.
+
+There are two ways to pass data among multiple scenes, both of which involve injection. 
+
+The first way is the simplest. A model, which represents the state all of the shared data, can be attached to the Entity Gateway. Since the gateway is already injected into all UseCases, this is the easiest way to share data and make it available to all UseCases. The downside to this is that all UseCases in the whole system will have access to this state model and it becomes hard to know which use cases are updating the model and what the models life cycle actually is. There are also cases where a recursive model is required and a global state cannot support this. 
+
+Another method, which limits the scope of the state model to a small number of scenes and allows for recursion is one where the Router's Presenter instantiates the model for use by its own UseCase. The model is accessed by the child Presenters when the router is injected and then is itself injected into the child's UseCase. In this manner the models scope is limited to just those scenes which actually need access to it. 
+
+Here is an example of a UseCase state model for a multi-scene use case for sending money:
+
+```swift
+class SendMoneyUseCaseState {
+    var fromAccount: Account
+	var amount: Money
+	var recipient: Recipient
+}
+```
+
+Below the scene Router's Presenter instantiates the model and injects it into its own UseCase:
+
+```Swift
+class SendMoneyRouterPresenter {
+
+    var state = SendMoneyUseCaseState()
+
+    init(useCase: SendMoneyRouterUseCase) {
+        self.useCase = useCase
+        useCase.state = state
+    }
+    // ...
+}
+```
+
+Here a child scene's Presenter injects the Router's state into the UseCase:
+
+```swift
+class SendMoneyStepOnePresenter {
+    weak var router: SendMoneyStepOneRouter! {
+        didSet {
+            useCase.state = router.state
+        }
+    }
+    // ...
+}
+```
+
+FIXME: The reason that the presenter sends it to the routers use case is that it might be the initializer of the state. Other wise it would be nil .
 
 
 
- which is not representing the system state 
-
-New processes are initiated by 
+FIXME: <u>put this somewhere</u>: Each child's Router is defined by a protocol. It is implemented by the parent.
 
 
 
-#### Passing Data that originates from the Use Case
+#### Collaborating UseCases
 
 #### Accumulation of User Process State
 
