@@ -6,11 +6,11 @@ date: 2018-03-28
 
 ## Introduction
 
-The Reason that VIPER uses a Rout is so that VIP stacks can be rendered independently of their containers. For example, a ViewController that is part of a sequence governed by a Navigation controller can also be reused in a modal situation.
+A VIPER Router moves the responsibility of navigation back to where it belongs: the routing ViewControllers.
 
+VIPER uses Routers so that ViewControllers (and their associated stack) can be rendered independently of their container ViewControllers. For example, a ViewController that is part of a sequence governed by a NavigationController can also be reused in a modal presentation.
 
-
-## The Function of a Router
+### The Function of a Router
 
 The primary function of a Router is to manage the display of a set of scenes using a pattern such as stacking, direct access or serial access. 
 
@@ -160,9 +160,13 @@ Shared Entities that a UseCase manipulates should not be retrieved from the UseC
 
 There are two ways to pass data among multiple scenes, both of which involve injection. 
 
-The first way is the simplest. A model, which represents the state all of the shared data, can be attached to the Entity Gateway. Since the gateway is already injected into all UseCases, this is the easiest way to share data and make it available to all UseCases. The downside to this is that all UseCases in the whole system will have access to this state model and it becomes hard to know which use cases are updating the model and what the models life cycle actually is. There are also cases where a recursive model is required and a global state cannot support this. 
+##### Injecting a Global State Model 
 
-Another method, which limits the scope of the state model to a small number of scenes and allows for recursion is one where the Router's Presenter instantiates the model for use by its own UseCase. The model is accessed by the child Presenters when the router is injected and then is itself injected into the child's UseCase. In this manner the models scope is limited to just those scenes which actually need access to it. 
+The first way is the simplest. A state Model, which represents the state all of the shared data, can be attached to the Entity Gateway. Since the gateway is already injected into all UseCases, this is the easiest way to share data and make it available to all UseCases. The downside to this is that all UseCases in the whole app will have access to this state model and it becomes hard to know which use cases are updating the model and what the models life cycle actually is. There are also cases where a recursive model is required and a global state cannot support this. 
+
+##### Injecting a Local State Model 
+
+Another method, which limits the scope of the state model to a small number of scenes and allows for recursion is one where the Router's Presenter instantiates the state model for use by its own and child UseCases. The model is accessed by the child Presenters when the router is injected and then is itself injected into the child's UseCase. In this manner the models scope is limited to just those scenes which actually need access to it. 
 
 Here is an example of a UseCase state model for a multi-scene use case for sending money:
 
@@ -174,7 +178,7 @@ class SendMoneyUseCaseState {
 }
 ```
 
-Below the scene Router's Presenter instantiates the model and injects it into its own UseCase:
+Below the scene Router's Presenter instantiates the model and injects it into its own UseCase so it can be initialized:
 
 ```Swift
 class SendMoneyRouterPresenter {
@@ -202,19 +206,13 @@ class SendMoneyStepOnePresenter {
 }
 ```
 
-FIXME: The reason that the presenter sends it to the routers use case is that it might be the initializer of the state. Other wise it would be nil .
+If the state does not need to be initialized by the Router's UseCase, there is probably no reason for the Router to have a UseCase.
 
 
 
 FIXME: <u>put this somewhere</u>: Each child's Router is defined by a protocol. It is implemented by the parent.
 
 
-
-#### Collaborating UseCases
-
-#### Accumulation of User Process State
-
-Normally fresh data comes from the entity gateway which is only known by the interactor. But how should data be passed from interactor to interactor?
 
 
 #### Connecting the Presenter to the Router
