@@ -1,14 +1,14 @@
 ---
 layout: post
 title: "Routing in VIPER Architure"
-date: 2018-03-28
+date: 2018-05-02
 ---
 
 ## Introduction
 
-A VIPER Router moves the responsibility of navigation back to where it belongs: the routing ViewControllers.
+In the VIPER architecture, the responsibility of scene navigation is placed where it belongs: in the routing ViewController. A ViewController which routes Scenes is known as a Router.
 
-VIPER uses Routers so that ViewControllers (and their associated stack) can be rendered independently of their container ViewControllers. For example, a ViewController that is part of a sequence governed by a NavigationController can also be reused in a modal presentation.
+A VIPER Router is implemented in a way that a ViewController (and the rest of its VIP stack) can be rendered without being dependent on its presenting or presented ViewController. For example, a ViewController that is part of a sequence governed by a NavigationController can also be reused in a modal or split presentation.
 
 ### The Function of a Router
 
