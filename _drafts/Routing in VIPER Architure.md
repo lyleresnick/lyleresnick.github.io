@@ -14,7 +14,7 @@ A VIPER Router is implemented in a way that a ViewController (and the rest of it
 
 The primary function of a Router is to manage the display of a set of scenes using a pattern such as stacking, direct access or serial access. 
 
-Router functionality is provided in iOS by specialized ViewControllers, such as Navigation-, TabBar- and PageView-Controllers. Each of these manages the display and life cycle of a set of child ViewControllers. There is also the possibility of creating custom Routers which implement other useage patterns such as menu or custom tab access, or a domain-defined sequence.
+Router functionality is provided in iOS by specialized ViewControllers, such as Navigation-, TabBar- and PageView-Controllers. Each of these manages the display life cycle of a set of child ViewControllers. There is also the possibility of creating custom Routers which implement other useage patterns such as menu, custom tab access, or a domain-defined sequence.
 
 Another function of a Router is to maintain system state for child modules.
 
@@ -22,19 +22,19 @@ The main difference between a VIPER Router and a UIKit router is that the routin
 
 ## Routers in VIPER
 
-In VIPER, a Router is just another VIP-stack, and is implemented with a ViewController, a Presenter and a UseCase.  A router is simply another module - one that knows how to display child scenes using a pattern. 
+In VIPER, a Router is just another [VIP module](http://lyleresnick.com/blog/2017/08/29/A-Crash-Course-on-the-VIPER-Architecture), and it is normally implemented with a ViewController, a Presenter and a UseCase.  A router is simply another module that knows how to display child scenes using a pattern. The biggest difference between a routing Module and a regular one is that the ViewController class displays child ViewControllers.
 
-A module's router is not another class of the module - it is the parent module. 
-
-A Router ViewController can be inherited from a NavigationController, a TabBarController, or a  PageViewController. A Custom Router will inherit from a plain ViewController to create a *container*  ViewController.
+A Router ViewController can be inherited from a NavigationController, a TabBarController, or a  PageViewController. A Custom Router inherits from a plain ViewController to create a *container*  ViewController.
 
 ### The Presenter Communicates with the Router
 
-A major rule of VIPER is that any event received by a ViewController must be forwarded directly to its Presenter. The Presenter forwards the event to either its Use Case or its Router. 
+The guiding rule of VIPER is that any event received by a ViewController must be forwarded directly to its Presenter. The Presenter forwards the event to either its Use Case or its Router. 
 
 When the output is received by the Presenter from the Use Case, it might send the output to the Router instead of the ViewController. An example of this is when a scene exits.
 
-The result is that a ViewController never communicates with a router, only the presenter does.
+TODO: insert code
+
+The result is that a ViewController never communicates with a Router, only the presenter does.
 
 ### The Router's VIP Stack
 
@@ -42,9 +42,9 @@ A router has its own VIP stack: A ViewController, a Presenter and a UseCase. All
 
 #### The ViewController 
 
-The role of a Router's ViewController is the same it would be without VIPER: to do the work of changing scenes. 
+The role of a Router's ViewController is the same as it would be without VIPER: to do the work of changing scenes. 
 
-When the Router's ViewController is a subclass of a NavigationController or TabBarController, the events from the UI are already consumed by the controller itself, so their delegates must be used to monitor events. In particular, the router injects its Presenter into the child view controllers in the delegate before they are displayed.
+When the Router's ViewController is a subclass of a NavigationController or TabBarController, the events from the UI are already consumed by the controller itself, so their delegates must be used to monitor events. In particular, the router injects its Presenter into each child ViewController in the delegate before the child is displayed.
 
 When a Navigation- or TabBarController is associated with a storyboard, the child's `perform(segue:)` calls are called from the parents implementation and the `prepareFor(segue:)` override is implemented as an extension within the NavigationController's file. This override is just a dance because the Navigation Controller actually implements the Segue.
 
