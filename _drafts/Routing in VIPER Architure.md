@@ -6,9 +6,9 @@ date: 2018-05-02
 
 ## Introduction
 
-In the VIPER architecture, the responsibility of scene navigation is placed where it belongs: in the routing ViewController. A ViewController which routes Scenes is known as a Router.
+In the VIPER architecture, the responsibility of scene navigation is placed where it belongs: in the parent ViewController. A ViewController which routes Scenes is known as a Router.
 
-A VIPER Router is implemented in a way that a ViewController (and the rest of its VIP stack) can be rendered without being dependent on its presenting or presented ViewController. For example, a ViewController that is part of a sequence governed by a NavigationController can also be reused in a modal or split presentation.
+A VIPER Router is implemented in a way that a ViewController (and the rest of its VIP stack) can be rendered without being dependent on its presenting or presented ViewController. For example, a ViewController that is part of a sequence governed by a NavigationController can also be reused in a modal in another sequence. A navigation sequence can easily be implemented with multiple starting positions.
 
 ### The Function of a Router
 
