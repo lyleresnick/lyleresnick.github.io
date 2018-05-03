@@ -22,7 +22,7 @@ The main difference between a VIPER Router and a UIKit router is that the routin
 
 ## Routers in VIPER
 
-A VIPER Router is just another [VIP module](http://lyleresnick.com/blog/2017/08/29/A-Crash-Course-on-the-VIPER-Architecture), and is normally implemented with a ViewController, a Presenter and a UseCase.  A router is simply another module that knows how to display child scenes using a pattern. The biggest difference between a routing Module and a regular one is that the ViewController class of the module displays child ViewControllers instead of views.
+A VIPER Router is just another [VIP module](http://lyleresnick.com/blog/2017/08/29/A-Crash-Course-on-the-VIPER-Architecture), and is normally implemented with a ViewController, a Presenter and a UseCase.  A router is simply another module that knows how to display child scenes using a pattern. The biggest difference between a routing Module and a regular one is that the ViewController class of the module displays child ViewControllers instead of just views.
 
 A Router ViewController can be inherited from a NavigationController, a TabBarController, or a  PageViewController. A Custom Router inherits from a plain ViewController to create a *container*  ViewController.
 
@@ -84,7 +84,7 @@ In VIPER, initiation of a scene change is the responsibility of the parent (just
 
 In iOS, a ViewController is given access to its parent via one of the navigation-, tabBar- or splitView-Controller properties. This allows the child to know about and to control the behaviour of parent. In the case of navigation or splitView, the control is used to push a new controller on top. This leads to dependency issues, since this added responsibility ties the child to a predetermined environment defined by presentation-style or system state. 
 
-iOS tries to overcome this problem for navigation and splitView by introducing the `show(:sender:)` and `showDetail(:sender:)` methods. At least these methods allow a child of parent to not be concerned about which stacking environment they are in. 
+iOS tries to overcome this problem for navigation and splitView by introducing the `show(:sender:)` and `showDetail(:sender:)` methods. These two methods remove from the child having to know which of the two types of containers it is in. 
 
 In a VIPER architecture child ViewControllers make no assumptions about their environment and as such are available for use in any role, whether defined by presentation-style or system state.
 
@@ -154,7 +154,7 @@ func eventItemSelected(index: Int) {
 
 #### Passing Data Among Collaborating UseCases
 
- It is not uncommon for multiple scenes to collaborate in order to complete real world *Use Case*. 
+It is not uncommon for multiple scenes to collaborate in order to complete real world *Use Case*. 
 
 Shared Entities that a UseCase manipulates should not be retrieved from the UseCase by the Presenter and then passed on to the Router only to be passed to the next ViewController, Presenter and UseCase. This would be quite tedious and is against the ruls tha the ViewController should not be concerned with Entities.
 
@@ -213,7 +213,8 @@ If the state does not need to be initialized by the Router's UseCase, there is p
 FIXME: <u>put this somewhere</u>: Each child's Router is defined by a protocol. It is implemented by the parent.
 
 
-
+TODO: passing view controller parameters
+TODO: passing callbacks instead of self
 
 #### Connecting the Presenter to the Router
 
