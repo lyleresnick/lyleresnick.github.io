@@ -22,15 +22,28 @@ The main difference between a VIPER Router and a UIKit router is that the routin
 
 ## Routers in VIPER
 
-A VIPER Router is just another [VIP module](http://lyleresnick.com/blog/2017/08/29/A-Crash-Course-on-the-VIPER-Architecture), and is normally implemented with a ViewController, a Presenter and a UseCase.  A router is simply another module that knows how to display child scenes using a pattern. The biggest difference between a routing Module and a regular one is that the ViewController class of the module displays child ViewControllers instead of just views.
+A VIPER Router is a [VIP module](http://lyleresnick.com/blog/2017/08/29/A-Crash-Course-on-the-VIPER-Architecture) that knows how to display child scenes using a pattern. All Routers will be implemented with a ViewController and a Presenter, but it will occasionally implement a UseCase. The biggest difference between a routing module and a regular module is that the module's ViewController class displays child ViewControllers instead of just views - some may do both.
 
-A Router ViewController can be inherited from a NavigationController, a TabBarController, or a  PageViewController. A Custom Router inherits from a plain ViewController to create a *container*  ViewController.
+A Router's ViewController can be inherited from a NavigationController, a TabBarController, or a  PageViewController. A custom Router inherits from a plain ViewController to create what is known as *container*  ViewController.
 
 ### The Presenter Communicates with the Router
 
-The guiding rule of VIPER is that any event received by a ViewController must be forwarded directly to its Presenter. The Presenter forwards the event to either its Use Case or its Router. 
+The guiding rule of VIPER is that any event received by a ViewController must be forwarded directly to its Presenter. The Presenter, then, forwards the event to either its Use Case or its Router.
 
-When the output is received by the Presenter from the Use Case, it might send the output to the Router instead of the ViewController. An example of this is when a scene exits.
+Here is an example of a Presenter determining how a Cancel event should be routed:
+
+```Swift
+func eventCancel() {
+    if editMode == .create {
+        router.routeCreateItemCancelled()
+    }
+    else {
+        router.routeDisplayView()
+    }
+}
+```
+
+When the Presenter receives output from the Use Case, it might send it on to the Router instead of the ViewController. An example of this is when a scene exits.
 
 TODO: insert code
 
@@ -44,21 +57,40 @@ A router has its own VIP stack: A ViewController, a Presenter and a UseCase. All
 
 The role of a Router's ViewController is the same as it would be without VIPER: to do the work of changing scenes. 
 
-When the Router's ViewController is a subclass of a NavigationController or TabBarController, the events from the UI are already consumed by the controller itself, so their delegates must be used to monitor events. In particular, the router injects its Presenter into each child ViewController in the delegate before the child is displayed.
+When the Router's ViewController is a subclass of a NavigationController or TabBarController, the events from the UI are already consumed by the controller itself, so their delegates must be used to monitor events. 
 
-When a Navigation- or TabBarController is associated with a storyboard, the child's `perform(segue:)` calls are called from the parents implementation and the `prepareFor(segue:)` override is implemented as an extension within the NavigationController's file. This override is just a dance because the Navigation Controller actually implements the Segue.
+One important use of the subclassed router's delegate is to inject the router's Presenter into each child ViewController before the child is displayed.
 
-In the case of a custom Routing ViewController , child ViewControllers are instantiated by the custom ViewController as normal, and the perform(segue:) and prepareFor(segue:) are implemented by the custom ViewController
+```Swift
+extension TodoRootRouterNavController: UINavigationControllerDelegate {
+    
+    func navigationController(_ navigationController: UINavigationController, willShow viewController: UIViewController, animated: Bool) {
+       
+        switch viewController {
+        case let viewController as TodoItemRouterViewController:
+            viewController.router = presenter
+        case let viewController as TodoListViewController:
+            viewController.router = presenter
+        default:
+            fatalError("Unknown viewController encountered")
+        }
+    }
+}
+```
 
-In VIPER, a custom Router will send all UI events to the Presenter,  as usual.
+TODO: move this to where it makes sense: When using storyboard segues with a Navigation- or SplitView-Controller, the child's `perform(segue:)` methods are called from the parents implementation and the `prepareFor(segue:)` override is implemented as an extension within the NavigationController's file. This override is just a dance because the Navigation Controller actually implements the Segue.
+
+In the case of a custom Routing ViewController, child ViewControllers are instantiated by the custom ViewController as normal, and the perform(segue:) and prepareFor(segue:) are implemented by the custom ViewController
+
+In VIPER, a custom Router will send all UI events, including lifecycle events, to the Presenter.
 
 #### The Presenter
 
-The role of the Presenter is the same as any other presenter: to consume events sent to the ViewController. When implementing a custom Router, such as one driven by menus or tabs, or a custom sequence, the messages from the UI are passed directly to the presenter as usual. 
+The role of the Router's Presenter is the same as any other presenter: to consume events sent by the ViewController. When implementing a custom Router, such as one driven by menus, tabs, or custom sequence, the messages from the UI are passed directly to the presenter as usual. 
 
-The majority of the messages which the Presenter responds to are routing messages that come from the Router's child modules. These messages originate from events generated by the user of the child modules.
+The majority of the messages that the Presenter will respond to are routing messages that come from the Router's child modules. These messages originate from events occurring in the Router's child modules.
 
-The Presenter may simply translate the message and send it to its output or it can pass the message to the Router's UseCase. 
+The Presenter may simply translate the message's contents and send it to its output or it can pass the message to the Router's UseCase. 
 
 The Presenter might instantiate state data models that will be injected into all child UseCases.
 
