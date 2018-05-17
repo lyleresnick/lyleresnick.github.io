@@ -26,9 +26,9 @@ A VIPER Router is implemented just like a regular [VIP module ](http://lyleresni
 
 ### The Presenter Communicates with the Router
 
-The guiding rule of VIPER is that any event received by a ViewController must be forwarded directly to its Presenter. The Presenter, then, forwards the event to either its Use Case or its Router.
+A primary rule of VIPER is: each event received by a ViewController must be forwarded directly to its Presenter, without further processing. The Presenter has the responsibility to forward the event to either its UseCase or its Router.
 
-Here is an example of a Presenter interpreting a Cancel event and then forwarding it to its Router:
+Here is an example of a Presenter interpreting a "Cancel" event and then forwarding it to its Router:
 
 ```Swift
 class ItemEditPresenter {
@@ -44,10 +44,10 @@ class ItemEditPresenter {
 }
 ```
 
-When the Presenter receives output from the Use Case, it might send it on to the Router instead of the ViewController. An example of this is when a scene exits:
+A Presenter can also send an event on to it's Router when it receives output from it's Use Case.  An example of this is when a scene exits due to a "Save" event:
 
 ```Swift
-extension ItemEditPresenter: ItemEditUseCaseOutput {
+extension ItemEditPresenter: ItemEditSaveUseCaseOutput {
     ...
     func presentDisplayView() {
         router.routeDisplayView()
@@ -59,11 +59,32 @@ The result is that a ViewController never communicates with a Router, only the p
 
 ### The Router's VIP Stack
 
-A router has its own VIP stack: A ViewController, a Presenter and a UseCase. All of their roles are the usual ones.
+A router has its own VIP stack: A ViewController, a Presenter and a UseCase. Each of their roles are the usual ones.
+
+![RouterInstantiationOfFirstChildSequence](/Assets/RouterInstantiationOfFirstChildSequence.png)
 
 #### The ViewController 
 
 The role of a Router's ViewController is the same as it would be without VIPER: to do the work of changing scenes. 
+
+TODO: In a custom Router 
+
+```Swift
+override func prepare(for segue: UIStoryboardSegue, sender: Any? = nil) {
+
+    switch Segue(rawValue: segue.identifier!)! {
+    case .showDisplayView:
+
+        let viewController = segue.destination as! ItemDisplayViewController
+        viewController.presenter.router = presenter
+
+    case .showEditView:
+
+        let viewController = segue.destination as! ItemEditViewController
+        viewController.presenter.router = presenter
+    }
+}
+```
 
 When the Router's ViewController is a subclass of a NavigationController or TabBarController, the events from the UI are already consumed by the controller itself, so their delegates must be used to monitor events. 
 
@@ -92,6 +113,12 @@ In the case of a custom Routing ViewController, child ViewControllers are instan
 
 In VIPER, a custom Router will send all UI events, including lifecycle events, to the Presenter.
 
+
+
+TODO: The scene change normally occurs when the ViewController receives a request from its Presenter.
+
+
+
 #### The Presenter
 
 The role of the Router's Presenter is the same as any other presenter: to consume events sent by the ViewController. When implementing a custom Router, such as one driven by menus, tabs, or custom sequence, the messages from the UI are passed directly to the presenter as usual. 
@@ -105,16 +132,6 @@ The Presenter might instantiate state data models that will be injected into all
 #### The UseCase
 
 The Router's UseCase initializes data that will be shared by all child UseCases. Usually this occurs when the viewLoaded event is received.  Most of the time, the Router does not need to implement a UseCase.
-
-#### Why are Router Messages implemented by the Router's Presenter?
-
-The ViewController in VIPER only forwards inbound events and Displays the results of those events.
-
-Router messages start as events in a child ViewController. All events received by a ViewController are forwarded to it's Presenter, so all Router messages are sent to the Presenter anyway.
-
-In some cases the Router must refer to its UseCase to make a decision based on system state - a message would have to be sent through two layers just to get to the UseCase. 
-
-In practice, implementing the routing messages in the Presenter is the right choice. 
 
 ## Changing Scenes 
 
