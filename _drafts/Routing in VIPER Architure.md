@@ -30,22 +30,32 @@ A Router's ViewController can be inherited from a NavigationController, a TabBar
 
 The guiding rule of VIPER is that any event received by a ViewController must be forwarded directly to its Presenter. The Presenter, then, forwards the event to either its Use Case or its Router.
 
-Here is an example of a Presenter determining how a Cancel event should be routed:
+Here is an example of a Presenter interpreting a Cancel event and then forwarding it to its Router:
 
 ```Swift
-func eventCancel() {
-    if editMode == .create {
-        router.routeCreateItemCancelled()
-    }
-    else {
-        router.routeDisplayView()
+class ItemEditPresenter {
+	...
+	func eventCancel() {
+        switch editMode  {
+        case .create:
+            router.routeCreateItemCancelled()
+        case .update:
+            router.routeDisplayView()
+        }
     }
 }
 ```
 
-When the Presenter receives output from the Use Case, it might send it on to the Router instead of the ViewController. An example of this is when a scene exits.
+When the Presenter receives output from the Use Case, it might send it on to the Router instead of the ViewController. An example of this is when a scene exits:
 
-TODO: insert code
+```Swift
+extension ItemEditPresenter: ItemEditUseCaseOutput {
+    ...
+    func presentDisplayView() {
+        router.routeDisplayView()
+    }
+}
+```
 
 The result is that a ViewController never communicates with a Router, only the presenter does.
 
