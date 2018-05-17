@@ -6,25 +6,23 @@ date: 2018-05-02
 
 ## Introduction
 
-In the VIPER architecture, the responsibility of scene management is placed where it belongs: in the parent ViewController. A ViewController which manages one or more scenes is known as a Router.
-
-A VIPER Router makes it possible to render a child ViewController without making it statically dependent on a parent or sibling ViewController. For example, a ViewController that is part of a sequence managed by a NavigationController can be reused in a modal situation or in any other sequence. A navigation sequence can easily be implemented with multiple starting positions.
-
-### The Function of a Router
-
 The primary function of a Router is to manage the display of a set of scenes using a pattern such as stacking, direct access or serial access. 
 
-Router functionality is provided in iOS by specialized ViewControllers, such as Navigation-, TabBar- and PageView-Controllers. Each of these manages the display life cycle of a set of child ViewControllers. Custom Routers, also known as container ViewControllers, can be created to implement other useage patterns such as menu, custom tab access, or a domain-defined sequence.
+In the VIPER architecture, the responsibility for scene management is given to the parent ViewController. A ViewController which manages one or more scenes is known as a Router.
 
-Another function of a Router is to maintain system state for child modules.
+A VIPER Router makes it possible to create a child ViewController that is not dependent on a parent or sibling ViewController. For example, a ViewController that is part of a sequence managed by a NavigationController can be reused in a modal situation or in another sequence. A navigation sequence can easily be implemented to have multiple starting positions.
 
-The main difference between a VIPER Router and a UIKit router is that the routing code is located where it is supposed to be: in the Router - not the child view controllers
+A secondary function of a Router is to maintain system state for child modules.
 
 ## Routers in VIPER
 
-A VIPER Router is a [VIP module](http://lyleresnick.com/blog/2017/08/29/A-Crash-Course-on-the-VIPER-Architecture) that knows how to display child scenes using a pattern. All Routers will be implemented with a ViewController and a Presenter, but it will occasionally implement a UseCase. The biggest difference between a routing module and a regular module is that the module's ViewController class displays child ViewControllers instead of just views - some may do both.
+In iOS, router functions are provided by specialized ViewControllers, such as Navigation-, TabBar- and PageView-Controllers. Each of these manage the life cycle and display of a set of child ViewControllers. A custom Router, known as a container ViewController in iOS, can be created to implement non-standard usage patterns such as menus, custom tab paging, or some other domain-defined sequence.
 
-A Router's ViewController can be inherited from a NavigationController, a TabBarController, or a  PageViewController. A custom Router inherits from a plain ViewController to create what is known as *container*  ViewController.
+The main difference between a VIPER Router and a UIKit router is that routing code is located in the Router - not in a child ViewController. This is not unlike the situation in the Android architecture.
+
+Each VIPER Router has a ViewController and a Presenter, and occasionally it will have a UseCase. The main difference between a routing module and a regular module is that its ViewController class displays child ViewControllers instead of just views, although some might display both.
+
+A VIPER Router is implemented just like a regular [VIP module ](http://lyleresnick.com/blog/2017/08/29/A-Crash-Course-on-the-VIPER-Architecture). The ViewController can be inherited from a NavigationController, a TabBarController, or a  PageViewController, as usual. A custom Router is inherited from a plain ViewController.
 
 ### The Presenter Communicates with the Router
 
