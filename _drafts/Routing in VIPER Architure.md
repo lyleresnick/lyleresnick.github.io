@@ -26,7 +26,7 @@ A VIPER Router is implemented just like a regular [VIP module ](http://lyleresni
 
 ### The Presenter Communicates with the Router
 
-A primary rule of VIPER is: each event received by a ViewController must be forwarded directly to its Presenter, without further processing. The Presenter has the responsibility to forward the event to either its UseCase or its Router.
+A primary rule of VIPER is that any event received by a ViewController must be forwarded directly to its Presenter, without further processing. The Presenter has the responsibility to forward the event to either its UseCase or its Router.
 
 Here is an example of a Presenter interpreting a "Cancel" event and then forwarding it to its Router:
 
@@ -55,7 +55,7 @@ extension ItemEditPresenter: ItemEditSaveUseCaseOutput {
 }
 ```
 
-The result is that a ViewController never communicates with a Router, only the presenter does.
+The result is that a ViewController never communicates with a Router, only the Presenter does.
 
 ### The Router's VIP Stack
 
@@ -67,7 +67,11 @@ A router has its own VIP stack: A ViewController, a Presenter and a UseCase. Eac
 
 The role of a Router's ViewController is the same as it would be without VIPER: to do the work of changing scenes. 
 
-TODO: In a custom Router 
+In a custom Router (a UIKit container ViewController), the ViewController is responsible for initiating the display of the child ViewController. This is perfomed by calling `performSegue(withIdentifier:sender:)`as usual.
+
+A custom Router sends all UI events, including lifecycle events, to the Presenter.
+
+The ViewController must, also, set the child's router to the Router's Presenter. This is done in the `prepare(for:sender:)` override:
 
 ```Swift
 override func prepare(for segue: UIStoryboardSegue, sender: Any? = nil) {
@@ -76,19 +80,19 @@ override func prepare(for segue: UIStoryboardSegue, sender: Any? = nil) {
     case .showDisplayView:
 
         let viewController = segue.destination as! ItemDisplayViewController
-        viewController.presenter.router = presenter
+        viewController.router = presenter
 
     case .showEditView:
 
         let viewController = segue.destination as! ItemEditViewController
-        viewController.presenter.router = presenter
+        viewController.router = presenter
     }
 }
 ```
 
-When the Router's ViewController is a subclass of a NavigationController or TabBarController, the events from the UI are already consumed by the controller itself, so their delegates must be used to monitor events. 
+When the Router's ViewController is a subclass of a Navigation- or SplitViewController, the UI events are consumed directly by the controller. In this case, the -ControllerDelegate is used to monitor the events.  
 
-One important use of the subclassed router's delegate is to inject the router's Presenter into each child ViewController before the child is displayed.
+One important use of the subclassed -ControllerDelegate is to inject the Router's Presenter into each child ViewController as the Router before the child is displayed.
 
 ```Swift
 extension TodoRootRouterNavController: UINavigationControllerDelegate {
@@ -107,17 +111,9 @@ extension TodoRootRouterNavController: UINavigationControllerDelegate {
 }
 ```
 
+Note that: the scene change request almost always occurs when the ViewController receives a request from its own Presenter, which originates in a child ViewController.
+
 TODO: move this to where it makes sense: When using storyboard segues with a Navigation- or SplitView-Controller, the child's `perform(segue:)` methods are called from the parents implementation and the `prepareFor(segue:)` override is implemented as an extension within the NavigationController's file. This override is just a dance because the Navigation Controller actually implements the Segue.
-
-In the case of a custom Routing ViewController, child ViewControllers are instantiated by the custom ViewController as normal, and the perform(segue:) and prepareFor(segue:) are implemented by the custom ViewController
-
-In VIPER, a custom Router will send all UI events, including lifecycle events, to the Presenter.
-
-
-
-TODO: The scene change normally occurs when the ViewController receives a request from its Presenter.
-
-
 
 #### The Presenter
 
