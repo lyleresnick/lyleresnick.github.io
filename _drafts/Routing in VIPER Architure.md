@@ -30,7 +30,7 @@ A primary rule of VIPER is that any event received by a ViewController must be f
 
 Here is an example of a Presenter interpreting a "Cancel" event and then forwarding it to its Router:
 
-```Swift
+```swift
 class ItemEditPresenter {
 	...
 	func eventCancel() {
@@ -46,7 +46,7 @@ class ItemEditPresenter {
 
 A Presenter can also send an event on to it's Router when it receives output from it's Use Case.  An example of this is when a scene exits due to a "Save" event:
 
-```Swift
+```swift
 extension ItemEditPresenter: ItemEditSaveUseCaseOutput {
     ...
     func presentDisplayView() {
@@ -73,7 +73,7 @@ A custom Router sends all UI events, including lifecycle events, to the Presente
 
 The ViewController must, also, set the child's router to the Router's Presenter. This is done in the `prepare(for:sender:)` override:
 
-```Swift
+```swift
 override func prepare(for segue: UIStoryboardSegue, sender: Any? = nil) {
 
     switch Segue(rawValue: segue.identifier!)! {
@@ -86,6 +86,7 @@ override func prepare(for segue: UIStoryboardSegue, sender: Any? = nil) {
 
         let viewController = segue.destination as! ItemEditViewController
         viewController.router = presenter
+        
     }
 }
 ```
@@ -94,7 +95,7 @@ When the Router's ViewController is a subclass of a Navigation- or SplitViewCont
 
 One important use of the subclassed -ControllerDelegate is to inject the Router's Presenter into each child ViewController as the Router before the child is displayed.
 
-```Swift
+```swift
 extension TodoRootRouterNavController: UINavigationControllerDelegate {
     
     func navigationController(_ navigationController: UINavigationController, willShow viewController: UIViewController, animated: Bool) {
@@ -111,9 +112,7 @@ extension TodoRootRouterNavController: UINavigationControllerDelegate {
 }
 ```
 
-Note that: the scene change request almost always occurs when the ViewController receives a request from its own Presenter, which originates in a child ViewController.
-
-TODO: move this to where it makes sense: When using storyboard segues with a Navigation- or SplitView-Controller, the child's `perform(segue:)` methods are called from the parents implementation and the `prepareFor(segue:)` override is implemented as an extension within the NavigationController's file. This override is just a dance because the Navigation Controller actually implements the Segue.
+Note that aside from the initial scene display, a scene change request almost always occurs when the ViewController receives a request from its own Presenter, which originates in a child ViewController.
 
 #### The Presenter
 
@@ -157,7 +156,11 @@ The problem for a VIPER Router implementation is that a Segue's source ViewContr
 
 The solution to this is to create a extension in the parent ViewController's file and override `prepareFor(segue:)` there. Here the NavController's `showItem(id: String)` initates a Segue on the topmost child with an `id` parameter. The `prepare(for segue: UIStoryboardSegue, sender: Any?)`  of the child is used to inject the `id` into the child's sibling.
 
-```Swift
+TODO: same idea as above - is this needed?: When using storyboard segues with a Navigation- or SplitView-Controller, the child's `perform(segue:)` methods are called from the parents implementation and the `prepareFor(segue:)` override is implemented as an extension within the NavigationController's file. This override is just a dance because the Navigation Controller actually implements the Segue.
+
+#### 
+
+```swift
 extension SomeRouterNavController: SomeRouterPresenterOutput {
         
     func showItem(id: String) {
@@ -168,7 +171,7 @@ extension SomeRouterNavController: SomeRouterPresenterOutput {
 }
 ```
 
-```Swift
+```swift
 extension SomeListViewController {
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
@@ -198,7 +201,7 @@ Data originates in a View when a user initiates an action. Normally, when a View
 
 Not all data should be passed in this way. Recall that in VIPER, entities are never passed as output to the ViewController, only PresentationModels and in turn, ViewModels. Data sent to a Router can be translated by the Presenter, if necessary.  This often occurs when a selection is made in a table and the index is translated to an `id` supplied by a ViewModel as is shown in this snippet of a Presenter:
 
-```Swift
+```swift
 func eventItemSelected(index: Int) {
     
     router.routeDisplayItem(id: viewModelList[index].id)
@@ -233,7 +236,7 @@ class SendMoneyUseCaseState {
 
 Below the scene Router's Presenter instantiates the model and injects it into its own UseCase so it can be initialized:
 
-```Swift
+```swift
 class SendMoneyRouterPresenter {
 
     var state = SendMoneyUseCaseState()
