@@ -16,6 +16,14 @@ A secondary function of a Router is to maintain system state for child modules.
 
 ## Routers in VIPER
 
+In VIPER, initiation of a scene change is the responsibility of the parent (just like in Android). 
+
+In iOS, a ViewController is given access to its parent via one of the navigation-, tabBar- or splitView-Controller properties. This allows the child to know about and to control the behaviour of parent. In the case of navigation or splitView, the control is used to push a new controller on top. This leads to dependency issues, since this added responsibility ties the child to a predetermined environment defined by presentation-style or system state. 
+
+iOS tries to overcome this problem for navigation and splitView by introducing the `show(:sender:)` and `showDetail(:sender:)` methods. These two methods remove from the child having to know which of the two types of containers it is in. 
+
+In a VIPER architecture child ViewControllers make no assumptions about their environment and as such are available for use in any role, whether defined by presentation-style or system state.
+
 In iOS, router functions are provided by specialized ViewControllers, such as Navigation-, TabBar- and PageView-Controllers. Each of these manage the life cycle and display of a set of child ViewControllers. A custom Router, known as a container ViewController in iOS, can be created to implement non-standard usage patterns such as menus, custom tab paging, or some other domain-defined sequence.
 
 The main difference between a VIPER Router and a UIKit router is that routing code is located in the Router - not in a child ViewController. This is not unlike the situation in the Android architecture.
@@ -59,19 +67,88 @@ The result is that a ViewController never communicates with a Router, only the P
 
 ### The Router's VIP Stack
 
-A router has its own VIP stack: A ViewController, a Presenter and a UseCase. Each of their roles are the usual ones.
+A router has its own VIP stack: A ViewController, a Presenter and a UseCase. Each of their roles are the usual ones. In order to understand how to implement a Router it is helpful to understand the implementation of a custom Router.
+
+The following interaction diagram details the interaction that occurs between a parent VIP Router and its initial child.  
 
 ![RouterInstantiationOfFirstChildSequence](/Assets/RouterInstantiationOfFirstChildSequence.png)
 
-#### The ViewController 
+This diagram may look overwhelming at first, but it simply reallocates work which is normally performed in the child, to the parent.
+
+#### The Router's ViewController 
 
 The role of a Router's ViewController is the same as it would be without VIPER: to do the work of changing scenes. 
 
-In a custom Router (a UIKit container ViewController), the ViewController is responsible for initiating the display of the child ViewController. This is perfomed by calling `performSegue(withIdentifier:sender:)`as usual.
+A custom Router (a UIKit container ViewController) sends all UI events, including lifecycle events, to the Presenter. The viewDidLoad is implemented as it would be in any other VIP module: 
 
-A custom Router sends all UI events, including lifecycle events, to the Presenter.
+```swift
+override func viewDidLoad() {
+    super.viewDidLoad()
+    presenter.eventViewReady()
+}
+```
 
-The ViewController must, also, set the child's router to the Router's Presenter. This is done in the `prepare(for:sender:)` override:
+#### The Router's Presenter
+
+In that the Presenter consumes events sent by the ViewController, the role of the Router's Presenter is similar to any other Presenter. 
+
+If the processing for an event only involves changing of a scene,  the event will be sent right back to the ViewController.
+
+```swift
+func eventViewReady() {
+    output.showOnboardingFirstScene()
+}
+```
+
+When the Router has to initialize data for use by its children, or the scene to display must be determined from global state, the event is sent on to the Router's UseCase. The Presenter might instantiate state data models that are injected into all child UseCases: 
+
+```swift
+var state = ItemUseCaseState()
+
+init(useCase: ItemRouterUseCase) {
+    self.useCase = useCase
+    useCase.state = state
+}
+
+func eventViewReady() {
+    useCase.eventViewReady(startMode: startMode)
+}
+```
+
+#### The Router's UseCase
+
+Most of the time, the Router does not need to implement a UseCase.
+
+The Router's UseCase should initialize data that will be shared by the UseCases of its children. Usually this happens when the `viewReady` event is received.  
+
+The UseCase may be used to determine which scene should be displayed, given global state. 
+
+
+
+In a custom Router, the ViewController is responsible for initiating the display of the child ViewController. This is performed by calling `performSegue(withIdentifier:sender:)`as usual.
+
+#### The Presenter as UseCaseOutput
+
+In most cases the Presenter as UseCaseOutput is pretty straight forward. It generally performs the same duties that a non-routing presenter would. 
+
+The simplest case where the event is just sent back to the ViewController was shown previously. 
+
+Most of the responsibilities of the Presenter are about responding to it's child VIP modules. 
+
+#### The ViewController as PresenterOutput
+
+This is where the action happens in a Router since this is where the next scene is displayed. Here, the ViewController initiates a Segue to display a "CreateView"
+
+```swift
+func showViewReady() {
+
+    DispatchQueue.main.async {
+        self.performSegue(withIdentifier: "showCreateView", sender: nil)
+    }
+}
+```
+
+The ViewController must set the child's router to the Router's Presenter. This is done in the `prepare(for:sender:)` override:
 
 ```swift
 override func prepare(for segue: UIStoryboardSegue, sender: Any? = nil) {
@@ -91,9 +168,11 @@ override func prepare(for segue: UIStoryboardSegue, sender: Any? = nil) {
 }
 ```
 
+#### Subclasses of NavigationController
+
 When the Router's ViewController is a subclass of a Navigation- or SplitViewController, the UI events are consumed directly by the controller. In this case, the -ControllerDelegate is used to monitor the events.  
 
-One important use of the subclassed -ControllerDelegate is to inject the Router's Presenter into each child ViewController as the Router before the child is displayed.
+The most important use of the subclassed -ControllerDelegate is to inject the Router's Presenter into each child ViewController as the Router before the child is displayed.
 
 ```swift
 extension TodoRootRouterNavController: UINavigationControllerDelegate {
@@ -114,39 +193,25 @@ extension TodoRootRouterNavController: UINavigationControllerDelegate {
 
 Note that aside from the initial scene display, a scene change request almost always occurs when the ViewController receives a request from its own Presenter, which originates in a child ViewController.
 
-#### The Presenter
+#### The Presenter as Router
 
-The role of the Router's Presenter is the same as any other presenter: to consume events sent by the ViewController. When implementing a custom Router, such as one driven by menus, tabs, or custom sequence, the messages from the UI are passed directly to the presenter as usual. 
+TODO: wrong place: The Router's Presenter also has another major source of events.  The majority of the events that the Presenter will consume are routing event that originate in the Router's child ViewControllers. This will be discussed later.
 
-The majority of the messages that the Presenter will respond to are routing messages that come from the Router's child modules. These messages originate from events occurring in the Router's child modules.
+If the event is one which terminates the scene, such as touching a back or forward button, the event will be sent to the parent of the router - the router's Router
 
-The Presenter may simply translate the message's contents and send it to its output or it can pass the message to the Router's UseCase. 
+```swift
+func routeCreateItemCancelled() {
+    output.showPop()
+}
+```
 
-The Presenter might instantiate state data models that will be injected into all child UseCases.
-
-#### The UseCase
-
-The Router's UseCase initializes data that will be shared by all child UseCases. Usually this occurs when the viewLoaded event is received.  Most of the time, the Router does not need to implement a UseCase.
-
-## Changing Scenes 
-
-### Who's Responsibility
-
-In VIPER, initiation of a scene change is the responsibility of the parent (just like in Android). iOS has an opinion about how scene change should be initiated. 
-
-In iOS, a ViewController is given access to its parent via one of the navigation-, tabBar- or splitView-Controller properties. This allows the child to know about and to control the behaviour of parent. In the case of navigation or splitView, the control is used to push a new controller on top. This leads to dependency issues, since this added responsibility ties the child to a predetermined environment defined by presentation-style or system state. 
-
-iOS tries to overcome this problem for navigation and splitView by introducing the `show(:sender:)` and `showDetail(:sender:)` methods. These two methods remove from the child having to know which of the two types of containers it is in. 
-
-In a VIPER architecture child ViewControllers make no assumptions about their environment and as such are available for use in any role, whether defined by presentation-style or system state.
-
-### Storyboards
+## Storyboards
 
 Storyboards provide a number of advantages other than simply reducing the need to hand-code view layouts. Storyboards document the layout and flow of the app. When a Segue instantiates a ViewController, it calls `awakeFromNib()`, which is used to configure the VIP stack and can perform post-IB injections. 
 
 In most cases, using Storyboards is not counter to the architecture of a VIPER Router. The only unusual situation is when using NavigationControllers. 
 
-#### NavigationControllers
+### NavigationControllers
 
 In a Storyboard, the "relationship" Segue from a parent points to its first-displayed child. In the case of Navigation- or SplitView-Controllers, the next Segue points to the next-displayed sibling scene. 
 
@@ -157,8 +222,6 @@ The problem for a VIPER Router implementation is that a Segue's source ViewContr
 The solution to this is to create a extension in the parent ViewController's file and override `prepareFor(segue:)` there. Here the NavController's `showItem(id: String)` initates a Segue on the topmost child with an `id` parameter. The `prepare(for segue: UIStoryboardSegue, sender: Any?)`  of the child is used to inject the `id` into the child's sibling.
 
 TODO: same idea as above - is this needed?: When using storyboard segues with a Navigation- or SplitView-Controller, the child's `perform(segue:)` methods are called from the parents implementation and the `prepareFor(segue:)` override is implemented as an extension within the NavigationController's file. This override is just a dance because the Navigation Controller actually implements the Segue.
-
-#### 
 
 ```swift
 extension SomeRouterNavController: SomeRouterPresenterOutput {
@@ -186,7 +249,7 @@ extension SomeListViewController {
 
 
 
-### Passing Data between Scenes
+## Passing Data between Scenes
 The router is responsible for passing local data between scenes. 
 
 There are 3 kinds of local data that can passed between scenes: 
@@ -195,7 +258,7 @@ There are 3 kinds of local data that can passed between scenes:
 2. data shared among collaborating UseCases (representing all or part of the system state).
 3. data originating in a younger sibling scene's UseCase   
 
-#### Passing Data Originating in a View
+### Passing Data Originating in a View
 
 Data originates in a View when a user initiates an action. Normally, when a ViewController instantiates another ViewController, data is passed to the new ViewController by injection. It is no different in VIPER, except that the injector is always a Router. In VIPER, data must be passed to the Router before it can be passed to the new ViewController.
 
@@ -208,7 +271,7 @@ func eventItemSelected(index: Int) {
 }
 ```
 
-#### Passing Data Among Collaborating UseCases
+### Passing Data Among Collaborating UseCases
 
 It is not uncommon for multiple scenes to collaborate in order to complete real world *Use Case*. 
 
@@ -216,11 +279,11 @@ Shared Entities that a UseCase manipulates should not be retrieved from the UseC
 
 There are two ways to pass data among multiple scenes, both of which involve injection. 
 
-##### Injecting a Global State Model 
+#### Injecting a Global State Model 
 
 The first way is the simplest. A state Model, which represents the state all of the shared data, can be attached to the Entity Gateway. Since the gateway is already injected into all UseCases, this is the easiest way to share data and make it available to all UseCases. The downside to this is that all UseCases in the whole app will have access to this state model and it becomes hard to know which use cases are updating the model and what the models life cycle actually is. There are also cases where a recursive model is required and a global state cannot support this. 
 
-##### Injecting a Local State Model 
+#### Injecting a Local State Model 
 
 Another method, which limits the scope of the state model to a small number of scenes and allows for recursion is one where the Router's Presenter instantiates the state model for use by its own and child UseCases. The model is accessed by the child Presenters when the router is injected and then is itself injected into the child's UseCase. In this manner the models scope is limited to just those scenes which actually need access to it. 
 
@@ -272,53 +335,4 @@ FIXME: <u>put this somewhere</u>: Each child's Router is defined by a protocol. 
 TODO: passing view controller parameters
 TODO: passing callbacks instead of self
 
-#### Connecting the Presenter to the Router
-
-
-
-### Going against the grain
-
-#### Allocating class responsibilities appropriately
-
-#### Responses from other Scenes (Alternative to the view controller delegate pattern)
-
-There are also cases where a presentation model must be prepared for an older sibling that the presenter must convert to view models (see TodoListPresenter.eventItemSelected())
-
-## 
-
-#### Additional behaviour for the Nav controller subclass 
-
-
-
-## App Overview
-
-Here is a screen shot of the top of the display:
-
-![ReportListDemoTop](/Assets/ReportListDemoTop.png)
-
-Here is the middle :
-
-![ReportListDemoMiddle](/Assets/ReportListDemoMiddle.png)
-
-
-
-
-
-
-
-
-
- I decided the best way to proceed was to generate the output into a separate structure to drive the display. 
-
-
-
-```
-public class TransactionModel {
-	String group;
-	String date;
-	String description;
-	String amount;
-	String debit;
-}
-```
 
