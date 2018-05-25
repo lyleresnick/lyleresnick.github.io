@@ -75,7 +75,7 @@ The following interaction diagram details the interaction that occurs between a 
 
 This diagram may look overwhelming at first, but it simply reallocates work which is normally performed in the child, to the parent.
 
-#### The Router's ViewController 
+#### The ViewController 
 
 The role of a Router's ViewController is the same as it would be without VIPER: to do the work of changing scenes. 
 
@@ -88,7 +88,7 @@ override func viewDidLoad() {
 }
 ```
 
-#### The Router's Presenter
+#### The Presenter
 
 In that the Presenter consumes events sent by the ViewController, the role of the Router's Presenter is similar to any other Presenter. 
 
@@ -115,25 +115,27 @@ func eventViewReady() {
 }
 ```
 
-#### The Router's UseCase
+
+
+Most of the responsibilities of the Presenter are about responding to it's child VIP modules. See Below.
+
+#### The UseCase
 
 Most of the time, the Router does not need to implement a UseCase.
 
-The Router's UseCase should initialize data that will be shared by the UseCases of its children. Usually this happens when the `viewReady` event is received.  
+There are two major reasons for a Router to implement a UseCase:
 
-The UseCase may be used to determine which scene should be displayed, given global state. 
+1. to initialize data that will be shared by the UseCases of its children. 
+2. to determine which scene should be displayed, based on  global state. 
 
 
+In both of these cases, this would be implemented when the `viewReady` event is received.  
 
 In a custom Router, the ViewController is responsible for initiating the display of the child ViewController. This is performed by calling `performSegue(withIdentifier:sender:)`as usual.
 
 #### The Presenter as UseCaseOutput
 
-In most cases the Presenter as UseCaseOutput is pretty straight forward. It generally performs the same duties that a non-routing presenter would. 
-
-The simplest case where the event is just sent back to the ViewController was shown previously. 
-
-Most of the responsibilities of the Presenter are about responding to it's child VIP modules. 
+In most cases the Presenter as UseCaseOutput is pretty straight forward. It will normally be responsible for forwarding messages to the ViewController, but there are times where it may be need to translate error messages as required by the UseCase. 
 
 #### The ViewController as PresenterOutput
 
@@ -167,6 +169,10 @@ override func prepare(for segue: UIStoryboardSegue, sender: Any? = nil) {
     }
 }
 ```
+
+
+
+Ther ViewController also has the option of displaying its own Views in lieu of displaying a ViewController. This might be the easiest way to display an error message.
 
 #### Subclasses of NavigationController
 
