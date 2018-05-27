@@ -32,7 +32,7 @@ Each VIPER Router has a ViewController and a Presenter, and occasionally it will
 
 A VIPER Router is implemented just like a regular [VIP module ](http://lyleresnick.com/blog/2017/08/29/A-Crash-Course-on-the-VIPER-Architecture). The ViewController can be inherited from a NavigationController, a TabBarController, or a  PageViewController, as usual. A custom Router is inherited from a plain ViewController.
 
-### The Presenter Communicates with the Router
+## The Presenter Communicates with the Router
 
 A primary rule of VIPER is that any event received by a ViewController must be forwarded directly to its Presenter, without further processing. The Presenter has the responsibility to forward the event to either its UseCase or its Router.
 
@@ -65,7 +65,7 @@ extension ItemEditPresenter: ItemEditSaveUseCaseOutput {
 
 The result is that a ViewController never communicates with a Router, only the Presenter does.
 
-### The Router's VIP Stack
+## The Router's VIP Stack
 
 A router has its own VIP stack: A ViewController, a Presenter and a UseCase. Each of their roles are the usual ones. In order to understand how to implement a Router it is helpful to understand the implementation of a custom Router.
 
@@ -75,7 +75,7 @@ The following interaction diagram details the interaction that occurs between a 
 
 This diagram may look overwhelming at first, but it simply reallocates work which is normally performed in the child, to the parent.
 
-#### The ViewController 
+### The ViewController 
 
 The role of a Router's ViewController is the same as it would be without VIPER: to do the work of changing scenes. 
 
@@ -88,7 +88,7 @@ override func viewDidLoad() {
 }
 ```
 
-#### The Presenter
+### The Presenter
 
 In that the Presenter consumes events sent by the ViewController, the role of the Router's Presenter is similar to any other Presenter. 
 
@@ -100,7 +100,7 @@ func eventViewReady() {
 }
 ```
 
-When the Router has to initialize data for use by its children, or the scene to display must be determined from global state, the event is sent on to the Router's UseCase. The Presenter might instantiate state data models that are injected into all child UseCases: 
+When the Router has to initialize data for use by its children, or the scene to display must be determined from global state, the event is sent on to the Router's UseCase. The Presenter might instantiate state data models that are injected into its child UseCases: 
 
 ```swift
 var state = ItemUseCaseState()
@@ -119,7 +119,7 @@ func eventViewReady() {
 
 Most of the responsibilities of the Presenter are about responding to it's child VIP modules. See Below.
 
-#### The UseCase
+### The UseCase
 
 Most of the time, the Router does not need to implement a UseCase.
 
@@ -133,24 +133,31 @@ In both of these cases, this would be implemented when the `viewReady` event is 
 
 In a custom Router, the ViewController is responsible for initiating the display of the child ViewController. This is performed by calling `performSegue(withIdentifier:sender:)`as usual.
 
-#### The Presenter as UseCaseOutput
+### The Presenter as UseCaseOutput
 
-In most cases the Presenter as UseCaseOutput is pretty straight forward. It will normally be responsible for forwarding messages to the ViewController, but there are times where it may be need to translate error messages as required by the UseCase. 
+Just as with the UseCase, most of the time, the Router does not need to implement UseCaseOutput.
 
-#### The ViewController as PresenterOutput
+In most cases the Presenter as UseCaseOutput is pretty straight forward. It will usually only be responsible for forwarding messages to the ViewController, but there are times where it may be need to translate error messages as required by the UseCase. 
 
-This is where the action happens in a Router since this is where the next scene is displayed. Here, the ViewController initiates a Segue to display a "CreateView"
+### The ViewController as PresenterOutput
+
+The job of the ViewController as PresenterOutput is to arrange for the child scenes to be displayed. Here, the ViewController initiates a Segue to display an EditView:
 
 ```swift
+private enum Segue: String {
+    case showDisplayView
+    case showEditView
+}
+
 func showViewReady() {
 
     DispatchQueue.main.async {
-        self.performSegue(withIdentifier: "showCreateView", sender: nil)
+        self.performSegue(withIdentifier: Segue.showEditView.rawValue, sender: itemParameters)
     }
 }
 ```
 
-The ViewController must set the child's router to the Router's Presenter. This is done in the `prepare(for:sender:)` override:
+The ViewController must set the child's router to the Router's Presenter. It must also set the domain parameters, if there are any, for the scene. This is done in the `prepare(for:sender:)` override:
 
 ```swift
 override func prepare(for segue: UIStoryboardSegue, sender: Any? = nil) {
@@ -160,25 +167,27 @@ override func prepare(for segue: UIStoryboardSegue, sender: Any? = nil) {
 
         let viewController = segue.destination as! ItemDisplayViewController
         viewController.router = presenter
+        viewController.domainParameters = sender as! ItemParameters
 
     case .showEditView:
 
         let viewController = segue.destination as! ItemEditViewController
         viewController.router = presenter
+        viewController.domainParameters = sender as! ItemParameters
         
     }
 }
 ```
 
+It is usually easiest to pass domain parameters is via the sender parameter. If there is more than one,  a struct can be used. This technique should be used even when not using VIPER, as the parameter is not used  for anything else in a manual Segue.
 
+The ViewController also has the option of displaying its own Views in lieu of displaying a ViewController. This might be the easiest way to display an error message when there is a failure detected in the UseCase.
 
-Ther ViewController also has the option of displaying its own Views in lieu of displaying a ViewController. This might be the easiest way to display an error message.
+### Subclasses of NavigationController
 
-#### Subclasses of NavigationController
+When the Router's ViewController is a subclass of a Navigation- or SplitViewController, the most interesting UI events are directly consumed by the controller. In this case, the respective -ControllerDelegate is used to monitor the events.  
 
-When the Router's ViewController is a subclass of a Navigation- or SplitViewController, the UI events are consumed directly by the controller. In this case, the -ControllerDelegate is used to monitor the events.  
-
-The most important use of the subclassed -ControllerDelegate is to inject the Router's Presenter into each child ViewController as the Router before the child is displayed.
+The most important use of the -ControllerDelegate is to inject the Router's Presenter into each child ViewController as the Router before the child is displayed.
 
 ```swift
 extension TodoRootRouterNavController: UINavigationControllerDelegate {
@@ -197,13 +206,132 @@ extension TodoRootRouterNavController: UINavigationControllerDelegate {
 }
 ```
 
-Note that aside from the initial scene display, a scene change request almost always occurs when the ViewController receives a request from its own Presenter, which originates in a child ViewController.
+Aside from the initial scene display, a scene change request almost always occurs when the ViewController receives a request from its own Presenter, which originates in a child ViewController.
 
-#### The Presenter as Router
+## The Presenter as Router
 
-TODO: wrong place: The Router's Presenter also has another major source of events.  The majority of the events that the Presenter will consume are routing event that originate in the Router's child ViewControllers. This will be discussed later.
+The Router's Presenter also has another major source of events: routing events that originate in the Router's child ViewControllers. An example of this is shown in the following interaction diagram:
 
-If the event is one which terminates the scene, such as touching a back or forward button, the event will be sent to the parent of the router - the router's Router
+![RouterInstantiationViaChildSequence](/Assets/RouterInstantiationViaChildSequence.png)
+
+Take the scenario where a ViewController is displaying a List and an Add button. The user can to add an item to the list or display an item already in the list. Touching the Add button takes the user to another ViewController to fill in the details. Touching an item in the list take the user to another ViewController to display the details.
+
+The router is passed as an abstraction which implements a protocol for each child. Here is an example of such a protocol for this example:
+
+```swift
+protocol ListRouter: class {
+    
+    func routeDisplayItem(id: String)
+    func routeCreateItem()
+}
+```
+
+### The Child ViewController
+
+As usual the child ViewController receives an event. The event is passed on to the child's Presenter. Here is a typical implementation responding to an "Add" button:
+
+```swift
+@IBAction func addTouched(_ sender: Any) {
+    presenter.eventCreateItem()
+}
+```
+
+Here is a typical implementation responding to a TableViewCell selection: 
+
+```swift
+extension ListAdapter: UITableViewDelegate {
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        presenter.eventItemSelected(index: indexPath.row)
+    }
+}
+```
+
+
+
+### The Child Presenter
+
+The Presenter sends the events on to the router as follows:
+
+```swift
+func eventCreateItem() {
+    router.routeCreateItem() 
+}
+
+func eventItemSelected(index: Int) {
+    router.routeDisplayItem(id: viewModelList[index].id) 
+}
+```
+
+In the case of the item selection, the index is translated into the id of the item that will be displayed.
+
+### The Router's Presenter
+
+The Router Presenter's job is simple: send the event on to the ViewController.
+
+```swift
+extension RootRouterPresenter: ListRouter {
+    
+    func routeDisplayItem(id: String) {
+        output.showItem(id: id)
+    }
+    
+    func routeCreateItem() {
+        output.showCreateItem()
+    }
+}
+```
+
+### The Router's ViewController
+
+The ViewController performs the Segue, and in the case of displaying the selected item, sends the `id` in the, otherwise unused, `sender` parameter:
+
+```swift
+private enum RootRouterSegue: String {
+    case create
+    case show
+}
+
+extension RootRouterNavController: RootRouterListPresenterOutput {
+    
+    func showCreateItem() {
+        
+        let identifier = RootRouterSegue.create.rawValue
+        viewControllers.first?.performSegue(withIdentifier: identifier, sender: nil)
+    }
+    
+    func showItem(id: String) {
+        
+        let identifier = RootRouterSegue.show.rawValue
+        viewControllers.first?.performSegue(withIdentifier: identifier, sender: id)
+    }
+}
+```
+
+Given the way that of Segue work, the `prepare(for:sender:)`  must be overridden in the child ViewController. To solve this dilemma, simply create and extension in the Router ViewController's  file: 
+
+```swift
+extension ListViewController {
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        switch RootRouterSegue(rawValue:segue.identifier!)! {
+        case .create:
+            break
+        case .show:
+            let viewController = segue.destination as! ItemDisplayViewController
+        	viewController.id = sender as! String
+        }
+    }
+}
+```
+
+This extension puts the routing code back into the router.
+
+
+
+
+
+TODO: place this at end: If the event is one which terminates the scene, such as touching a back or forward button, the event will be sent to the parent of the router - the router's Router
 
 ```swift
 func routeCreateItemCancelled() {
@@ -211,7 +339,7 @@ func routeCreateItemCancelled() {
 }
 ```
 
-## Storyboards
+## Special Provisions for Storyboards
 
 Storyboards provide a number of advantages other than simply reducing the need to hand-code view layouts. Storyboards document the layout and flow of the app. When a Segue instantiates a ViewController, it calls `awakeFromNib()`, which is used to configure the VIP stack and can perform post-IB injections. 
 
