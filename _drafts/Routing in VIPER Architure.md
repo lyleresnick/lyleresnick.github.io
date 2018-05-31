@@ -208,15 +208,11 @@ extension TodoRootRouterNavController: UINavigationControllerDelegate {
 
 Aside from the initial scene display, a scene change request almost always occurs when the ViewController receives a request from its own Presenter, which originates in a child ViewController.
 
-## The Presenter as Router
+## Changing Scenes
 
-The Router's Presenter also has another major source of events: routing events that originate in the Router's child ViewControllers. An example of this is shown in the following interaction diagram:
+Take the scenario where a ViewController displays a List and an Add button. The user can to add an item to the list or display an item already in the list. Tapping the Add button takes the user to another scene to enter the details of a new item. Tapping an item in the list takes the user to another scene which displays the details of the item.
 
-![RouterInstantiationViaChildSequence](/Assets/RouterInstantiationViaChildSequence.png)
-
-Take the scenario where a ViewController is displaying a List and an Add button. The user can to add an item to the list or display an item already in the list. Touching the Add button takes the user to another ViewController to fill in the details. Touching an item in the list take the user to another ViewController to display the details.
-
-The router is passed as an abstraction which implements a protocol for each child. Here is an example of such a protocol for this example:
+It is the routers responsibility to make the transition from the initial scene to the final scene. From the initial ViewControllers point of view the router looks like this:
 
 ```swift
 protocol ListRouter: class {
@@ -226,17 +222,25 @@ protocol ListRouter: class {
 }
 ```
 
+The router is passed to all child ViewControllers as an abstraction which implements one specific routing protocol for each child. 
+
+The following interaction diagram shows an initial ViewController initiating the display of an new scene:
+
+![RouterInstantiationViaChildSequence](/Assets/RouterInstantiationViaChildSequence.png)
+
+The message sequence is the same, regardless of whether the router is custom or off the shelf. 
+
 ### The Child ViewController
 
-As usual the child ViewController receives an event. The event is passed on to the child's Presenter. Here is a typical implementation responding to an "Add" button:
+The child ViewController receives an event in the usual manner. The event is immediately passed on to the child's Presenter. Here is a typical implementation for an "Add" button:
 
 ```swift
-@IBAction func addTouched(_ sender: Any) {
+@IBAction func addTapped(_ sender: Any) {
     presenter.eventCreateItem()
 }
 ```
 
-Here is a typical implementation responding to a TableViewCell selection: 
+Here is a typical implementation for a TableViewCell selection: 
 
 ```swift
 extension ListAdapter: UITableViewDelegate {
@@ -246,8 +250,6 @@ extension ListAdapter: UITableViewDelegate {
     }
 }
 ```
-
-
 
 ### The Child Presenter
 
@@ -263,7 +265,7 @@ func eventItemSelected(index: Int) {
 }
 ```
 
-In the case of the item selection, the index is translated into the id of the item that will be displayed.
+In the case of the item selection, the `index` is translated into the `id` of the item that will be displayed.
 
 ### The Router's Presenter
 
@@ -284,7 +286,7 @@ extension RootRouterPresenter: ListRouter {
 
 ### The Router's ViewController
 
-The ViewController performs the Segue, and in the case of displaying the selected item, sends the `id` in the, otherwise unused, `sender` parameter:
+The Router's ViewController initiates the Segue of the child. In the case of displaying the selected item, sends the `id` in the, otherwise unused, `sender` parameter:
 
 ```swift
 private enum RootRouterSegue: String {
@@ -292,7 +294,7 @@ private enum RootRouterSegue: String {
     case show
 }
 
-extension RootRouterNavController: RootRouterListPresenterOutput {
+extension RootRouterNavController: RootRouterPresenterOutput {
     
     func showCreateItem() {
         
@@ -308,7 +310,7 @@ extension RootRouterNavController: RootRouterListPresenterOutput {
 }
 ```
 
-Given the way that of Segue work, the `prepare(for:sender:)`  must be overridden in the child ViewController. To solve this dilemma, simply create and extension in the Router ViewController's  file: 
+Given the way that navigation Segues are implemented, the `prepare(for:sender:)`  must be overridden in the child ViewController. To keep this routing code in the router, simply create an extension in the Router ViewController's file: 
 
 ```swift
 extension ListViewController {
@@ -325,62 +327,7 @@ extension ListViewController {
 }
 ```
 
-This extension puts the routing code back into the router.
-
-
-
-
-
-TODO: place this at end: If the event is one which terminates the scene, such as touching a back or forward button, the event will be sent to the parent of the router - the router's Router
-
-```swift
-func routeCreateItemCancelled() {
-    output.showPop()
-}
-```
-
-## Special Provisions for Storyboards
-
-Storyboards provide a number of advantages other than simply reducing the need to hand-code view layouts. Storyboards document the layout and flow of the app. When a Segue instantiates a ViewController, it calls `awakeFromNib()`, which is used to configure the VIP stack and can perform post-IB injections. 
-
-In most cases, using Storyboards is not counter to the architecture of a VIPER Router. The only unusual situation is when using NavigationControllers. 
-
-### NavigationControllers
-
-In a Storyboard, the "relationship" Segue from a parent points to its first-displayed child. In the case of Navigation- or SplitView-Controllers, the next Segue points to the next-displayed sibling scene. 
-
-Using a Segue and in turn the `show*(:sender:)` methods, a child ViewController of a Navigation- or SplitView-Controller by-passes the parent when initiating a sibling scene - or so it seems. The Segue actually calls the parent controller's `pushViewController(_:animated:)` method.
-
-The problem for a VIPER Router implementation is that a Segue's source ViewController is the previous sibling, not the parent, so the parent's `prepareFor(segue:)` is not called - but the previous sibling's is called.
-
-The solution to this is to create a extension in the parent ViewController's file and override `prepareFor(segue:)` there. Here the NavController's `showItem(id: String)` initates a Segue on the topmost child with an `id` parameter. The `prepare(for segue: UIStoryboardSegue, sender: Any?)`  of the child is used to inject the `id` into the child's sibling.
-
-TODO: same idea as above - is this needed?: When using storyboard segues with a Navigation- or SplitView-Controller, the child's `perform(segue:)` methods are called from the parents implementation and the `prepareFor(segue:)` override is implemented as an extension within the NavigationController's file. This override is just a dance because the Navigation Controller actually implements the Segue.
-
-```swift
-extension SomeRouterNavController: SomeRouterPresenterOutput {
-        
-    func showItem(id: String) {
-
-        let identifier = SomeRouterSegue.showSome.rawValue
-        viewControllers.first?.performSegue(withIdentifier: identifier, sender: id)
-    }
-}
-```
-
-```swift
-extension SomeListViewController {
-    
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        
-        let viewController = segue.destination as! SomeItemViewController
-        let id = sender as! String
-        viewController.id = id
-    }
-}
-```
-
-
+If you really wanted to be pure about responsibility, you could create a custom Segue whose source would be the NavigationController - it would not look as good in the storyboard but it would make more sense from a responsibility point of view.
 
 
 ## Passing Data between Scenes
@@ -460,13 +407,5 @@ class SendMoneyStepOnePresenter {
 ```
 
 If the state does not need to be initialized by the Router's UseCase, there is probably no reason for the Router to have a UseCase.
-
-
-
-FIXME: <u>put this somewhere</u>: Each child's Router is defined by a protocol. It is implemented by the parent.
-
-
-TODO: passing view controller parameters
-TODO: passing callbacks instead of self
 
 
