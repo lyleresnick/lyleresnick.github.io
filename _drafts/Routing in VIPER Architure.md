@@ -14,7 +14,7 @@ A VIPER Router makes it possible to create a child ViewController that is not de
 
 A secondary function of a Router is to maintain system state for child modules.
 
-## Routers in VIPER
+## Routing in VIPER
 
 In VIPER, initiation of a scene change is the responsibility of the parent (just like in Android). 
 
@@ -73,7 +73,7 @@ The following interaction diagram details the interaction that occurs between a 
 
 ![RouterInstantiationOfFirstChildSequence](/Assets/RouterInstantiationOfFirstChildSequence.png)
 
-This diagram may look overwhelming at first, but it simply reallocates work which is normally performed in the child, to the parent.
+This diagram may look overwhelming at first, but it simply reallocates work to the parent which is normally performed in the child.
 
 ### The ViewController 
 
@@ -183,7 +183,7 @@ It is usually easiest to pass domain parameters is via the sender parameter. If 
 
 The ViewController also has the option of displaying its own Views in lieu of displaying a ViewController. This might be the easiest way to display an error message when there is a failure detected in the UseCase.
 
-### Subclasses of NavigationController
+## Subclasses of NavigationController
 
 When the Router's ViewController is a subclass of a Navigation- or SplitViewController, the most interesting UI events are directly consumed by the controller. In this case, the respective -ControllerDelegate is used to monitor the events.  
 
@@ -210,7 +210,7 @@ Aside from the initial scene display, a scene change request almost always occur
 
 ## Changing Scenes
 
-Take the scenario where a ViewController displays a List and an Add button. The user can to add an item to the list or display an item already in the list. Tapping the Add button takes the user to another scene to enter the details of a new item. Tapping an item in the list takes the user to another scene which displays the details of the item.
+Imagine a scenario where a ViewController displays a List and an Add Button. The user can choose to add an item to the list or display an item already in the list. Tapping the Add button takes the user to another scene to enter the details of a new item. Tapping an item in the list takes the user to another scene which displays the details of the item.
 
 It is the routers responsibility to make the transition from the initial scene to the final scene. From the initial ViewControllers point of view the router looks like this:
 
@@ -222,13 +222,15 @@ protocol ListRouter: class {
 }
 ```
 
-The router is passed to all child ViewControllers as an abstraction which implements one specific routing protocol for each child. 
+It is the routers responsibility to implement this interface. 
 
-The following interaction diagram shows an initial ViewController initiating the display of an new scene:
+The router is injected into to each child ViewController. It implements one routing protocol for each child. 
+
+The following interaction diagram shows a child ViewController initiating the display of an new scene:
 
 ![RouterInstantiationViaChildSequence](/Assets/RouterInstantiationViaChildSequence.png)
 
-The message sequence is the same, regardless of whether the router is custom or off the shelf. 
+The message sequence for the creation of a new scene is always the same, regardless of whether the router is custom or derived from a Navigation- ViewController. 
 
 ### The Child ViewController
 
