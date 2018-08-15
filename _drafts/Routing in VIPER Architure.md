@@ -139,7 +139,7 @@ The following diagram details the interaction that occurs between a parent VIP R
 
 The role of a Router's ViewController is the same as it would be without VIPER: to perform the work of changing scenes. 
 
-A custom Router (a UIKit container ViewController) sends all UI events, including lifecycle events, to the Presenter. The viewDidLoad is implemented as it would be in any other VIP module: 
+A custom Router (a UIKit container ViewController) sends all of the events that it receives, including lifecycle events, to the Presenter. The viewDidLoad is implemented as it would be in any other VIP module: 
 
 ```swift
 override func viewDidLoad() {
@@ -160,30 +160,29 @@ func eventViewReady() {
 }
 ```
 
-When the Router has to initialize data for use by its children, or when the scene to display is dependent on state, the event is sent to the Router's UseCase. The Presenter might instantiate state data models that are injected into its child UseCases: 
+When the Router has to initialize data for its child scenes, or when the decision of which scene to display is dependent on state, the event is sent to the Router's UseCase. The Presenter might instantiate state data models that are injected into its child UseCases: 
 
 ```swift
-var state = ItemUseCaseState()
+class ItemRouterPresenter {
+	...
+    var state = ItemUseCaseState()
 
-init(useCase: ItemRouterUseCase) {
-    self.useCase = useCase
-    useCase.state = state
-}
+    init(useCase: ItemRouterUseCase) {
+        self.useCase = useCase
+        useCase.state = state
+    }
 
-func eventViewReady() {
-    useCase.eventViewReady(startMode: startMode)
+    func eventViewReady() {
+        useCase.eventViewReady(startMode: startMode)
+    }
 }
 ```
-
-
 
 Most of the responsibilities of the Presenter are about responding to its child VIP modules - see below.
 
 ### The UseCase
 
-In most cases, it is not necessary for the Router to implement a UseCase.
-
-There are two major reasons to implement a UseCase for a Router:
+Normally, it is not necessary for the Router to implement a UseCase, but there are two good reasons to implement a UseCase for a Router:
 
 1. to initialize data which will be shared by the UseCases of its children and
 2. to determine which scene should be displayed, based on state. 
@@ -192,7 +191,7 @@ There are two major reasons to implement a UseCase for a Router:
 
 Whenever the Router implements a UseCase, the its Presenter will implement the UseCaseOutput.
 
-In most cases the Presenter as UseCaseOutput is pretty straight forward. It usually only  forwards messages to the ViewController, while occasionally performing localization. 
+In most cases the Presenter as UseCaseOutput is pretty straight forward. It usually only  forwards messages to the ViewController, while performing localization. 
 
 ### The ViewController as PresenterOutput
 
