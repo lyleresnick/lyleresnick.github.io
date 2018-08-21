@@ -392,15 +392,15 @@ The router is responsible for passing data between scenes.
 
 There are 3 kinds of data that can passed between scenes: 
 
-1. data originating in a View due to user data entry,
+1. data originating in a View due to data entry by a user,
 2. data shared among collaborating UseCases (representing all or part of the system state) and
-3. data originating in a younger sibling scene's UseCase  (normally data passed back by delegate)
+3. data originating in a younger sibling scene's UseCase  (data that is normally passed back by delegate)
 
 ### Passing Data Originating in a View
 
 Data originates in a View when a user initiates an action. Normally, when a ViewController instantiates another ViewController, data is passed to the new ViewController by injection. It is no different in VIPER, except that the injector is always a Router. In VIPER, data must be passed to the Router before it can be passed to the new ViewController.
 
-Not all data should be passed in this way. Recall that in VIPER, entities are never passed as output to the ViewController, only PresentationModels and in turn, ViewModels. Data sent to a Router can be translated by the Presenter, if necessary.  This often occurs when a selection is made in a table and the index is translated to an `id` supplied by a ViewModel as is shown in this snippet of a Presenter:
+Most data should not be passed in this way. Recall that in VIPER, entities are never passed as output to the ViewController, only PresentationModels and in turn, ViewModels. Data sent to a Router can be translated by the Presenter, if necessary.  This often occurs when a selection is made in a table and the index is translated to an `id` supplied by a ViewModel as is shown in this snippet of a Presenter:
 
 ```swift
 func eventItemSelected(index: Int) {
@@ -411,7 +411,7 @@ func eventItemSelected(index: Int) {
 
 ### Passing Data Among Collaborating UseCases
 
-It is not uncommon for multiple scenes to collaborate in order to complete a real world *Use Case*. 
+It is not uncommon for multiple scenes to collaborate in order to complete business *Use Case*. 
 
 Shared Entities that a UseCase manipulates should not be retrieved from the UseCase by the Presenter and then passed on to the Router only to be passed to the next ViewController, Presenter and UseCase. This would be quite tedious and is against the rule that the ViewController should not be concerned with Entities.
 
@@ -419,13 +419,13 @@ There are two ways to pass data among multiple scenes, both of which involve inj
 
 #### Injecting a Global State Model 
 
-The first way is the simplest. A State Model, which represents the state all of the shared data, can be attached to the Entity Gateway. Since the gateway is already injected into all UseCases, this is the easiest way to share data and make it available to all UseCases. The downside to this is that all UseCases in the whole app will have access to this state model and it becomes hard to know which use cases are updating the model and what the models life cycle actually is. There are also cases where a recursive model is required and a global state cannot support this. 
+The first way is the simplest. A State Model, which represents the state all of the shared data, can be attached to the Entity Gateway. Since the gateway is already injected into all UseCases, this is the easiest way to share data and make it available to all UseCases. The downside to this is that all UseCases in the whole app will have access to this state model and it becomes hard to know which use cases are updating the model and what the life cycle of the model is. When a recursive scene flow is necessary, a global state cannot be used. 
 
 #### Injecting a Local State Model 
 
-Another method, which limits the scope of the state model to a small number of scenes and allows for recursion is one where the Router's Presenter instantiates the state model for use by its own and child UseCases. The model is accessed by the child Presenters when the router is injected and then is itself injected into the child's UseCase. In this manner the models scope is limited to just those scenes which actually need access to it. 
+Another method, which limits the scope of the state model to a small number of scenes and allows for recursion is one where the Router's Presenter instantiates the state model for use by its own and child UseCases. The model is accessed by the child Presenters when the router is injected and then is itself injected into the child's UseCase. In this manner the model's scope is limited to just those scenes which actually need to access it. 
 
-Here is an example of a UseCase state model for a multi-scene use case for sending money:
+Here is an example of a UseCase state model for a multi-scene buasiness use case for sending money:
 
 ```swift
 class SendMoneyUseCaseState {
@@ -435,7 +435,7 @@ class SendMoneyUseCaseState {
 }
 ```
 
-Below the scene Router's Presenter instantiates the model and injects it into its own UseCase so it can be initialized:
+Below, the Router's Presenter instantiates the model and injects it into its own UseCase so it can be initialized:
 
 ```swift
 class SendMoneyRouterPresenter {
@@ -467,7 +467,7 @@ If the state does not need to be initialized by the Router's UseCase, there is p
 
 ### Passing Data Originating in a Younger Sibling's UseCase
 
-It is often the case that data is changed in a younger sibling 's UseCase and the older sibling's Presenter must acquire the data to update it's ViewController's display. Before the younger sibling is popped off the stack, the data can be sent back to the Presenter via a closure. 
+It is often the case that data is changed in a younger sibling 's UseCase and the older sibling's Presenter must acquire the data to update it's ViewController's display. Before the younger sibling is dismissed, the data can be sent back to the Presenter via a closure. 
 
 In the following example, the Presenter calls its Router to display an item. It passes the item id and a closure. A nice result of this implementation is that the index is captured by the closure, so there is no need to store it in a property:
 
@@ -487,10 +487,13 @@ func eventItemSelected(index: Int) {
 The UseCase responds to the *Back* navigation event by calling the `presentChanged` method, but only if the item changed:
 
 ```swift
-func eventBack() {
+class ItemRouterUseCase {
+	...
+    func eventBack() {
 
-    if state.itemChanged {
-        output.presentChanged(item: ListPresentationModel(entity: state.currentItem!))
+        if state.itemChanged {
+            output.presentChanged(item: ListPresentationModel(entity: state.currentItem!))
+        }
     }
 }
 ```
@@ -511,10 +514,6 @@ extension ItemRouterPresenter: ItemRouterBackUseCaseOutput {
     }
 }
 ```
-
-
-
-
 
 ## Summary 
 
