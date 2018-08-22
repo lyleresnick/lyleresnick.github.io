@@ -467,7 +467,7 @@ If the state does not need to be initialized by the Router's UseCase, there is p
 
 ### Passing Data Originating in a Younger Sibling's UseCase
 
-It is often the case that data is changed in a younger sibling 's UseCase and the older sibling's Presenter must acquire the data to update it's ViewController's display. Before the younger sibling is dismissed, the data can be sent back to the Presenter via a closure. 
+Often, data is changed in a younger sibling's UseCase and the older sibling's Presenter must acquire the data to update it's ViewController's display. Before the younger sibling is dismissed, the data can be sent back to the Presenter via a closure. 
 
 In the following example, the Presenter calls its Router to display an item. It passes the item id and a closure. A nice result of this implementation is that the index is captured by the closure, so there is no need to store it in a property:
 
@@ -487,7 +487,7 @@ func eventItemSelected(index: Int) {
 The UseCase responds to the *Back* navigation event by calling the `presentChanged` method, but only if the item changed:
 
 ```swift
-class ItemRouterUseCase {
+class ItemUseCase {
 	...
     func eventBack() {
 
@@ -501,7 +501,7 @@ class ItemRouterUseCase {
 Here is the code that calls the closure. Notice that the item being passed back is a ListPresentationModel, even though it was created from an item.
 
 ```swift
-extension ItemRouterPresenter: ItemRouterBackUseCaseOutput {
+extension ItemPresenter: ItemBackUseCaseOutput {
 
     func presentChanged(item: ListPresentationModel) {
         
@@ -517,4 +517,10 @@ extension ItemRouterPresenter: ItemRouterBackUseCaseOutput {
 
 ## Summary 
 
-TODO: fix this In the VIPER architecture, a parent ViewController is responsible for the management of its child ViewControllers. There is no need to create router classes other than ViewControllers to route child ViewControllers. All of the routing code is placed in the parent, not in the child.
+In the VIPER architecture, a parent ViewController is responsible for the management of its child ViewControllers. Router classes are simply ViewControllers that instantiate and manage child ViewControllers. Unlike the UIKit architecture, all code related to routing is placed in the parent, not in the child.
+
+The benefits of using a Router are: 
+
+1. there is less code in each child ViewController, and
+2. each ViewController is independent of its parent and sibling ViewControllers, allowing it to be reused in multiple contexts.
+3. the router is responsible for injection of data when it is not otherwise injected into the UseCase, so the resulting VIP modules are easy to test 
