@@ -10,7 +10,7 @@ The primary function of a Router is to manage the display of a group of scenes, 
 
 The iOS UIKit architecture offers variety of routing ViewControllers for managing scene transitions, such as Navigation, SplitView, and TabBar. In iOS architecture, the responsibility to arrange for a transition usually lies with the child ViewController. This causes a child ViewController to be tightly coupled to its parent, making it complicated to use it in multiple situations. The architecture also causes the child ViewController to become bloated with routing code that should be placed in the parent controller. 
 
-In the VIPER architecture, a parent ViewController, known as a Router, is fully responsible for the management of its child ViewControllers. 
+In the VIPER architecture, a parent ViewController, known as a Router, is fully responsible for the management of its child ViewControllers. The Router decouples the ViewControllers from one another.
 
 A VIPER architected Router ensures that its child ViewControllers are independent of their parent or sibling ViewControllers. This means that a ViewController which is part of a sequence managed by a NavigationController can be reused in a modal situation, in a SplitView or in another sequence; or that a navigation sequence can easily be implemented to have multiple starting positions.
 
@@ -20,7 +20,7 @@ This article is a continuation of the article [A Crash Course on the VIPER Archi
 
 ## Routing in VIPER
 
-In VIPER, although a child ViewController will request a scene change, the management of the scene change is the responsibility of the parent. The parent is known as a Router. The router is used to decouple the ViewControllers.
+In VIPER, although a child ViewController will request a scene change, the management of the scene change is the responsibility of the parent. The parent is known as a Router. 
 
 In iOS, a ViewController is given access to its parent via one of the Navigation-, TabBar- or SplitViewController properties. Knowledge of the parent is used to push a new controller on top or set up the navigationBar. 
 
