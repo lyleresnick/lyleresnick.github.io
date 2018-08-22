@@ -20,7 +20,7 @@ This article is a continuation of the article [A Crash Course on the VIPER Archi
 
 ## Routing in VIPER
 
-In VIPER, although a child ViewController will request a scene change, management of the scene change is the responsibility of the parent. The parent is known as a Router.
+In VIPER, although a child ViewController will request a scene change, the management of the scene change is the responsibility of the parent. The parent is known as a Router. The router is used to decouple the ViewControllers.
 
 In iOS, a ViewController is given access to its parent via one of the Navigation-, TabBar- or SplitViewController properties. Knowledge of the parent is used to push a new controller on top or set up the navigationBar. 
 
@@ -392,13 +392,13 @@ The router is responsible for passing data between scenes.
 
 There are 3 kinds of data that can passed between scenes: 
 
-1. data originating in a View due to data entry by a user,
-2. data shared among collaborating UseCases (representing all or part of the system state) and
-3. data originating in a younger sibling scene's UseCase  (data that is normally passed back by delegate)
+1. data originating in a ViewController due to data entry by a user,
+2. data shared among collaborating UseCases which represents all or part of the system state and
+3. data originating in a younger sibling scene's UseCase (data that is normally passed back by delegate).
 
 ### Passing Data Originating in a View
 
-Data originates in a View when a user initiates an action. Normally, when a ViewController instantiates another ViewController, data is passed to the new ViewController by injection. It is no different in VIPER, except that the injector is always a Router. In VIPER, data must be passed to the Router before it can be passed to the new ViewController.
+Data originates in a ViewController when a user initiates an action. Normally, when a ViewController instantiates another ViewController, that data is passed to the new ViewController by injection. This is no different in VIPER, except that the injector is always a Router. In VIPER, data is passed to the Router before it is be passed to the new ViewController. 
 
 Most data should not be passed in this way. Recall that in VIPER, entities are never passed as output to the ViewController, only PresentationModels and in turn, ViewModels. Data sent to a Router can be translated by the Presenter, if necessary.  This often occurs when a selection is made in a table and the index is translated to an `id` supplied by a ViewModel as is shown in this snippet of a Presenter:
 
@@ -521,6 +521,6 @@ In the VIPER architecture, a parent ViewController is responsible for the manage
 
 The benefits of using a Router are: 
 
-1. there is less code in each child ViewController, and
-2. each ViewController is independent of its parent and sibling ViewControllers, allowing it to be reused in multiple contexts.
+1. there is less code in each child ViewController
+2. each ViewController is decoupled from its parent and sibling ViewControllers, allowing it to be reused in multiple contexts, and
 3. the router is responsible for injection of data when it is not otherwise injected into the UseCase, so the resulting VIP modules are easy to test 
