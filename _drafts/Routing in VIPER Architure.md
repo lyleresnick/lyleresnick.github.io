@@ -261,13 +261,13 @@ extension TodoRootRouterNavController: UINavigationControllerDelegate {
 }
 ```
 
-## Changing Scenes
+## A Scene Change Example
 
 Imagine a scenario where a ViewController displays a List and an Add Button. The user can choose to add a new item to the list or to display an item from the list. 
 
-When the Add button is tapped a scene is displayed which allows the user to enter the details of a new item. When an item in the list is tapped, a scene is displayed which shows the details of the item.
+When the Add button is tapped, a scene is displayed that allows the user to enter the details of a new item. When an item in the list is tapped, a scene is displayed that shows the details of the item.
 
-It is the routers responsibility to make the transition from the initial scene to the next scene. From the initial ViewControllers point of view, the router looks like this:
+It is the router's responsibility to control the transition from the initial scene to the next scene. From the initial ViewControllers point of view, the router looks like this:
 
 ```swift
 protocol ListRouter: class {
@@ -285,11 +285,11 @@ The following diagram shows a child ViewController initiating the display of an 
 
 ![RouterInstantiationViaChildSequence](/Assets/RouterInstantiationViaChildSequence.png)
 
-The message sequence for the creation of a new scene is always the same, regardless of whether the router is custom or derived from a Navigation- ViewController. 
+The message sequence for the creation of a new scene is always the same, regardless of whether the router is derived from a NavigationController or a custom container ViewController. 
 
-### The Child ViewController
+### The Child ViewController's Role
 
-The child ViewController receives an event in the usual manner. The event is immediately passed on to the child's Presenter. Here is a typical implementation for an Add button:
+The child ViewController receives events in the usual manner. The event is immediately passed on to the child's Presenter. Here is the implementation for an Add button:
 
 ```swift
 @IBAction func addTapped(_ sender: Any) {
@@ -297,7 +297,7 @@ The child ViewController receives an event in the usual manner. The event is imm
 }
 ```
 
-Here is a typical implementation for a TableViewCell selection: 
+Here is the implementation for a TableViewCell selection: 
 
 ```swift
 extension ListAdapter: UITableViewDelegate {
@@ -308,7 +308,7 @@ extension ListAdapter: UITableViewDelegate {
 }
 ```
 
-### The Child Presenter
+### The Child Presenter's Role
 
 The Presenter sends the events on to the router as follows:
 
@@ -322,9 +322,9 @@ func eventItemSelected(index: Int) {
 }
 ```
 
-In the case of the item selection, the `index` is translated into the `id` of the item that will be displayed.
+In the case of the item selection, the `index` is translated into the `id` of the item that will be displayed. The  `id` has been stored in the view model specifically for this purpose.
 
-### The Router's Presenter
+### The Router Presenter's Role
 
 The job of the Router's Presenter is simple: send the event on to the ViewController.
 
@@ -341,9 +341,9 @@ extension RootRouterPresenter: ListRouter {
 }
 ```
 
-### The Router's ViewController
+### The Router ViewController's Role
 
-The Router's ViewController initiates the Segue of the child. In the case of displaying the selected item, sends the `id` via the `sender` parameter:
+The Router's ViewController initiates the Segue of the child. In the case of displaying the selected item, it sends the `id` via the `sender` parameter, to avoid storing it in a property.
 
 ```swift
 private enum RootRouterSegue: String {
@@ -367,7 +367,7 @@ extension RootRouterNavController: RootRouterPresenterOutput {
 }
 ```
 
-Given that `prepare(for:sender:)`  must be overridden in the child ViewController, an extension is created in the Router ViewController's file: 
+Due to the way navigation and modal segues are set up in UIKit, `prepare(for:sender:)`  must be overridden by the child ViewController. In order make it clear that the router is in control,  we create an extension in the Router's ViewController file: 
 
 ```swift
 extension ListViewController {
@@ -384,19 +384,19 @@ extension ListViewController {
 }
 ```
 
-If you really wanted to be pure about responsibility, you could create a custom Segue whose source would be the NavigationController - it would not look as good in the storyboard, but it would make more sense from a responsibility point of view.
+If you really wanted to be pure about responsibility, you might create a custom Segue whose source would be the NavigationController - it would not look as familiar in the storyboard, but it would make more sense from a responsibility point of view.
 
 
 ## Passing Data between Scenes
 The router is responsible for passing data between scenes. 
 
-There are 3 kinds of data that can passed between scenes: 
+There are 3 scenarios in which data can passed between scenes: 
 
-1. data originating in a ViewController due to data entry by a user,
+1. data created in a ViewController via data entry by a user,
 2. data shared among collaborating UseCases which represents all or part of the system state and
 3. data originating in a younger sibling scene's UseCase (data that is normally passed back by delegate).
 
-### Passing Data Originating in a View
+### Passing Data Created in a ViewController
 
 Data originates in a ViewController when a user initiates an action. Normally, when a ViewController instantiates another ViewController, that data is passed to the new ViewController by injection. This is no different in VIPER, except that the injector is always a Router. In VIPER, data is passed to the Router before it is be passed to the new ViewController. 
 
