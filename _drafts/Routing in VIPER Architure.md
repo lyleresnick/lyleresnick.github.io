@@ -390,24 +390,17 @@ If you really wanted to be pure about responsibility, you might create a custom 
 ## Passing Data between Scenes
 The router is responsible for passing data between scenes. 
 
-There are 3 scenarios in which data can passed between scenes: 
+There are 3 scenarios in which data can pass between scenes: 
 
-1. data created in a ViewController via data entry by a user,
+1. data originating in a ViewController via data entry by a user,
 2. data shared among collaborating UseCases which represents all or part of the system state and
 3. data originating in a younger sibling scene's UseCase (data that is normally passed back by delegate).
 
-### Passing Data Created in a ViewController
+### Passing Data Originating in a ViewController
 
-Data originates in a ViewController when a user initiates an action. Normally, when a ViewController instantiates another ViewController, that data is passed to the new ViewController by injection. This is no different in VIPER, except that the injector is always a Router. In VIPER, data is passed to the Router before it is be passed to the new ViewController. 
+Data originates in a ViewController when a user sets a value in a control. The data will be passed to another scene when the user initiates an action that sends the data with it. Normally, when a ViewController instantiates another ViewController, that data is passed to the new ViewController by injection. This is no different in VIPER, except that the injector is always a Router. In VIPER, data is passed to the Router before it is passed to the new ViewController. 
 
-Most data should not be passed in this way. Recall that in VIPER, entities are never passed as output to the ViewController, only PresentationModels and in turn, ViewModels. Data sent to a Router can be translated by the Presenter, if necessary.  This often occurs when a selection is made in a table and the index is translated to an `id` supplied by a ViewModel as is shown in this snippet of a Presenter:
-
-```swift
-func eventItemSelected(index: Int) {
-    
-    router.routeDisplayItem(id: viewModelList[index].id)
-}
-```
+Most data should not be passed in this manner. Recall that, in VIPER, entities are never passed as output to the ViewController, only PresentationModels and in turn, ViewModels. Data sent to a Router should be  translated by the Presenter, such as when a selection is made in a table and the index is translated to an `id` as shown above.
 
 ### Passing Data Among Collaborating UseCases
 
