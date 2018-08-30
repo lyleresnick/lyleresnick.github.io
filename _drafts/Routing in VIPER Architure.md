@@ -387,38 +387,42 @@ extension ListViewController {
 If you really wanted to be pure about responsibility, you might create a custom Segue whose source would be the NavigationController - it would not look as familiar in the storyboard, but it would make more sense from a responsibility point of view.
 
 
-## Passing Data between Scenes
-The router is responsible for passing data between scenes. 
+## Transferring Data between Scenes
+The router is mostly responsible for moving data between scenes. 
 
-There are 3 scenarios in which data can pass between scenes: 
+We can divide the data transfer between scenes into 3 scenarios: 
 
-1. data originating in a ViewController via data entry by a user,
-2. data shared among collaborating UseCases which represents all or part of the system state and
-3. data originating in a younger sibling scene's UseCase (data that is normally passed back by delegate).
+1. transient data that a Scene must pass forward to another Scene,
+2. transient data that a Scene must pass backward to another Scene, and
+3. persistent data that is shared amongst many Scenes.
 
-### Passing Data Originating in a ViewController
+### Transferring Data Forward to the Next Scene
 
-Data originates in a ViewController when a user sets a value in a control. The data will be passed to another scene when the user initiates an action that sends the data with it. Normally, when a ViewController instantiates another ViewController, that data is passed to the new ViewController by injection. This is no different in VIPER, except that the injector is always a Router. In VIPER, data is passed to the Router before it is passed to the new ViewController. 
+Normally, using UIKit, when a ViewController instantiates another ViewController, data is passed forward to the new ViewController by injection. In VIPER, a Router instantiates a ViewController, so the Router must perform the injection. Data is first passed from the initial Scene to the Router. 
 
-Most data should not be passed in this manner. Recall that, in VIPER, entities are never passed as output to the ViewController, only PresentationModels and in turn, ViewModels. Data sent to a Router should be  translated by the Presenter, such as when a selection is made in a table and the index is translated to an `id` as shown above.
+Data sent to a Router should be  translated by the Scene's Presenter. A typical example of this, as seen above, is when a selection is made in a TableView and the index is translated by to an `id` before being passed to the Router. 
 
-### Passing Data Among Collaborating UseCases
+Most data does not need to be passed in this manner. 
 
-It is not uncommon for multiple scenes to collaborate in order to complete business *Use Case*. 
+### Transferring Data Shared Amongst Many Scenes
 
-Shared Entities that a UseCase manipulates should not be retrieved from the UseCase by the Presenter and then passed on to the Router only to be passed to the next ViewController, Presenter and UseCase. This would be quite tedious and is against the rule that the ViewController should not be concerned with Entities.
+Recall that, in VIPER, Entities are never stored in a ViewController because they are never passed as output to the ViewController. The ViewController only knows about ViewModels and the Presenter only knows about PresentationModels. 
 
-There are two ways to pass data among multiple scenes, both of which involve injection. 
+It is not uncommon for multiple scenes to collaborate in order to complete a business *Use Case*. 
+
+Shared Entities that multiple UseCases manipulate should not be retrieved from the UseCase by the Presenter and then passed on to the Router only to be passed to the next ViewController, Presenter and UseCase. This would be quite tedious and is against the rule that the ViewController should not be concerned with Entities.
+
+There are two ways to pass data among multiple scenes, depending on the scope of the data. Both ways involve injection. 
 
 #### Injecting a Global State Model 
 
-The first way is the simplest. A State Model, which represents the state all of the shared data, can be attached to the Entity Gateway. Since the gateway is already injected into all UseCases, this is the easiest way to share data and make it available to all UseCases. The downside to this is that all UseCases in the whole app will have access to this state model and it becomes hard to know which use cases are updating the model and what the life cycle of the model is. When a recursive scene flow is necessary, a global state cannot be used. 
+The first way is the simplest. A State Model, which represents the state all of the shared data, can be attached to the Entity Gateway. Since the gateway is already injected into all UseCases, this is the easiest way to share data and make it available to all UseCases. The downside to this is that all UseCases in the whole app will have access to this state model and it becomes hard to know which use cases are updating the model and what the life cycle of the model is. When a recursive scene flow is necessary, a local state must be used. 
 
 #### Injecting a Local State Model 
 
-Another method, which limits the scope of the state model to a small number of scenes and allows for recursion is one where the Router's Presenter instantiates the state model for use by its own and child UseCases. The model is accessed by the child Presenters when the router is injected and then is itself injected into the child's UseCase. In this manner the model's scope is limited to just those scenes which actually need to access it. 
+Another method, which limits the scope of the State Model to a smaller number of scenes and allows for recursion is one where the Router's Presenter instantiates the State Model for use by its own and child UseCases. The model is accessed by the child Presenters when the router is injected and then is itself injected into the child's UseCase. In this manner the model's scope is limited to just those scenes which actually need to access it. 
 
-Here is an example of a UseCase state model for a multi-scene buasiness use case for sending money:
+Here is an example of a UseCase state model for a multi-scene business use case for sending money:
 
 ```swift
 class SendMoneyUseCaseState {
@@ -458,7 +462,7 @@ class SendMoneyStepOnePresenter {
 
 If the state does not need to be initialized by the Router's UseCase, there is probably no reason for the Router to have a UseCase.
 
-### Passing Data Originating in a Younger Sibling's UseCase
+### Transferring Data Back to the Previous Scene
 
 Often, data is changed in a younger sibling's UseCase and the older sibling's Presenter must acquire the data to update it's ViewController's display. Before the younger sibling is dismissed, the data can be sent back to the Presenter via a closure. 
 
