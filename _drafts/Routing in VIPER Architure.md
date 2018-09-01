@@ -72,7 +72,7 @@ class ItemEditViewController: UIViewController {
 }
 ```
 
-In turn, the Presenter forwards the *Cancel* event to its Router:
+Next, the Presenter forwards the *Cancel* event to its Router:
 
 ```swift
 class ItemEditPresenter {
@@ -367,7 +367,7 @@ extension RootRouterNavController: RootRouterPresenterOutput {
 }
 ```
 
-Due to the way navigation and modal segues are set up in UIKit, `prepare(for:sender:)`  must be overridden by the child ViewController. In order make it clear that the router is in control,  we create an extension in the Router's ViewController file: 
+TODO: Fix This. Due to the way navigation and modal segues are set up in UIKit, `prepare(for:sender:)`  must be overridden by the child ViewController. In order make it clear that the router is in control,  we create an extension in the Router's ViewController file: 
 
 ```swift
 extension ListViewController {
@@ -396,27 +396,27 @@ We can divide the data transfer between scenes into 3 scenarios:
 2. transient data that a Scene must pass backward to another Scene, and
 3. persistent data that is shared amongst many Scenes.
 
-### Transferring Data Forward to the Next Scene
+### Transferring Data to the Next Scene
 
 Normally, using UIKit, when a ViewController instantiates another ViewController, data is passed forward to the new ViewController by injection. In VIPER, a Router instantiates a ViewController, so the Router must perform the injection. Data is first passed from the initial Scene to the Router. 
 
-Data sent to a Router should be  translated by the Scene's Presenter. A typical example of this, as seen above, is when a selection is made in a TableView and the index is translated by to an `id` before being passed to the Router. 
+Data sent to a Router should be translated by the Scene's Presenter. A typical example of this, as seen above, is when a selection is made in a TableView and the index is translated by to an `id` before being passed to the Router. 
 
-Most data does not need to be passed in this manner. 
+Data that is captured by a UseCase should be passed in this manner - it should be passed as described in the next section. 
 
 ### Transferring Data Shared Amongst Many Scenes
 
-Recall that, in VIPER, Entities are never stored in a ViewController because they are never passed as output to the ViewController. The ViewController only knows about ViewModels and the Presenter only knows about PresentationModels. 
+Recall that, in VIPER, Entities are never stored in a ViewController because they are never passed as output to the ViewController. The ViewController only knows about ViewModels. 
 
-It is not uncommon for multiple scenes to collaborate in order to complete a business *Use Case*. 
+It is common for multiple scenes to collaborate in order to complete a business *Use Case*. 
 
 Shared Entities that multiple UseCases manipulate should not be retrieved from the UseCase by the Presenter and then passed on to the Router only to be passed to the next ViewController, Presenter and UseCase. This would be quite tedious and is against the rule that the ViewController should not be concerned with Entities.
 
-There are two ways to pass data among multiple scenes, depending on the scope of the data. Both ways involve injection. 
+There are two ways to pass Entity data among multiple scenes, depending on the scope of the data. Both ways involve injection. 
 
 #### Injecting a Global State Model 
 
-The first way is the simplest. A State Model, which represents the state all of the shared data, can be attached to the Entity Gateway. Since the gateway is already injected into all UseCases, this is the easiest way to share data and make it available to all UseCases. The downside to this is that all UseCases in the whole app will have access to this state model and it becomes hard to know which use cases are updating the model and what the life cycle of the model is. When a recursive scene flow is necessary, a local state must be used. 
+The first way is the simplest. A State Model, which represents the state all of the shared data, can be attached to the Entity Gateway. Since the gateway is already injected into all UseCases, this is the easiest way to share data and make it available to all UseCases. The downside to this is that all UseCases in the whole app will have access to this state model and it becomes hard to know which use cases are updating the model and what the life cycle of the model is. When you need to implement a recursive scene flow or you would like to limit the scope of the data to a few scenes, a local state should be used. 
 
 #### Injecting a Local State Model 
 
@@ -464,7 +464,7 @@ If the state does not need to be initialized by the Router's UseCase, there is p
 
 ### Transferring Data Back to the Previous Scene
 
-Often, data is changed in a younger sibling's UseCase and the older sibling's Presenter must acquire the data to update it's ViewController's display. Before the younger sibling is dismissed, the data can be sent back to the Presenter via a closure. 
+Often, a result is captured in a UseCase and must be passed back to a presenting Scene's Presenter to update it's ViewController's display. Before the presented Scene is dismissed, the data can be sent back to the presenting Scene's Presenter via a closure. 
 
 In the following example, the Presenter calls its Router to display an item. It passes the item id and a closure. A nice result of this implementation is that the index is captured by the closure, so there is no need to store it in a property:
 
