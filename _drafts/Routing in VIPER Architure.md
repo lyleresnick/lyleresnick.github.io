@@ -343,7 +343,7 @@ extension RootRouterPresenter: ListRouter {
 
 ### The Router ViewController's Role
 
-The Router's ViewController initiates the Segue of the child. In the case of displaying the selected item, it sends the `id` via the `sender` parameter, to avoid storing it in a property.
+The Router's ViewController initiates the Segues of its children. In the case of displaying the selected item, it transmits the `itemId` by capturing it in a closure.
 
 ```swift
 private enum RootRouterSegue: String {
@@ -354,15 +354,19 @@ private enum RootRouterSegue: String {
 extension RootRouterNavController: RootRouterPresenterOutput {
     
     func showCreateItem() {
-        
-        let identifier = RootRouterSegue.create.rawValue
-        viewControllers.first?.performSegue(withIdentifier: identifier, sender: nil)
+        listViewController.performSegue(withIdentifier: RootRouterSegue.create.rawValue,
+                                        sender: nil)
     }
     
     func showItem(id: String) {
         
-        let identifier = RootRouterSegue.show.rawValue
-        viewControllers.first?.performSegue(withIdentifier: identifier, sender: id)
+		let listViewController = viewControllers.first as! ListViewController
+        listViewController.prepareFor = { segue in
+            let viewController = segue.destination as! ItemDisplayViewController
+            viewController.id = itemId
+        }
+        listViewController.performSegue(withIdentifier: RootRouterSegue.show.rawValue,
+                                        sender: nil)
     }
 }
 ```
@@ -370,15 +374,12 @@ extension RootRouterNavController: RootRouterPresenterOutput {
 TODO: Fix This. Due to the way navigation and modal segues are set up in UIKit, `prepare(for:sender:)`  must be overridden by the child ViewController. In order make it clear that the router is in control,  we create an extension in the Router's ViewController file: 
 
 ```swift
-extension ListViewController {
-    
+class ListViewController {
+    var prepareFor: PrepareForSegueClosure?
+    ...
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        switch RootRouterSegue(rawValue:segue.identifier!)! {
-        case .create:
-            break
-        case .show:
-            let viewController = segue.destination as! ItemDisplayViewController
-        	viewController.id = sender as! String
+        if let prepareFor = prepareFor {
+			prepareFor(segue)
         }
     }
 }
