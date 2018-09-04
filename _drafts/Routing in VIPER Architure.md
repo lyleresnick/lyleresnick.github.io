@@ -322,7 +322,7 @@ func eventItemSelected(index: Int) {
 }
 ```
 
-In the case of the item selection, the `index` is translated into the `id` of the item that will be displayed. The  `id` has been stored in the view model specifically for this purpose.
+In the case of the item selection, the `index` is translated into the `id` of the item that will be displayed. The  `id` was stored in the view model specifically for this purpose.
 
 ### The Router Presenter's Role
 
@@ -330,6 +330,8 @@ The job of the Router's Presenter is simple: send the event on to the ViewContro
 
 ```swift
 extension RootRouterPresenter: ListRouter {
+    
+    weak var output: RootRouterPresenterOutput!
     
     func routeDisplayItem(id: String) {
         output.showItem(id: id)
@@ -343,7 +345,12 @@ extension RootRouterPresenter: ListRouter {
 
 ### The Router ViewController's Role
 
-The Router's ViewController initiates the Segues of its children. In the case of displaying the selected item, it transmits the `itemId` by capturing it in a closure.
+The Router's ViewController initiates the Segues of its children by calling `performSegue(withIdentifier:`
+`sender:)`. 
+
+In the example below, the Router ViewController is inherited from a NavigationController. 
+
+In the case of displaying the selected item, it transmits the `id` by capturing it in a closure, and then injecting the closure. 
 
 ```swift
 private enum RootRouterSegue: String {
@@ -351,9 +358,11 @@ private enum RootRouterSegue: String {
     case show
 }
 
-extension RootRouterNavController: RootRouterPresenterOutput {
+extension RootRouterNavController: RootRouterListPresenterOutput {
     
     func showCreateItem() {
+        
+        let listViewController = viewControllers.first as! ListViewController
         listViewController.performSegue(withIdentifier: RootRouterSegue.create.rawValue,
                                         sender: nil)
     }
@@ -363,7 +372,7 @@ extension RootRouterNavController: RootRouterPresenterOutput {
 		let listViewController = viewControllers.first as! ListViewController
         listViewController.prepareFor = { segue in
             let viewController = segue.destination as! ItemDisplayViewController
-            viewController.id = itemId
+            viewController.id = id
         }
         listViewController.performSegue(withIdentifier: RootRouterSegue.show.rawValue,
                                         sender: nil)
@@ -371,7 +380,7 @@ extension RootRouterNavController: RootRouterPresenterOutput {
 }
 ```
 
-TODO: Fix This. Due to the way navigation and modal segues are set up in UIKit, `prepare(for:sender:)`  must be overridden by the child ViewController. In order make it clear that the router is in control,  we create an extension in the Router's ViewController file: 
+The closure is executed in the `prepare(for segue:sender:?` override.
 
 ```swift
 class ListViewController {
@@ -385,7 +394,7 @@ class ListViewController {
 }
 ```
 
-If you really wanted to be pure about responsibility, you might create a custom Segue whose source would be the NavigationController - it would not look as familiar in the storyboard, but it would make more sense from a responsibility point of view.
+If you really wanted to be pure about responsibility, you could create a custom Segue whose source would be the NavigationController - it would not look as familiar in the storyboard, but it would make more sense from a responsibility point of view.
 
 
 ## Transferring Data between Scenes
@@ -403,7 +412,7 @@ Normally, using UIKit, when a ViewController instantiates another ViewController
 
 Data sent to a Router should be translated by the Scene's Presenter. A typical example of this, as seen above, is when a selection is made in a TableView and the index is translated by to an `id` before being passed to the Router. 
 
-Data that is captured by a UseCase should be passed in this manner - it should be passed as described in the next section. 
+Data that is captured by a UseCase should not be passed this way - it should be passed as described in the next section. 
 
 ### Transferring Data Shared Amongst Many Scenes
 
@@ -411,7 +420,7 @@ Recall that, in VIPER, Entities are never stored in a ViewController because the
 
 It is common for multiple scenes to collaborate in order to complete a business *Use Case*. 
 
-Shared Entities that multiple UseCases manipulate should not be retrieved from the UseCase by the Presenter and then passed on to the Router only to be passed to the next ViewController, Presenter and UseCase. This would be quite tedious and is against the rule that the ViewController should not be concerned with Entities.
+Shared Entities that multiple UseCases manipulate should not be retrieved from the UseCase by the Presenter and then passed on to the Router, only to be passed to the next ViewController, Presenter and UseCase. This would be quite tedious and is against the rule that the ViewController should not know about Entities.
 
 There are two ways to pass Entity data among multiple scenes, depending on the scope of the data. Both ways involve injection. 
 
@@ -467,7 +476,7 @@ If the state does not need to be initialized by the Router's UseCase, there is p
 
 Often, a result is captured in a UseCase and must be passed back to a presenting Scene's Presenter to update it's ViewController's display. Before the presented Scene is dismissed, the data can be sent back to the presenting Scene's Presenter via a closure. 
 
-In the following example, the Presenter calls its Router to display an item. It passes the item id and a closure. A nice result of this implementation is that the index is captured by the closure, so there is no need to store it in a property:
+In the following example, the Presenter calls its Router to display an item. It passes the item's id and a closure to execute if the user edits the item. A nice result of this implementation is that the index is captured by the closure, so there is no need to store it in a property:
 
 ```swift
 func eventItemSelected(index: Int) {
