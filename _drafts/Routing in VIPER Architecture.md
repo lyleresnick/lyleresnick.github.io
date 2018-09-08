@@ -12,7 +12,7 @@ The iOS UIKit architecture offers variety of routing ViewControllers for managin
 
 In the VIPER architecture, a parent ViewController, known as a Router, is fully responsible for the management of its child ViewControllers. The Router effectively decouples the ViewControllers from one another.
 
-A VIPER architected Router ensures that its child ViewControllers are independent of their parent or sibling ViewControllers. This means that a ViewController which is part of a sequence managed by a NavigationController can be reused in a modal situation, in a SplitView or in another sequence; or that a navigation sequence can easily be implemented to have multiple starting positions.
+A VIPER architected Router ensures that its child ViewControllers are independent of their parent or sibling ViewControllers. This means that a ViewController which is part of a sequence managed by a NavigationController can also be presented in a SplitView or in a modal popup.
 
 A secondary function of a VIPER Router is to maintain local system state for its child modules.
 
@@ -22,15 +22,13 @@ This article is a continuation of the article [A Crash Course on the VIPER Archi
 
 In VIPER, although a child ViewController will request a scene change, the management of the scene change is the responsibility of the parent. The parent is known as a Router. 
 
-In iOS, a ViewController is given access to its parent via one of the Navigation-, TabBar- or SplitViewController properties. Knowledge of the parent is used to push a new controller on top or set up the navigationBar. 
+In iOS, a ViewController is given access to its parent via one of the Navigation-, TabBar- or SplitViewController properties. Knowledge of the parent is required to push a new controller on top or to set up the navigationBar. 
 
 Allowing this kind of access means that the child knows about and can directly control the behaviour of its parent. This circular relationship causes dependency problems, since the added responsibility ties the child to a predetermined environment defined by presentation-style or system state. Normally, this kind of relationship would be seen as a code smell and would never be allowed upon review - but somehow someone at Apple missed this one. 
 
-The dependency problem is most obvious when you try to use a ViewController in the context of supporting a small iPhone, a large iPhone and an iPad. Depending on the device and the orientation, the ViewController has to be parented by either a NavigationController or a SplitViewController. iOS tries to fix the problem of using a ViewController in this circumstance by having us use the `show(:sender:)` and `showDetail(:sender:)` methods to remove the need for the child to know which type of container it is in - but this is a special case.
+The dependency problem is most obvious when you try to use a ViewController in the context of supporting a small iPhone, a large iPhone and an iPad. Depending on the device and the orientation, the ViewController has to be parented by either a NavigationController or a SplitViewController. iOS tries to fix the problem of using a ViewController in this circumstance by having us use the `show(:sender:)` and `showDetail(:sender:)` methods to remove the need for the child to know which type of container it is in - but this is a special case for those 2 controllers.
 
-In VIPER, the code for both of these activities is moved to the parent. A VIPER architected child ViewController makes no assumption about its environment and, as such, is available for use in any role, whether defined by presentation-style or system state.
-
-The main difference between a VIPER Router and a UIKit router is that routing decisions are made in the Router - not the child ViewController. The child simply requests that routing is required. This is the same pattern as found in the Android architecture, where Activities perform routing for Fragments.
+In VIPER, the code for ViewController presentation is moved to the parent ViewController. A VIPER architected child ViewController makes no assumption about its environment and, as such, is available for use in any role, whether defined by presentation-style or system state. The child simply requests that routing is required. This is the same pattern as found in the Android architecture, where Activities perform routing for Fragments.
 
 A VIPER Router is implemented just like a regular [VIP module](http://lyleresnick.com/blog/2017/08/29/A-Crash-Course-on-the-VIPER-Architecture). A Routing ViewController may be inherited from a Navigation-, TabBar-, or a  SplitViewController, as usual.  
 
@@ -40,7 +38,7 @@ Each VIPER Router has a ViewController and a Presenter, and occasionally, a UseC
 
 ## The Presenter Communicates with the Router
 
-An important rule of VIPER is that any event received by a ViewController must be forwarded directly to its Presenter, without further processing. A ViewController cannot pass events directly to its Router. The Presenter must forward the event to the VIP stack's Router. This means that the ViewController must tell the Presenter about its Router.
+An important rule of VIPER is that any event received by a ViewController must be forwarded directly to its Presenter, without further processing. A ViewController cannot pass events directly to its Router, because it does not know how to process the event. The Presenter must, ultimately, forward the event to the module's Router. This means that the ViewController must tell the Presenter about its Router.
 
 Typically, it happens like this:
 
@@ -119,8 +117,6 @@ extension ItemEditPresenter: ItemEditSaveUseCaseOutput {
 }
 ```
 
-Since the ViewController never communicates with its Router, the detail of how to route is deferred to the Router - the Presenter just asks for the routing.
-
 ## The Router's VIP Stack
 
 A router has its own VIP stack: A ViewController, a Presenter and a UseCase. In order to understand how to implement a Router it is helpful to understand the implementation of a custom Router.
@@ -129,7 +125,7 @@ Here is a diagram of a VIP-stack:
 
 ![Diagram of VIPER classes]({{ site.url }}/assets/VIPER Class Diagram.png)
 
-In the diagram you can see that the Presenter communicates with the Router.  As far as the child VIP-Stack is concerned, the Router is a black box, in that it does not matter that the Router is actually another VIP-stack.
+In the diagram, you can see that the Presenter communicates with the Router.  As far as the child VIP-Stack is concerned, the Router is a black box - it does not matter that the Router is actually another VIP-stack.
 
 The following diagram details the interaction that occurs between a parent VIP Router and its initial child.  
 
@@ -150,7 +146,7 @@ override func viewDidLoad() {
 
 ### The Presenter
 
-In that the Presenter consumes events sent by the ViewController, the role of the Router's Presenter is similar to any other Presenter. 
+The role of the Router's Presenter is similar to any other Presenter: to consume events sent by the ViewController
 
 If the processing for an event only involves changing of a scene,  the event will be sent right back to the ViewController.
 
@@ -182,7 +178,7 @@ Most of the responsibilities of the Presenter are about responding to its child 
 
 ### The UseCase
 
-Normally, it is not necessary for the Router to implement a UseCase, but there are two good reasons to implement a UseCase for a Router:
+It is not normally necessary for the Router to implement a UseCase, but there are two good reasons to implement a UseCase for a Router:
 
 1. to initialize data which will be shared by the UseCases of its children and
 2. to determine which scene should be displayed, based on state. 
@@ -191,7 +187,7 @@ Normally, it is not necessary for the Router to implement a UseCase, but there a
 
 Whenever the Router implements a UseCase, the its Presenter will implement the UseCaseOutput.
 
-In most cases the Presenter as UseCaseOutput is pretty straight forward. It usually only  forwards messages to the ViewController, while performing localization. 
+In most cases the Presenter as UseCaseOutput is pretty simple. It will perform localization and then forward the messages to its ViewController. The Presenter may also send messages to its Router. 
 
 ### The ViewController as PresenterOutput
 
@@ -345,8 +341,7 @@ extension RootRouterPresenter: ListRouter {
 
 ### The Router ViewController's Role
 
-The Router's ViewController initiates the Segues of its children by calling `performSegue(withIdentifier:`
-`sender:)`. 
+The Router's ViewController initiates the Segues of its children by calling `performSegue(withIdentifier:sender:)`. 
 
 In the example below, the Router ViewController is inherited from a NavigationController. 
 
