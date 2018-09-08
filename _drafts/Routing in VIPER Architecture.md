@@ -8,11 +8,11 @@ date: 2018-07-24
 
 The primary function of a Router is to manage the display of a group of scenes, implemented by ViewControllers, using a pattern such as stacking, direct access or serial access. 
 
-The iOS UIKit architecture offers variety of routing ViewControllers for managing scene transitions, such as Navigation, SplitView, and TabBar. In iOS architecture, the responsibility to arrange for a transition usually lies with the child ViewController. This causes a child ViewController to be tightly coupled to its parent, making it complicated to use it in multiple situations. This architecture also causes the child ViewController to become bloated with routing code that should be placed in the parent controller. 
+The iOS UIKit architecture offers variety of routing ViewControllers for managing scene transitions, such as Navigation, SplitView, and TabBar. In iOS architecture, it is the responsibility of a child ViewController to arrange for a scene transition by referencing its parent (routing) ViewController. This tightly couples the child ViewController to its parent, making it complicated to use it in multiple situations. This architecture also causes the child ViewController to become bloated with routing code that should be placed in the parent controller. 
 
-In the VIPER architecture, a parent ViewController, known as a Router, is fully responsible for the management of its child ViewControllers. The Router effectively decouples the ViewControllers from one another.
+In the VIPER architecture, a parent ViewController, known as a Router, is fully responsible for the management of its child ViewControllers. The VIPER Router effectively decouples ViewControllers from one another.
 
-A VIPER architected Router ensures that its child ViewControllers are independent of their parent or sibling ViewControllers. This means that a ViewController which is part of a sequence managed by a NavigationController can also be presented in a SplitView or in a modal popup.
+A VIPER architected Router ensures that its child ViewControllers are independent of their parent or sibling ViewControllers. This means that a ViewController which is part of a sequence managed by a NavigationController may also be presented in a SplitView or in a modal popup.
 
 A secondary function of a VIPER Router is to maintain local system state for its child modules.
 
@@ -20,11 +20,11 @@ This article is a continuation of the article [A Crash Course on the VIPER Archi
 
 ## Routing in VIPER
 
-In VIPER, although a child ViewController will request a scene change, the management of the scene change is the responsibility of the parent. The parent is known as a Router. 
+In VIPER, although a child ViewController starts a scene change, the management of the scene change is the responsibility of the parent. The parent is known as a Router. 
 
 In iOS, a ViewController is given access to its parent via one of the Navigation-, TabBar- or SplitViewController properties. Knowledge of the parent is required to push a new controller on top or to set up the navigationBar. 
 
-Allowing this kind of access means that the child knows about and can directly control the behaviour of its parent. This circular relationship causes dependency problems, since the added responsibility ties the child to a predetermined environment defined by presentation-style or system state. Normally, this kind of relationship would be seen as a code smell and would never be allowed upon review - but somehow someone at Apple missed this one. 
+Allowing this kind of access means that the child knows about and can directly control the behaviour of its parent. This circular relationship causes dependency problems, since the added responsibility ties the child to a predetermined environment defined by presentation-style or system state. Normally, this kind of relationship would be seen as a code smell and would never be allowed upon review - but somehow it lingers. 
 
 The dependency problem is most obvious when you try to use a ViewController in the context of supporting a small iPhone, a large iPhone and an iPad. Depending on the device and the orientation, the ViewController has to be parented by either a NavigationController or a SplitViewController. iOS tries to fix the problem of using a ViewController in this circumstance by having us use the `show(:sender:)` and `showDetail(:sender:)` methods to remove the need for the child to know which type of container it is in - but this is a special case for those 2 controllers.
 
