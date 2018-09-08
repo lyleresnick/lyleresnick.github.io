@@ -59,64 +59,6 @@ class ItemViewController: UIViewController {
 }
 ```
 
-Here is an example of a ViewController forwarding a *Cancel* event to its Presenter:
-
-```swift
-class ItemEditViewController: UIViewController {
-	...
-    @IBAction func cancelTapped(_ sender: UIBarButtonItem) {
-        presenter.eventCancel()
-    }
-}
-```
-
-Next, the Presenter forwards the *Cancel* event to its Router:
-
-```swift
-class ItemEditPresenter {
-	...
-    func eventCancel() {
-        router.routeEditingCancelled()
-    }
-}
-```
-
-A Presenter may, also, forward an event to its Router when it receives an event as output from its UseCase.  
-
-Here is part of a result block in which the success or failure of a *Save* is forwarded to the Presenter:
-
-```swift
-class ItemEditUseCase {
-    ...
-    func eventSave() {
-        ...
-        entityGateway.itemManager.save( ... ) { result in 
-                     
-            switch result {
-            case let .failure(error):  
-                output.presentSaveError()
-            case let .success(item):
-                output.presentSaveCompleted()
-            }
-        }
-    }
-}
-```
-
-The Presenter forwards the success event to the router, so it can remove the scene. In the case of an error,  the Presenter forwards the error event to the ViewController for display:
-
-```swift
-extension ItemEditPresenter: ItemEditSaveUseCaseOutput {
-    
-    func presentSaveCompleted() {
-        router.routeSaveCompleted()
-    }
-    func presentSaveError() {
-        output.showSaveError(message: "There was a problem saving")
-    }
-}
-```
-
 ## The Router's VIP Stack
 
 A router has its own VIP stack: A ViewController, a Presenter and a UseCase. In order to understand how to implement a Router it is helpful to understand the implementation of a custom Router.
@@ -144,6 +86,17 @@ override func viewDidLoad() {
 }
 ```
 
+Here is an example of a ViewController forwarding a *Cancel* event to its Presenter:
+
+```swift
+class ItemEditViewController: UIViewController {
+	...
+    @IBAction func cancelTapped(_ sender: UIBarButtonItem) {
+        presenter.eventCancel()
+    }
+}
+```
+
 ### The Presenter
 
 The role of the Router's Presenter is similar to any other Presenter: to consume events sent by the ViewController
@@ -153,6 +106,17 @@ If the processing for an event only involves changing of a scene,  the event wil
 ```swift
 func eventViewReady() {
     output.showOnboardingFirstScene()
+}
+```
+
+Here is an example of a Presenter forwarding a *Cancel* event to its Router:
+
+```swift
+class ItemEditPresenter {
+	...
+    func eventCancel() {
+        router.routeEditingCancelled()
+    }
 }
 ```
 
@@ -188,6 +152,40 @@ It is not normally necessary for the Router to implement a UseCase, but there ar
 Whenever the Router implements a UseCase, the its Presenter will implement the UseCaseOutput.
 
 In most cases the Presenter as UseCaseOutput is pretty simple. It will perform localization and then forward the messages to its ViewController. The Presenter may also send messages to its Router. 
+
+Here is part of a result block in which the success or failure of a *Save* in a child is forwarded to its Presenter:
+
+```swift
+class ItemEditUseCase {
+    ...
+    func eventSave() {
+        ...
+        entityGateway.itemManager.save( ... ) { result in 
+                     
+            switch result {
+            case let .failure(error):  
+                output.presentSaveError()
+            case let .success(item):
+                output.presentSaveCompleted()
+            }
+        }
+    }
+}
+```
+
+The Presenter forwards the success event to its router, which will remove the scene. In the case of an error,  the Presenter forwards the error event to its ViewController for display:
+
+```swift
+extension ItemEditPresenter: ItemEditSaveUseCaseOutput {
+    
+    func presentSaveCompleted() {
+        router.routeSaveCompleted()
+    }
+    func presentSaveError() {
+        output.showSaveError(message: "There was a problem saving")
+    }
+}
+```
 
 ### The ViewController as PresenterOutput
 
