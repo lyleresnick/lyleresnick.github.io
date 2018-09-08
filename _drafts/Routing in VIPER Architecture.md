@@ -1,16 +1,16 @@
 ---
 layout: post
-title: "Routing in VIPER Architure"
+title: "Routing in VIPER Architecture"
 date: 2018-07-24
 ---
 
 ## Introduction
 
-The primary function of a Router is to manage the display of a group of scenes, supported by ViewControllers, using a pattern such as stacking, direct access or serial access. 
+The primary function of a Router is to manage the display of a group of scenes, implemented by ViewControllers, using a pattern such as stacking, direct access or serial access. 
 
-The iOS UIKit architecture offers variety of routing ViewControllers for managing scene transitions, such as Navigation, SplitView, and TabBar. In iOS architecture, the responsibility to arrange for a transition usually lies with the child ViewController. This causes a child ViewController to be tightly coupled to its parent, making it complicated to use it in multiple situations. The architecture also causes the child ViewController to become bloated with routing code that should be placed in the parent controller. 
+The iOS UIKit architecture offers variety of routing ViewControllers for managing scene transitions, such as Navigation, SplitView, and TabBar. In iOS architecture, the responsibility to arrange for a transition usually lies with the child ViewController. This causes a child ViewController to be tightly coupled to its parent, making it complicated to use it in multiple situations. This architecture also causes the child ViewController to become bloated with routing code that should be placed in the parent controller. 
 
-In the VIPER architecture, a parent ViewController, known as a Router, is fully responsible for the management of its child ViewControllers. The Router decouples the ViewControllers from one another.
+In the VIPER architecture, a parent ViewController, known as a Router, is fully responsible for the management of its child ViewControllers. The Router effectively decouples the ViewControllers from one another.
 
 A VIPER architected Router ensures that its child ViewControllers are independent of their parent or sibling ViewControllers. This means that a ViewController which is part of a sequence managed by a NavigationController can be reused in a modal situation, in a SplitView or in another sequence; or that a navigation sequence can easily be implemented to have multiple starting positions.
 
