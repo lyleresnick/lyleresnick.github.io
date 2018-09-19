@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Routing in VIPER Architecture"
-date: 2018-09-18
+date: 2018-09-19
 ---
 
 ## Introduction
