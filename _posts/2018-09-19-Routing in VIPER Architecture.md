@@ -16,7 +16,7 @@ A VIPER architected Router ensures that its child ViewControllers are independen
 
 A secondary function of a VIPER Router is to maintain local system state for its child modules.
 
-This article is a continuation of the article [A Crash Course on the VIPER Architecture]({{site.url}}/blog/2017/08/29/A-Crash-Course-on-the-VIPER-Architecture).
+This article is a continuation of the article [A Crash Course on the VIPER Architecture]({{site.url}}/blog/2017/08/29/A-Crash-Course-on-the-VIPER-Architecture). An app which demonstrates the VIPER architecture with examples of both custom and stock Routers can be found at [Todo](https://github.com/lyleresnick/Todo).
 
 ## Routing in VIPER
 
