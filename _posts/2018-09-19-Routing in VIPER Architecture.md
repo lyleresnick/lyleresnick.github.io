@@ -265,7 +265,7 @@ The router is injected into to each child ViewController. It implements one rout
 
 The following diagram shows a child ViewController initiating the display of an new scene:
 
-![RouterInstantiationViaChildSequence](/Assets/RouterInstantiationViaChildSequence.png)
+![RouterInstantiationViaChildSequence]({{ site.url }}/assets/RouterInstantiationViaChildSequence.png)
 
 The message sequence for the creation of a new scene is always the same, regardless of whether the router is derived from a NavigationController or a custom container ViewController. 
 
