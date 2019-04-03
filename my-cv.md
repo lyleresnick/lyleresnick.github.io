@@ -11,10 +11,10 @@ permalink: /my-cv
 
 {: .data-block}
 
-| iOS Architect, SME, Team Lead, Developer / Android Developer |                                |
-| :--------------------------------------- | -----------------------------: |
-| RBC, Toronto                             | May 2015 – Aug 2016 (Contract) |
-| RBC Banking & Wallet Apps                |                                |
+| iOS SME & Team Lead / Android Developer |                                |
+| :-------------------------------------- | -----------------------------: |
+| RBC, Toronto                            | May 2015 – Aug 2016 (Contract) |
+| RBC Banking & Wallet Apps               |                                |
 
 
 {: .data-block }
