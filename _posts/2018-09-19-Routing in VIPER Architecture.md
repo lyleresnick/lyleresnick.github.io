@@ -401,53 +401,72 @@ It is common for multiple scenes to collaborate in order to complete a business 
 
 Shared Entities that multiple UseCases manipulate should not be retrieved from the UseCase by the Presenter and then passed on to the Router, only to be passed to the next ViewController, Presenter and UseCase. This would be quite tedious and is against the rule that the ViewController should not know about Entities.
 
-There are two ways to pass Entity data among multiple scenes, depending on the scope of the data. Both ways involve injection. 
-
-#### Injecting a Global State Model 
-
-The first way is the simplest. A State Model, which represents the state all of the shared data, can be attached to the Entity Gateway. Since the gateway is already injected into all UseCases, this is the easiest way to share data and make it available to all UseCases. The downside to this is that all UseCases in the whole app will have access to this state model and it becomes hard to know which use cases are updating the model and what the life cycle of the model is. 
-
-When you have to implement a recursive scene flow or you would like to limit the scope of the data to a few scenes, a more localized state should be used. 
-
 #### Injecting a Local State Model 
 
-Another method, which limits the scope of the State Model to a smaller number of scenes and allows for recursion is one where the Router's Presenter instantiates the State Model for use by its own and child UseCases. The model is accessed by the child Presenters when the router is injected and then is itself injected into the child's UseCase. In this manner the model's scope is limited to just those scenes which actually need to access it. 
+In order to limit the scope of a State Model to a small number of scenes and allow for recursion the Router's UseCase should instantiate a specific State Model to be used by itself and its child UseCases. The Router's  UseCase associates the Model with a UseCaseStore. The State is dissociated from the UseCaseStore when the Router's UseCase is terminated. 
+
+In the simple case, where only one instance of a scene flow is presented, the State Model is set by assignment. In the case where the scene flow can be presented recursively, the newly created State model should be pushed onto a stack associated with the UseCaseStore. The stack is popped when the Router is destroyed. The scenes access the State by looking at the top of the stack.
+
+Using this technique, the model's scope is limited to just those scenes that actually need to access it. 
 
 Here is an example of a UseCase state model for a multi-scene business use case for sending money:
 
 ```swift
 class SendMoneyUseCaseState {
     var fromAccount: Account
-	var amount: Money
-	var recipient: Recipient
+    var amount: Money
+    var recipient: Recipient
 }
 ```
 
-Below, the Router's Presenter instantiates the model and injects it into its own UseCase so it can be initialized:
+Below, the Router's UseCase instantiates the model and associates it with the UseCaseStore :
 
 ```swift
-class SendMoneyRouterPresenter {
 
-    var state = SendMoneyUseCaseState()
 
-    init(useCase: SendMoneyRouterUseCase) {
-        self.useCase = useCase
-        useCase.state = state
+class SendMoneyRouterUseCase {
+  
+		//  ...
+    private var useCaseStore: UseCaseStore
+    private var sendMoneyState = SendMoneyUseCaseState()
+
+    init(entityGateway: EntityGateway = EntityGatewayFactory.entityGateway,
+         useCaseStore: UseCaseStore = RealUseCaseStore.store) {
+        self.entityGateway = entityGateway
+        self.useCaseStore = useCaseStore
+        self.useCaseStore[sendMoneyStateKey] = sendMoneyState
     }
     // ...
 }
 ```
 
-Here a child scene's Presenter injects the Router's state into the UseCase:
+Here a child scene's UseCase injects the state into a Transformer:
 
 ```swift
-class SendMoneyStepOnePresenter {
-    weak var router: SendMoneyStepOneRouter! {
-        didSet {
-            useCase.state = router.state
-        }
+class SendMoneyStepOneUseCase {
+  
+     // ...
+    private let sendMoneyState: SendMoneyUseCaseState
+
+    init( entityGateway: EntityGateway = EntityGatewayFactory.entityGateway,
+          useCaseStore: UseCaseStore = RealUseCaseStore.store ) {
+        self.entityGateway = entityGateway
+        self.itemState = useCaseStore[sendMoneyStateKey] as! SendMoneyUseCaseState
+
+    func eventViewReady() {
+      
+    		let transformer = SendMoneySceneOneViewReadyUseCaseTransformer(state: sendMoneyState)
+        transformer.transform(output: output)
     }
     // ...
+}
+```
+
+Here the state is disassociated from the EntityGateway:
+
+```Swift
+deinit {
+  useCaseStore[sendMoneyStateKey].sendMoneyState = nil
 }
 ```
 
