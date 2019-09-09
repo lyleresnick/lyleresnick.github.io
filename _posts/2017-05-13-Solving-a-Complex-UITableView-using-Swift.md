@@ -6,41 +6,43 @@ date: 2017-05-13
 
 ## Introduction
 
-In this article I want to present a technique for solving a complex UITableView. By complex, I mean a tableView which is required to display more rows than occurs in the original data set.  At the same time I will present simple technique to reduce the size of the UIViewController that owns the tableView.
+In this article we will discuss a technique for solving a complex UITableView. By complex, I mean a tableView that will display many more row types than exist in the source data set - in this case seven.  At the same time, we will discuss a simple technique to reduce the size of the UIViewController that owns the tableView.
 
 ## Dynamic Display
 
-It is not unusual that one has to produce a UITableView which will display more than one kind of row. Maybe the rows are alternately coloured and there is a refresh button or a total at the end of the table. Maybe in one state, a cell has a particular arrangement of views, but in another state, it has another arrangement. 
+It is not unusual to have to create a UITableView that displays more than one kind of row. Maybe the rows are alternately coloured and there is a refresh button or a total at the end of the table. Maybe in one state, a cell has a particular arrangement of views, but in another state, it has another arrangement. 
 
-This kind of tableview display can be created by using the cell index, as given via `cellForRowAt` , to access the item in the input data set. When `cellForRowAt` is called, you can determine: 
+This kind of tableview can be created easily using the cell index to access the item in the source data set. This index is given via `cellForRowAt`. For example, when `cellForRowAt` is called, we can determine: 
 
 - the cell colour from the index position, 
 - when to display the refresh button cell or total cell, instead of a regular cell, based on the size of the dataset,
-- the cell type with a particular view arrangement based the input data item,
+- the cell type with a particular view arrangement based the source data item,
 - the total from the all items in the dataset, 
 - the data to display for the current row.
 
-The first three items are concerned with configuration and the others are concerned with assignment of data to the views. These are the two general responsibilities of `cellForRowAt`
+The first three items are concerned with configuration and the others are concerned with assignment of data to the views. Configuration and assignment should be the only responsibilities of `cellForRowAt`.
 
-A `cellForRowAt` method which implements all of the above responsibilities *dynamically* will be very long and full of `if`s, `switch`es, `&&`s and nested `if`s, most of which are required just to determine the type of the cell. Once the cell type is known, it is easy to make the assignments. 
+A `cellForRowAt` method that implements all of the above responsibilities *dynamically* will contain many `if`s, `switch`es, `&&`s and nested `if`s, most of which are required just to determine the type of the cell. Once the type of the cell is known, it is easy to do the configuration and make the assignments. 
 
-I refer to the code in `cellForRowAt` as *dynamic*, because the type of the cell has to be determined and then processed each time that `cellForRowAt` is called. This is in contrast to a *static* technique, where the  type of  the cell is predetermined and the processing is done once, before `cellForRowAt` is ever called.
+The code in `cellForRowAt` is referred to as *dynamic* because the cell type must be determined and then processed each time that `cellForRowAt` is called. This is in contrast to a *static* technique, where the cell type is predetermined and the cell processing is done once, before `cellForRowAt` is ever called.
 
-When the assignment code is entangled in the code responsible for determination of type, it becomes very hard to understand and change. Whenever I begin to write code like this, I repeatedly feel like the code is asking "why am I here" and I know there are  hidden classes begging to be found.
+When the assignment code is entangled in the code responsible for determination of type, it becomes very hard to understand and change. Whenever I write or see code like this, I know there are hidden classes just begging to be found.
 
-Over time, new requirements will present themselves. Unless this code is refactored so it is extensible and understandable, changes made by various developers will further obscure its intent.
+Over time, when new requirements emerge, the code will have to be changed. Unless this entangled code is refactored so that it is extensible and understandable, changes made by various developers will further obscure its intent.
 
 ## UITableView Sections
 
-Occasionally, a more complicated requirement comes along, such as having to create a UITableView that displays many kinds of cells, where the cells repeat in regular cycles. An example of this would be a report which has repeating groups, where each group consists of a Header, followed by a repetition of Detail Rows, followed by a Footer. The Header might display a date, location or type; it might contain a button. The Footer might display a total for the section. The Details display all of the other data from the input dataset. There may be more than one kind of Detail - some might display a button and some might not.
+Occasionally, a more complicated requirement comes along, such as having to create a UITableView that displays many kinds of cells, where the cells repeat in regular cycles. 
+
+An example of this would be a report that has repeating groups, where each group consists of a Header, followed by a repetition of Detail Rows, followed by a Footer. The Header might display a date, location or type; maybe it contains a button. The Footer might display a total for the section. The Details display the remaining data from the input dataset. There may be more than one kind of Detail - some might display a button and some might not.
 
 One solution for this kind of requirement is to use UITableView sections. Tableview sections directly support the display of section header and footer views. The tableView can use indexPaths containing a section index and a row index to access each section and each section's associated data. 
 
-When using sections you need to organize the input data into groups to represent the sections. Sometimes, by chance, the input data is already structured into groups, but, most of the  time you will have to structure it yourself. Usually the structure will be an array of structures containing precalculated header and footer data and an array containing the related portion of the input dataset.
+When using sections we have to organize the input data into groups to represent the sections. Sometimes, by chance, the input data is already structured into groups, but, most of the time we have to organize it. Usually the structure will be an array of structures containing precalculated header and footer data and an array containing the related portion of the input dataset.
 
 ## A Complex Requirement
 
-Things get more complicated when you have to produce a display containing repeating groups that themselves contain repeating groups. One reason it is more complicated is because UITableViews do not directly  support this kind of structure.
+Things get more complicated when we have to produce a display containing repeating groups that themselves contain repeating groups. The reason It is more complicated it that UITableViews do not directly  support this kind of structure.
 
 Suppose there are two simple input streams of credit card transactions: one Posted, and the other Authorized. Posted Transactions are those that are due for payment; Authorized Transactions are those that are recent and not due. The input data streams are not identical in format, but each one contains identical data. Each transaction record consists of a Date, a Description, an Amount,  and a Debit indicator. The input streams are sorted by Date.
 
@@ -52,7 +54,7 @@ Each Detail row will contain the Description, and Amount of the Transaction. Deb
 
 The last row will contain the total of all of the displayed transactions.
 
-When data is not available for any of the transaction streams, you are required to display the Header as usual with an error message, without Subheaders, Subfooters or a Footer.
+When data is not available for any of the transaction streams, we are required to display the Header as usual with an error message, without Subheaders, Subfooters or a Footer.
 
 Here are screen shots of what the display should look like. Here is the top:
 
@@ -72,17 +74,17 @@ And here is the bottom:
 
 ![ReportTableDemoBottom]({{ site.url }}/assets/ReportTableDemoBottom.png)
 
-You can see that the output has repetitions of Transaction Type Groups and each of those has repetitions of Date groups.  You cannot map the original data set, by index, with the data to be displayed by the tableView. There are more rows in the display than in the original data streams. 
+As you can see, the output has repetitions of Transaction Type Groups and each of those has repetitions of Date groups.  We cannot directly map the original data set, simply by an index, to the data to be displayed. There are more rows in the display than in the original data streams. 
 
-You cannot rely on a function of the index to determine the cell type for a given index and you cannot rely on the builtin section support, because you have to implement section Headers, Subheaders, Subfooters and Footers.
+We cannot rely on a function of the index to determine the cell type for a given index and we cannot rely on the builtin section support, because we have to implement section Headers, Subheaders, Subfooters and Footers.
 
 When things get this complex, a different kind of solution is necessary. 
 
 ## A Different Perspective
 
-Another way to think about the task is this: you are going to transform the input data stream to an output stream and then print it on paper, or at least on a web page, of whatever length you require. The trick is to not commit to the actual output styling - its just an abstraction. Once you have created the output data stream,  you just have to collect it in such a way that the tableView can easily display the output.
+One way to think about the task is this: transform the input data stream to an output stream and then print it on paper, or at least on a web page, of whatever length is required. The trick is to not commit to the actual output styling - its just an abstraction. Once the output data stream has been created,  it just has to be collected in such a way that the tableView can easily display the output.
 
-I will demonstrate this in a demo app that you can find at [**ReportTableAdapterDemo**](https://github.com/lyleresnick/ReportTableAdapterDemo).
+This technique is demonstrated in a demo app that you can find at [**ReportTableAdapterDemo**](https://github.com/lyleresnick/ReportTableAdapterDemo).
 
 In order to satisfy the requirements for the demo, we can break down the app into a number of tasks 
 
@@ -95,7 +97,7 @@ In order to satisfy the requirements for the demo, we can break down the app int
 
 ## The Data
 
-First, I want to organize the data for the demo.
+First, we have to organize the data for the demo.
 
 In the demonstration code each transaction is represented like this: 
 
@@ -109,9 +111,9 @@ struct TransactionModel {
 }
 ```
 
-The `TransactionModel` represents the data model that a service layer would deliver to the viewController. The data is not delivered exactly as it should be - I will revisit this in the next post. It does not matter that the data is coming from two different sources. What matters is that the data can be coerced to the same format, which allows the processing for the two sources to be identical - think: protocols.
+The `TransactionModel` represents the data model that a service layer would deliver to the viewController. The data is not delivered exactly as it should be - we will revisit this in the next post. It does not matter that the data is coming from two different sources. What matters is that the data can be coerced to the same format, which allows the processing for the two sources to be identical - think: protocols.
 
-I have created data to represent the two input streams: `authorizedData` and `postedData`. Both streams are simply arrays of `TransactionModel`s. Each transaction looks similar to this: 
+The data represents the two input streams: `authorizedData` and `postedData`. Both streams are simply arrays of `TransactionModel`s. Each transaction looks similar to this: 
 
 ```swift
  TransactionModel( group: "P", 
@@ -122,9 +124,9 @@ You can view the whole input stream [**here**](https://github.com/lyleresnick/Re
 
 ## Designing the View
 
-Next, I want to design the rows I'm going to "print" . I do this first, visually, with IB and then think about the code to generate the lines. 
+Next, we want to design the rows we  are going to "print". First we visually design with IB and then think about the code to generate the lines. 
 
-I have specified a cell for each type of row  that is required to be displayed. There are 7 cell types, corresponding to:
+We specify a cell to represent each type of row that can be displayed. There are 7 cell types, corresponding to:
 
 - header,
 - subheader,
@@ -144,7 +146,7 @@ The purpose of each cell type is should be obvious with respect to the screen sh
 
 Notice 2 subtleties: the footer and the grandfooter look similar; and each Date group is displayed as a block in one colour, where the top and bottom margins are equal
 
-Part of my solution strategy is to avoid computation wherever possible. Even though the *footer* and *grandfooter* rows look similar, I use a separate cell type for each because they behave differently in the following ways:
+Part of the solution strategy is to avoid computation wherever it is possible to use structures instead. Even though the *footer* and *grandfooter* rows look similar, we use a separate cell type for each because they *behave* differently in the following ways:
 
 - The background colour of the footer cell is determined dynamically based on its row position (odd or even). 
 - The grandfooter cell background is always blue. 
@@ -152,15 +154,15 @@ Part of my solution strategy is to avoid computation wherever possible. Even tho
 
 By separating out the behaviour by type, it will be easy to change either of the two row styles, without affecting the other, when a design change is required.
 
-In the same way, I could have designed the *detail* cell so that it would change its height dynamically, depending on whether it was the last row in a group. I chose not to do that. I would have to introduce a boolean to implicitly record the actual type that the cell should be. I decided to introduce a *subfooter* cell just to take up the space below the last detail.  It is highlighted in the screen shot above.
+In the same way, the *detail* cell could have been designed so that it would change its height dynamically, depending on whether it was the last row in a group. We would have to introduce a boolean to explicitly record the actual type that the cell should be. Instead of this, a *subfooter* cell is introduced just to take up the space below the last detail.  It is highlighted in the screen shot above.
 
 ## Generating the Rows
 
-As I mentioned earlier, my strategy is to transform the input stream into an output stream. The output stream can then be displayed by the tableview. 
+As mentioned earlier, the strategy is to transform the input stream into an output stream. The output stream can then be displayed by the tableview. 
 
-Since each section is identical in format, I only have to write a transformer for one input data stream. I can reuse the transformer for the second data stream.
+Since each section is identical in format, we only have to write a transformer for one input data stream. We can reuse the transformer for the second data stream.
 
-I created a protocol, called `TransactionListTransformerOutput`, to support the notion that I could be sending the output to anywhere. It is shown here: 
+The `TransactionListTransformerOutput` protocol supports the notion that we could be sending the output to anywhere. It is shown here: 
 
 ```swift
 protocol TransactionListTransformerOutput {
@@ -255,7 +257,7 @@ In the inner iteration the data is transformed and added to the section total. A
 
 Data is sent to the output stream as it is produced. 
 
-By the way, the structure for the transformer was derived systematically from the output requirement using a technique called *Data directed Design*, which I will discuss in a future article.
+By the way, the structure for the transformer was derived systematically from the output requirement using a technique called *Data directed Design*, which will be discussed in a future article.
 
 ## The TableView Adapter
 
@@ -265,15 +267,15 @@ From the break down of the tasks listed above, it seems like we need (at least) 
 
 There is a lot of talk these days about the problems associated with the Massive ViewController (MVC). The problem with MVCs is that they are hard to understand because of large scope and they are hard to change due to coupling. 
 
-One simple-to-implement best practice, which will allow you to avoid MVCs that contain a tableView is to create a separate class to act as the datasource for a tableView. I acknowledge that almost every demonstration, by Apple or otherwise, implements the dataSource as part of the viewController. Once you get used to separating them, you will see that implementing a dataSource in a ViewController is an anti-pattern leading to code bloat. You can read more about this in [**Lighter View Controllers**](https://www.objc.io/issues/1-view-controllers/lighter-view-controllers/).
+One simple-to-implement best practice, which will allow us to avoid MVCs that contain a tableView is to create a separate class to act as the datasource for a tableView. Almost every demonstration, by Apple or otherwise, implements the dataSource as part of the viewController. Once you get used to separating them, you will see that implementing a dataSource in a ViewController is an anti-pattern leading to code bloat. You can read more about this in [**Lighter View Controllers**](https://www.objc.io/issues/1-view-controllers/lighter-view-controllers/).
 
-By moving the the task of collecting the TransformerOutput to another class, the Adapter, we neatly split the application into two major components. The viewController generates the rows and the adapter collects the rows. 
+By moving the the task of collecting the TransformerOutput to another class, called the Adapter, we neatly split the application into two major components. The viewController generates the rows and the adapter collects the rows. 
 
-I want to point out that both the viewController and the Adapter have other responsibilities . The viewController is also responsible for managing its views and and the adapter is responsible for producing cells for the table in its role as a tableViewDataSource. That being said, separating out the adapter from the viewController is a good start to separating responsibilities. I will leave the resolution of the other conflicting responsibilities to a future article.
+Both the ViewController and the Adapter have other responsibilities. The ViewController is also responsible for managing its views and the adapter is responsible for producing cells for the table in its role as a TableViewDataSource. That being said, separating out the Adapter from the ViewController is a good start to separating responsibilities. The resolution of the other conflicting responsibilities is left to a future article.
 
 ### Three Protocols
 
-The adapter implements three protocols:  `UITableViewDataSource`, `UITableViewDelegate` and `TransactionListTransformerOutput` . Each protocol has been implemented as an extension. This is a great practice because it reduces the scope of the protocol implementations and allows the compiler to more accurately place messages about missing implementations .
+The adapter implements three protocols:  `UITableViewDataSource`, `UITableViewDelegate` and `TransactionListTransformerOutput` . Each protocol has been implemented as an extension. This is a great practice because it reduces the scope of the protocol implementations and allows the compiler to accurately place messages about missing implementations .
 
 The only thing that the extensions do not implement is the data and this is left to the class.
 
@@ -287,7 +289,7 @@ class TransactionListAdapter: NSObject {
 
 ### The TransformerOutput Implementation
 
-Although the `TransactionListTransformerOutput` protocol describes the output of the Transformer, it is also describes the input to the Adapter. The naming scheme suggests that the rows will be appended to the output. The response to each message of the protocol is to append a row to the `rowList`. 
+Although the `TransactionListTransformerOutput` protocol describes the output of the Transformer, it also describes the input to the Adapter. The naming scheme suggests that the rows will be appended to the output. The response to each message of the protocol is to append a row to the `rowList`. 
 
 ```swift
 extension TransactionListAdapter: TransactionListTransformerOutput {
@@ -333,13 +335,15 @@ extension TransactionListAdapter: TransactionListTransformerOutput {
     }
 }
 ```
-The `append` methods are converting the data into `Row`s. the data in each row is  in a format that will be used directly for display. By the time all of the rows are generated, there are no decisions left to be made with respect to height, colour, view configuration and data display content. The data retained in the Rows will be assigned directly to the controls in the Cells. 
+The `append` methods are converting the data into `Row`s. the data in each row is in a format that will be used directly for display. By the time all of the rows are generated, there are no decisions left to be made with respect to height, colour, view configuration and data display content. The data retained in the Rows will be assigned directly to the Controls in the Cells. 
 
-The band colour has been captured by the *odd* property of the row. I could have stored that the actual colour code in each row, but I think colour specification is a best confined to the view, so i have used `odd` as a proxy.
+The band colour has been captured by the *odd* property of the row. The actual colour code could have been stored in each row, but colour specification is a best confined to the view, so `odd` is used as a proxy.
 
 ### Storage of the Rows
 
-The Rows are implemented  as `structs`. I was able to write less code to implement the Rows using structs instead of classes, mostly because I did not have to specify a constructor. In the future, I also want to compare the rows and Swift directly supports equality comparison of structs (of scalars).  
+The Rows are implemented  as `structs`. Less code is required to implement the Rows using structs than classes, mostly because constructors do not have to be specified. Using `let`, they are also immutable.
+
+In the future, for testing, we will want to compare the rows and Swift directly supports equality comparison of structs (of scalars).  
 
 Each row type implements the `Row`  protocol.  
 
@@ -422,15 +426,15 @@ private struct MessageRow: Row {
 }
 ```
 
-The Rows are pretty simple. They contain precisely the data needed for display; no further conversions are necessary. The result is that the Rows are pure ViewModels, having no behaviour. 
+The Rows are pretty simple. They contain precisely the data needed for display; no further conversions are necessary. The result is that the Rows are pure immutable ViewModels, having no behaviour. 
 
-The choice of where to put data conversion is interesting because there are many choices of where to place it: in the cell binding function, in the initializer for the ViewModel, in the transformer output function (the appender), or in the transformer itself. For now I've put most of the conversions in either the transformer or in the transformer output, but I think there is a better placement strategy. I will discuss this choice again in a the next post. 
+Where to perform data conversion is interesting because there are many choices of where to place it: in the cell binding function, in the initializer for the ViewModel, in the transformer output function (the appender), or in the transformer itself. For now, most of the conversions have been placed in either the transformer or in the transformer output, but I think there is a better placement strategy. We will discuss this choice again in the next post. 
 
 ### The Cells
 
-As was discussed, the second major responsibility of `cellForRowAt` is to assign values to the views. The `TransactionCell` protocol specifies the interface to bind the data in a row to a cell for display. Each Cell must implement `bind(row:)`.
+As discussed, the second major responsibility of `cellForRowAt` is to assign values to the views. The `TransactionCell` protocol specifies the interface to bind the data in a Row to a Cell for display. Each Cell must implement `bind(row:)`.
 
-The Row banding colour is a behaviour that is implemented by many of the cells. Since there are only two band colours, I introduced a boolean property called *odd* to capture the banding colour of the cell with respect to the row position. This behaviour is supplied by `setBackgroundColour(odd:)`. 
+The Row banding colour is a behaviour that is implemented by many of the cells. Since there are only two band colours, a boolean property called *odd* will be used to capture the banding colour of the cell with respect to the group position. This behaviour is supplied by `setBackgroundColour(odd:)`. 
 
 ```swift
 private protocol TransactionCell {
@@ -447,9 +451,9 @@ private extension TransactionCell where Self: UITableViewCell {
 }
 ```
 
-Protocol Extensions are a great place to put reusable methods that usually end up in a base class. I could have created another protocol just for the `setBackgroundColour(odd:)` method so as to not include it where is was not required, but its usage is pretty much coupled to the implementation of bind(row:), so placing it in the `TransactionCell` protocol seems to be the right place. 
+Protocol Extensions are a great place to put reusable methods that usually end up in a base class. 
 
-I would have preferred to place the cell classes in the scope of the  `TransactionListAdapter`  or at least make them private to the file, but Interface Builder does not seem to be able to find them in either of these situations, so I settled for private IBOutlets.
+It would have been better to place the cell classes in the scope of the  `TransactionListAdapter` or at least to make them private to the file, but Interface Builder does not seem to be able to find them in either of these situations, so we will use private IBOutlets.
 
 There is not much left to do in the implementation of the `bind` methods - just cast, then set a few controls and the background colour.
 
@@ -564,28 +568,28 @@ extension TransactionListAdapter: UITableViewDelegate {
 }
 ```
 
-As you can see `tableView(_:numberOfRowsInSection:)` is trivial. 
+As you can see, `tableView(_:numberOfRowsInSection:)` is trivial. 
 
 `tableView(_:cellForRowAt:)` is more interesting in that it is also fairly simple: just access the row, dequeue the cell for the row's type (cellId), bind the row data to the cell and return the cell. How simple is that.
 
-`tableView(_:heightForRowAt:)` simply returns the height given by the row. The height seems like it should be a property of the cell, but the cell, and therefore the cell's type, is not directly accessible in the scope of the method. It is therefore easier to access the height via the row.
+`tableView(_:heightForRowAt:)` simply returns the height given by the row.
 
-It is interesting how trivial the implementation of `tableView(_:cellForRowAt:)` is. All of the usual work of deciding which cell is being setup is being handled automatically via Swift's protocol polymorphism - no switch statements required. All of the usual control assignments are relegated to the Cell classes that own the controls. 
+It is interesting how trivial the implementation of `tableView(_:cellForRowAt:)` is. All of the usual work of deciding which cell is being setup is being handled automatically via polymorphism - no switch statements required. All of the usual control assignments are relegated to the Cell classes that own the controls. 
 
 The `UITableViewDataSource` knows only about `TransactionCells`. Each TransactionCell knows what kind of `Row` it can handle.
 
 ## Summary
 
-This solution, which involves generating rows to be consumed by a tableView adapter can be used whenever the data display requirement is non-trivial. I recommend using the solution even when there is a one to one mapping of cells to input steam data. The `if` statements in a typical `cellForRowAtIndex` implementation are usually related to determination of type and the easiest way to simplify the code is to use structures to capture ViewModels which can be displayed directly by the cells. This greatly simplifies the code by distributing the various concerns to smaller, more specific, classes. 
+This solution, which involves generating rows to be consumed by a TableView adapter can be used whenever the data display requirement is non-trivial. I recommend using this kind of solution even when there is a one to one mapping of cells to input steam data. The `if` statements in a typical `cellForRowAtIndex` implementation are usually related to determination of type and the easiest way to simplify the code is to use structures to capture ViewModels which can be displayed directly by the Cells. This greatly simplifies the code by distributing the various concerns to smaller, more specific, classes. 
 
-I mentioned earlier I avoid doing calculations to dynamically determine types , because calculations produce bugs. Structure is easier to understand.
+We should avoid performing calculations to dynamically determine types, because calculations produce bugs. Structures are much easier to understand and their use does not provide an opportunity to produce bugs.
 
-You can imagine if I implemented all 3 of the protocols in the ViewController. All 325 lines of code would have been in one file. You might also imagine that it might be easier to test that the Transformation is working correctly when classes are more specific in their responsibilities.
+Imagine if all 3 protocols were implemented in the ViewController. All 325 lines of code would have resided in one file. It is easier to test that the Transformation is working correctly when classes are more specific in their responsibilities.
 
-I could have moved the Cells and Rows into files of their own, except that the Rows would have to be internal scope, not private, because they are used by the Cells. It's not that I mind the internal scoping, so much as I mind that the Row names are too general for the increased scope. Sometimes it is just better to use better names to make things safe than to use private access. I'll discuss this further, in the next blog article.
+The Cells and Rows could have been moved into files of their own, except that the Rows would have to be internal scope, not private, because they are used by the Cells. It's not that the internal scoping is an issue, it's that the Row names are too general for the increased scope. Sometimes it's just better to use better names to make things safe than to use private access. We will discuss this further, in the next blog article.
 
 It is extremely easy to extend this pattern further with new cell and row types. I didn't think twice about how to add the extra space in the banded block.
 
-By the way, in Android, ListViews and RecyclerViews do not have builtin support for sections, so I use the kind of solution presented here even when the requirement is only for single repeating sections. In iOS, I never use UITableView section support unless I need to display floating headers - I find it easier to use the presented solution.
+By the way, in Android, ListViews and RecyclerViews do not have builtin support for sections, so I use the kind of solution presented here even when the requirement is only for single repeating sections. In iOS, I never use UITableView section support unless I need to display floating headers - I find it easier to use the kind of solution presented here.
 
-I will show in the next instalment how enums can be used to replace structs to simplify the code even further.
+In the next instalment, we will look at how enums can be used to replace structs to simplify the code even further.
