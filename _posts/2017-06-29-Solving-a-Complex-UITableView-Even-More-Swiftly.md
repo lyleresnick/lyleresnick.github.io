@@ -6,13 +6,13 @@ date: 2017-06-29
 
 ## Introduction
 
-In [Solving a Complex UITableView using Swift]({{site.url}}/blog/2017/05/13/Solving-a-Complex-UITableView-using-Swift.html), I introduced a solution for solving a complex UITableView. In this article, I want to improve the solution by refactoring the code in three ways:
+In [Solving a Complex UITableView using Swift]({{site.url}}/blog/2017/05/13/Solving-a-Complex-UITableView-using-Swift.html), we reviewed a solution for solving a complex UITableView. In this article, we will improve the solution by refactoring the code in three ways:
 
 - remove even more responsibilities from the ViewController and distribute them into new or existing classes
 - take advantage of a few key Swift features, namely failable enum initializers, enums with associated values, and extensions and
 - redistribute the code which converts the input and output data.
 
-The complete app which demonstrates the result of the refactoring can be found at [**ReportTableDemo**](https://github.com/lyleresnick/ReportTableDemo). The original app which I will be refactoring can be found at [**ReportTableAdapterDemo**](https://github.com/lyleresnick/ReportTableAdapterDemo).
+The complete app which demonstrates the result of the refactoring can be found at [**ReportTableDemo**](https://github.com/lyleresnick/ReportTableDemo). The original app which we will be refactoring can be found at [**ReportTableAdapterDemo**](https://github.com/lyleresnick/ReportTableAdapterDemo).
 
 
 ## Responsibilities of the ViewController 
@@ -29,7 +29,7 @@ As you may have heard before, this is kind of viewController is known as a *Mass
 
 ## Introducing the Transformer Class
 
-In the last article, the [`TransactionListViewController`](https://github.com/lyleresnick/ReportTableAdapterDemo/blob/master/ReportTableAdapterDemo/TransactionListViewController.swift) implemented a function named `transformFromTwoSources`. I have moved the implementation of this function to a class, `TransactionListTwoSourceTransformer`.
+In the last article, the [`TransactionListViewController`](https://github.com/lyleresnick/ReportTableAdapterDemo/blob/master/ReportTableAdapterDemo/TransactionListViewController.swift) implemented a function named `transformFromTwoSources`. The implementation of this function has been moved to the class, `TransactionListTwoSourceTransformer`.
 
 The viewController now looks like this: 
 
@@ -57,7 +57,7 @@ class TransactionListViewController: UIViewController {
 }
 ```
 
-You may have noticed that the ViewController just got really small! It is now responsible only for its views and those are set up by Interface Builder. Actually, that is not completely correct - it knows where the data for the Transformer is coming from - that is actually a responsibility which I will talk about in a future post.
+You may have noticed that the ViewController just got really small! It is now responsible only for its views and those are set up by Interface Builder. Actually, that is not completely correct - it knows where the data for the Transformer is coming from - that is actually a responsibility which we will talk about in a future post.
 
 We will look at the `TransactionListTwoSourceTransformer`, but first, lets take a look at the `TransactionModel` and `TransactionGroup` classes.
 
@@ -88,7 +88,7 @@ enum TransactionGroup: String {
 }
 ```
 
-In the original [`TransactionModel`](https://github.com/lyleresnick/ReportTableAdapterDemo/blob/master/ReportTableAdapterDemo/TransactionModel.swift), each data value was stored as a string. Generally, unless a value can be processed as a string, you have to convert it to its primitive form. By primitive, I mean in a form that I can be naturally processed, like a date, a number, a URL, or an enum.
+In the original [`TransactionModel`](https://github.com/lyleresnick/ReportTableAdapterDemo/blob/master/ReportTableAdapterDemo/TransactionModel.swift), each data value was stored as a string. Unless a value can be processed as a string, it must be converted to its primitive form. Primitive forms, such as dates, numbers,  URLs, or  enums can be processed naturally.
 
 In the new `TransactionModel`, the data is stored in its primitive form. In the previous version, the data was converted in the transformer function.  The conversion function has been moved to the `TransactionModel` . It is now responsible for all conversions required to change the external representation to the new internal representation. 
 
@@ -160,7 +160,7 @@ Besides encapsulating the code responsible for the transformation, `TransactionL
 - responsibility of converting data to output format has been moved to the `TransactionListAdapter`. 
 - the iterator on the array of transactions has been replaced with an `IndexingIterator`.
 
-These changes leave the `TransactionListTwoSourceTransformer` with one responsibility: convert the primitive data input to primitive output by recognizing the date groupings and exceptions, as well as calculating a total and grand total. This is pretty simple. In a future post I will elaborate on how the structure of code was designed.
+These changes leave the `TransactionListTwoSourceTransformer` with one responsibility: convert the primitive data input to primitive output by recognizing the date groupings and exceptions, as well as calculating a total and grand total. This is pretty simple. In a future post we will discuss how the structure of this code was designed.
 
 ```swift
 class TransactionListTwoSourceTransformer {
@@ -239,7 +239,9 @@ enum TransactionListRow {
 }
 ```
 
-I like the enum notation, because it's more compact than a struct. They preserve the comparable property that I previously wanted from the structs. I like the that the enum *namespaces* the cases. When you implement this kind of solution to back a UITableView, you end up with a lot of structs that have really long names. You need the long names in order to keep them unique and make it obvious which scene they belong to.
+Notice that the enum form is much more compact than a struct. Enums also preserve the comparable property that we previously wanted from the structs. 
+
+A nice feature is that the enum *namespaces* the cases. When structs are used for this kind of solution, the structs tend to have really long names, since there is no namespace to keep them unique within a scene.
 
 You may be wondering where the `cellId` and `height` information have gone. Since both are constants related to a given row type, they have been implemented as a read only variables of the `TransactionListRow`.  
 
@@ -308,7 +310,7 @@ private extension TransactionListRow {
 }
 ```
 
-Besides changing the structs to enums, all of the other changes I made to the adapter are fairly insignificant. Except for the conversion of the `cellId`, the `UITableViewDataSource` implementation has not changed at all.
+Besides changing the structs to enums, the other changes made to the adapter are fairly insignificant. Except for the conversion of the `cellId`, the `UITableViewDataSource` implementation has not changed at all.
 
 ```swift
 class TransactionListAdapter: NSObject {
@@ -339,7 +341,7 @@ extension TransactionListAdapter: UITableViewDelegate {
 }
 ```
 
-The method extension on `Double` formalizes the conversion to string. It could have been implemented as a method, but I prefer this syntactic sugar - it makes it easier to code and read. 
+The method extension on `Double` formalizes the conversion to string. It could have been implemented as a method, but it makes it easier to read and code. 
 
 ```swift
 private extension Double {
@@ -420,4 +422,4 @@ Each item of input data was validated and converted from a `String` to its primi
 
 The adapter has changed little from the previous version, even though the implementation of the rows has been changed from `struct` to `enum`. 
 
-In a future post, I will refactor this version to use a VIPER architecture.
+In a future post, we will refactor this version to use a VIPER architecture.
