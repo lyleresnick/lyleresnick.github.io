@@ -22,9 +22,9 @@ In commercial applications, UIViewControllers get large. I've seen 2000 lines in
 
 VIPER is a micro-architecture - a predefined set of classes that work together to structure a solution. VIPER is an implementation of [Bob Martin's Clean Architecture](https://8thlight.com/blog/uncle-bob/2012/08/13/the-clean-architecture.html). 
 
-In this post I will describe the various components and responsibilities of the VIPER architecture. 
+In this post we will look at the various components and responsibilities of the VIPER architecture. 
 
-In the next post, I’ll demonstrate that the VIPER architecture can be very simple to implement and show how its benefits can be quickly realized.  I'll use the requirement and solution to [Solving a Complex UITableView Even More Swiftly]({{site.url}}/blog/2017/06/29/Solving-a-Complex-UITableView-Even-More-Swiftly.html) as the basis of this example. The app which demonstrates the refactoring to Clean Architecture can be found at [**CleanReportTableDemo**](https://github.com/lyleresnick/CleanReportTableDemo). I will be explaining this app in the next post.
+In the next post, I’ll demonstrate that the VIPER architecture can be very simple to implement and show how its benefits can be quickly realized.  We will use the requirement and solution to [Solving a Complex UITableView Even More Swiftly]({{site.url}}/blog/2017/06/29/Solving-a-Complex-UITableView-Even-More-Swiftly.html) as the basis of this example. The app which demonstrates the refactoring to Clean Architecture can be found at [**CleanReportTableDemo**](https://github.com/lyleresnick/CleanReportTableDemo). I will be explaining this app in the next post.
 
 ## An Explanation of the VIPER Architecture 
 
@@ -69,8 +69,6 @@ Copying data between layers by passing values, instead of objects prevents imple
 Clean Architecture also requires that objects in one layer can only communicate to adjacent layers. Objects in non-adjacent layers cannot communicate with one another. 
 
 Objects in a layer must not expose their implementation to any other layer. The implementation must be encapsulated. For example an array or dictionary in a layer must not be exposed by name to another layer. 
-
-This is what I mean by honouring the layer boundaries.
 
 ### The VIPER Classes
 
@@ -133,7 +131,7 @@ The ViewController's main role in VIPER is to the configure the View hierarchy. 
 
 In VIPER, the UIViewController sends <u>every</u> event coming from a UIControl or lifecycle method directly to the Presenter. The ViewController does not process the event in any way, whatsoever. It simply retrieves associated data, either input as text or selected by index, and sends it with the event to the Presenter. In the case of repeating UIControls contained in a UITableView or UICollectionView, the Cell receives the event and sends it to the Presenter.  Super simple!
 
-You can see in the interaction diagram that the ViewController has another role: show the output for the event. I will discuss this role, below.
+You can see in the interaction diagram that the ViewController has another role: show the output for the event. We will discuss this role, below.
 
 #### ViewController Examples
 
@@ -143,7 +141,7 @@ Here are some examples of UIViewControllers, or their delegate proxies, capturin
 
 In this UIViewController `viewDidLoad` method, all views have been configured in Interface Builder. There is nothing to do other than pass the message to the Presenter. 
 
-I am passing the height of the main view to the Presenter so it can set the height of a UITableViewCell to the full screen height when showing  errors or other unusual states.
+The height of the main view is passed to the Presenter so it can set the height of a UITableViewCell to the full screen height when showing  errors or other unusual states.
 
 ```swift
 class ContactListViewController: UIViewController {
@@ -213,7 +211,7 @@ The Presenter's role is to receive an event from the ViewController and pass it 
 
 Examples of input conversion might be from String to Int, formatted String date to Date, an Int from a UIPickerView to an enum - the list goes on. 
 
-As you may have noticed in the diagram, the Presenter has another role: present the result of the event. I will discuss this role, below.
+As you may have noticed in the diagram, the Presenter has another role: present the result of the event. We will discuss this role, below.
 
 #### Presenter Examples
 
@@ -310,7 +308,7 @@ If the Presenter required a callback, it would send itself as a delegate to be p
 
 The Router is responsible for managing scene transition. A Router can be a UINavigationController,  a UITabController or a custom container ViewController.  From my point of view, a router is simply a Container ViewController which itself is a VIP stack.
 
-I will leave the details of router implementation to a future post. 
+The router implementation is discussed in a future post. 
 
 ### The UseCase
 
@@ -464,7 +462,7 @@ It is a good practice to create an EntityManager for each type of Entity that ha
 
 The UseCase does not know where the data is coming from or where it is going to - that is the job of the EntityManager.
 
-An EntityManager receives data originating as JSON, XML, or some other external format from an external store and converts it to either structs or classes. I suggest that Entities should be classes, since you will probably want to mutate them over the course of many events. 
+An EntityManager receives data originating as JSON, XML, or some other external format from an external store and converts it to structs. 
 
 The EntityManager creates the Entity by converting data from an external form to a form that can be used directly by the UseCase. Entities should not contain Strings that are actually numbers and enums, or unconverted JSON dictionaries. For example: date Strings should be converted to Dates, URL Strings should be converted to URLs, number Strings should be converted to their specific number type and exclusive values should be converted to enums. 
 
@@ -474,15 +472,15 @@ Data sent to an EntityManager should not require conversion by the UseCase. It i
 
 By providing the data conversion, the EntityManagers effectively decouple the UseCase from the physical form and location of external storage. 
 
-As I mentioned, the EntityGateway is a protocol. It is defined as a protocol so that the UseCase is decoupled from the source of the data. EntityManagers should also be defined in terms of protocols. This makes it very easy to unit test the UseCase. You can inject an alternate implementation of an EntityManager to control the data for a test.
+As discussed, the EntityGateway is a protocol. It is defined as a protocol so that the UseCase is decoupled from the source of the data. EntityManagers should also be defined in terms of protocols. This makes it very easy to unit test the UseCase. You can inject an alternate implementation of an EntityManager to control the data for a test.
 
 ### The Transformer
 
-The Transformer is not formally part of VIPER, but due of the number of events that a typical UseCase has  to process, I find it useful to create one Transformer class for each event that changes the state of the system.  
+The Transformer is not formally part of VIPER, but due of the number of events that a typical UseCase has  to process, it is useful to create one Transformer class for each event that changes the state of the system.  
 
-Normally the functionality of a Transformer would be rendered as a method of a UseCase. I convert the method to a *method-object* and then call it from the UseCase event method. The Transformer usually consists of a constructor and a method called `transform` . In the UseCase method, I initialize the constructor with the required EntityManagers obtained from the EntityGateway and any data required from previously run UseCases. 
+Normally the functionality of a Transformer would be rendered as a method of a UseCase. Convert the method to a *method-object* and then call it from the UseCase event method. The Transformer usually consists of a constructor and a method called `transform` . In the UseCase method, initialize the constructor with the required EntityManagers obtained from the EntityGateway and any data required from previously run UseCases. 
 
-I pass the event parameters from UseCase to the `transform` method along with the reference to the Presenter (for output).
+Pass the event parameters from UseCase to the `transform` method along with the reference to the Presenter (for output).
 
 Here is an example:
 
@@ -518,7 +516,7 @@ class OrderEntrySaveUseCaseTransformer {
 }
 ```
 
-I would then implement `eventSave` as follows: 
+Implement `eventSave` as follows: 
 
 ```swift
 class OrderEntryUseCase {
@@ -535,7 +533,7 @@ class OrderEntryUseCase {
 }
 ```
 
-I still implement the UseCase's `Capture` methods in the UseCase.
+Implement the UseCase's `Capture` methods in the UseCase.
 
 You will see that this setup makes it very easy to test the Transformer. It separates the UseCase's responsibilities from one another, making it very easy to understand the code. When you need to decompose a large amount of processing by implementing private methods, it is easy to ascertain the scope of the methods.
 
@@ -553,7 +551,7 @@ If an output method has a large number of parameters, it is better to put the va
 
 When the input to the Presenter is repetitive, the Presenter holds the ViewModel structures in an array and delivers them via an indexed accessor method.
 
-When the input to the Presenter is repetitive and heterogeneous, it is a good practice to use *associated-value* `enum`s to hold the data. Although, due to syntax, I find that when an enum contains a large number of associated values, the extraction of values is painful, not to mention that every time a value is added you have to add another '_'  everywhere you read the enum. 
+When the input to the Presenter is repetitive and heterogeneous, it is a good practice to use *associated-value* `enum`s to hold the data.  
 
 A better practice is to extract a single value from the enum. This value is a name for a tuple. You can then use the field names defined by the enum to access the individual values stored in the enum. 
 
@@ -650,7 +648,7 @@ In the case of non-repeating data, the ViewController obtains the ViewModel data
 
 In the case of repeating data, the data is acquired from the Presenter via an indexed accessor method. The methods are used by a UITableView-, UIPicker-, UICollectionView- or other DataSource. The accessor method returns a ViewModel containing the data to be displayed
 
-For the same reasons that I mentioned regarding the UseCaseOutput, it is a good practice to create one PresenterOutput protocol for each event. 
+It is a good practice to create one PresenterOutput protocol for each event, for the same reason mentioned regarding the UseCaseOutput.
 
 #### PresenterOutput Examples
 
@@ -819,7 +817,7 @@ A ViewController is normally defined via Interface Builder, so we cannot use its
 
 We do not want the ViewController to know anything about the Interactor. The Interactor must exist before the presenter can own it. The Presenter must exist before the ViewController can own it.
 
- The VIPER stack is assembled by a 3rd party class that knows about all of the classes in the stack and how they are connected together. I call this part a Connector.
+ The VIPER stack is assembled by a 3rd party class that knows about all of the classes in the stack and how they are connected together. This class is called a Connector.
 
 A Connector is created and executed by the ViewController by overriding `awakeFromNib()`, which is called after all outlets are created.
 
@@ -863,7 +861,7 @@ class TransactionListConnector {
 
 ## Summary
 
-I find that the easiest way to determine whether you are implementing the VIPER architecture correctly is to use the rules and classes correctly and consistently. 
+The easiest way to determine that you are implementing the VIPER architecture correctly is to use the rules and classes correctly and consistently. 
 
 VIPER is easy to implement if you keep it simple.  
 
