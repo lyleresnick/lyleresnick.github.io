@@ -6,13 +6,13 @@ date: 2017-09-03
 
 ## Introduction
 
-VIPER is a micro-architecture - a set of classes that work together to structure a solution.  
+VIPER is an application architecture - a set of classes that work together to structure a solution.  
 
-VIPER is an implementation of [Bob Martin's Clean Architecture](https://8thlight.com/blog/uncle-bob/2012/08/13/the-clean-architecture.html). I'm going to demonstrate that VIPER can be very simple to implement and its benefits can be realized very quickly.  
+VIPER is an implementation of [Bob Martin's Clean Architecture](https://8thlight.com/blog/uncle-bob/2012/08/13/the-clean-architecture.html). In this demonstration, we will see that VIPER can be very simple to implement and its benefits can be realized very quickly.  
 
 I'll use the requirement from [Solving a Complex UITableView using Swift]({{site.url}}/blog/2017/05/13/Solving-a-Complex-UITableView-using-Swift.html) as the basis of this example. I'm going to refactor the solution of [Solving a Complex UITableView Even More Swiftly]({{site.url}}/blog/2017/06/29/Solving-a-Complex-UITableView-Even-More-Swiftly.html) into a VIPER solution. The complete App which demonstrates this refactoring can be found at [**CleanReportTableDemo**](https://github.com/lyleresnick/CleanReportTableDemo).
 
-I discussed how I think VIPER should be structured in [A Crash Course on the VIPER Architecture]({{site.url}}/blog/2017/08/29/A-Crash-Course-on-the-VIPER-Architecture.html).
+We discussed how VIPER should be structured in [A Crash Course on the VIPER Architecture]({{site.url}}/blog/2017/08/29/A-Crash-Course-on-the-VIPER-Architecture.html).
 
 ## The App
 
@@ -45,24 +45,24 @@ class TransactionListViewController: UIViewController {
     }
 }
 ```
-I have made three additions to the viewController:. 
-- I overrode `awakeFromNib()` , 
-- I added a property called `presenter`, and
-- I added a method called `showReport`, which I will discuss later.
+Three changes have been made to the ViewController:. 
+- `awakeFromNib()` has been overridden, 
+- a property called `presenter` has been added, and
+- a method called `showReport` has been added, which we will discuss later.
 
-I made one more very significant change: the ViewController no longer knows where the transaction data comes from. 
+There is one other very significant change: the ViewController no longer knows where the transaction data comes from. 
 
-Storyboards are a very important part of my workflow because of their visual layout and resulting documentation. Even though I'm implementing VIPER, I definitely want to continue using Storyboards to define ViewController layouts.
+Storyboards are a very important part of the Xcode workflow because of their visual layout and resultant documentation. Even though we are implementing VIPER, we would prefer to continue using Storyboards to define ViewController layouts.
 
 `awakeFromNib()` is called immediately after the ViewController is instantiated from the storyboard and the outlets are set. This is the perfect place to call the Connector to configure the remainder of the VIPER stack. 
 
-As I mentioned previously, the VIPER stack must be configured, or more specifically, connected. I have allocated the configuration responsibility to a class I call the Connector.
+As mentioned previously, the VIPER stack must be configured, or more specifically, connected. The responsibility of configuration has been allocated to a class called a Connector.
 
 You might have noticed that the `presenter` property has not been set. This is because it is set by the Connector.
 
 ### The Connector
 
-You might be wondering why the VIPER stack has to be configured by a third party. It will become obvious when you look at the code. Remember that part of the requirement of the clean architecture is that it must be testable. 
+You might be wondering why the VIPER stack has to be configured by a third party class. It will become obvious when you look at the code. Remember that part of the requirement of the clean architecture is that it must be testable. 
 
 Certainly, you could arrange for the ViewController to directly allocate the Presenter and then have the ViewController set the presenter's viewController as a delegate. This is pretty normal stuff. In the same way the Presenter could directly allocate the UseCase and then have the Presenter set the UseCase's presenter as a delegate. 
 
@@ -102,7 +102,7 @@ class TransactionListConnector {
 }
 ```
 
-With a view toward testability, I have injected the Presenter into the UseCase as its output and the ViewController into the Presenter as its output. Because the adapter is part of the view, it also needs a reference to the presenter.  
+With a view toward testability, the Presenter is injected into the UseCase as its output and the ViewController is injected into the Presenter as its output. Because the adapter is part of the view, it also needs a reference to the presenter.  
 
 ### The Presenter
 
@@ -111,12 +111,12 @@ In the previous version, the Adapter had two responsibilities:
 1. convert the data into a format suitable for display by the view and 
 2. respond to the tableView's requests by delivering cells containing the formatted data. The first responsibility has been moved to the Presenter. 
 
-I split the second responsibility by:
+The second responsibility is split by:
 
 1. making the Adapter a pure adapter between the tableView and the Presenter and 
 2. moving the remainder of the Adapter's implementation to the Presenter.
 
-I changed the name of the rows by calling them `TransactionListViewModel`s, because this is what they are known as in VIPER.  
+The name representing the rows has been changed to `TransactionListViewModel`s, because this is what they are known as in VIPER.  
 
 ```swift
 class TransactionListPresenter {
@@ -158,11 +158,11 @@ In some circumstances, the Presenter will pass an event to a Router to access ot
 
 All messages moving towards the UseCase (towards the centre of the architecture model) begin with the word `event`.   
 
-The other methods provide to access the viewModel. They have been extracted from the original adapter. They do not begin with the word `event`, as they are called by the Adapter on behalf of the tableView to pull data from the Presenter. I will discuss this further, below. 
+The other methods provide to access the viewModel. They have been extracted from the original adapter. They do not begin with the word `event`, as they are called by the Adapter on behalf of the tableView to pull data from the Presenter. We will discuss this further, below. 
 
 ### The UseCase 
 
-As mentioned before, VIPER's UseCase actually implements the business logic. Well that is normally true. But, subject to the SRP, I have further delegated the work to a Transformer.
+As mentioned before, the business logic is implemented by VIPER's UseCase. Normally that is true, but as per the SRP, the work has been delegated to a Transformer class, owned by the UseCase.
 
 ```swift
 class TransactionListUseCase {
@@ -182,7 +182,7 @@ class TransactionListUseCase {
 }
 ```
 
-The UseCase's two methods are exactly the same as the two methods found in the ViewController of the previous version. As you already know from the previous post, they do almost exactly the same thing - we are using the `eventViewReady` method, now. I will discuss the `eventViewReadyOneSource` method another day.
+The UseCase's two methods are exactly the same as the two methods found in the ViewController of the previous version. As you already know from the previous post, they do almost exactly the same thing - we are using the `eventViewReady` method, now. We will discuss the `eventViewReadyOneSource` method another day.
 
 You can see that the injected EntityGateway provides some opaque indirection w.r.t. the access of the transactions, whereas in the previous version, the transactions where accessed from a known location. Here, only the EntityGateway knows where they are located. 
 
@@ -192,7 +192,7 @@ Except for some cosmetic naming changes, the Transformer called by the UseCase i
 
 The naming of the output protocol methods have been changed to align it with the VIPER structure. The `TransactionListTransformerOutput` protocol is now called the `TransactionListViewReadyUseCaseOutput` protocol and the `append` methods have been renamed to `present` methods.
 
-You will notice that I added two methods to the protocol: `presentInit()` and `presentReport()`. In real world situations, you might generate the report a number of times to, say, keep it up to date. In the previous version, it was assumed that it would not be regenerated.
+Two methods have been added to the protocol: `presentInit()` and `presentReport()`. These methods will allow the report to be regenerated so it can be refreshed. In the previous version, it was assumed that it would not be regenerated.
 
 ```swift
 protocol TransactionListViewReadyUseCaseOutput: class {
@@ -282,7 +282,7 @@ Except for the names and use of entity managers to access the data, the code her
 
 The UseCaseOutput is composed of all of the *Event*UseCaseOutputs.
 
-As I mentioned earlier, the data formatting responsibility has been moved from the Adapter to the Presenter.  
+As mentioned earlier, the data formatting responsibility has been moved from the Adapter to the Presenter.  
 
 All conversion to text is handled by the UseCaseOutput. If we were required to perform localization, it would be done here as well. In the previous version there is still data conversion being performed in the header cell.
 
@@ -499,7 +499,7 @@ As you may have noticed, the function of the app is identical to the previous ve
 - the place where each kind of processing occurs has been formalized and
 - the names of each method have been formalized.
 
-This formality makes it easy for those familiar with VIPER to understand the code and therefore makes it easier to change.
+This formality makes it easier, for those familiar with VIPER, to understand the code and thereby makes it easier to change.
 
 There are more classes: each one has very specific responsibilities.
 
