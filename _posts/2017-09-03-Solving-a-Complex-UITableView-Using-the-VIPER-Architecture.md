@@ -32,13 +32,12 @@ class TransactionListViewController: UIViewController {
         super.awakeFromNib()
         
         TransactionListConnector(viewController: self).configure()
-        adapter = TransactionListAdapter(presenter: presenter)
+        adapter = TransactionListAdapter()
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        tableView.delegate = adapter
         tableView.dataSource = adapter
         
         presenter.eventViewReady()
@@ -49,8 +48,6 @@ Three changes have been made to the ViewController:.
 - `awakeFromNib()` has been overridden, 
 - a property called `presenter` has been added, and
 - a method called `showReport` has been added, which we will discuss later.
-
-There is one other very significant change: the ViewController no longer knows where the transaction data comes from. 
 
 Storyboards are a very important part of the Xcode workflow because of their visual layout and resultant documentation. Even though we are implementing VIPER, we would prefer to continue using Storyboards to define ViewController layouts.
 
@@ -116,7 +113,7 @@ The second responsibility is split by:
 1. making the Adapter a pure adapter between the tableView and the Presenter and 
 2. moving the remainder of the Adapter's implementation to the Presenter.
 
-The name representing the rows has been changed to `TransactionListViewModel`s, because this is what they are known as in VIPER.  
+The name representing the rows has been changed to `TransactionListRowViewModel`s, because this is what they are known as in VIPER.  
 
 ```swift
 class TransactionListPresenter {
@@ -125,8 +122,8 @@ class TransactionListPresenter {
     
     fileprivate static let outboundDateFormatter = DateFormatter.dateFormatter( format: "MMM' 'dd', 'yyyy" )
 
-    fileprivate var rows = [TransactionListViewModel]()
-    fileprivate var odd = false
+    private var rows = [TransactionListRowViewModel]()
+    private var odd = false
     
     private let useCase: TransactionListUseCase
     
@@ -137,18 +134,6 @@ class TransactionListPresenter {
     func eventViewReady() {
         useCase.eventViewReady()
     }
-    
-    func cellId(at index: Int) -> String {
-        return rows[ index ].cellId
-    }
-    
-    func cellHeight(at index: Int) -> CGFloat {
-        return rows[ index ].height
-    }
-    
-    var rowCount: Int { return rows.count }
-    
-    func row(at index: Int) -> TransactionListViewModel { return rows[ index ] }
 }
 ```
 
@@ -157,8 +142,6 @@ The presenter takes the ViewReady event and passes it on to the UseCase. This is
 In some circumstances, the Presenter will pass an event to a Router to access other ViewControllers.
 
 All messages moving towards the UseCase (towards the centre of the architecture model) begin with the word `event`.   
-
-The other methods provide to access the viewModel. They have been extracted from the original adapter. They do not begin with the word `event`, as they are called by the Adapter on behalf of the tableView to pull data from the Presenter. We will discuss this further, below. 
 
 ### The UseCase 
 
@@ -361,10 +344,10 @@ extension Double {
 }
 ```
 
-The TransactionListViewModel extension has been moved from the Adapter to the Presenter and has been made private, since that is the only class that needs to know about it.
+The TransactionListRowViewModel extension has been moved from the Adapter to the TransactionListRowViewModel.
 
 ```swift
-private extension TransactionListViewModel {
+extension TransactionListRowViewModel {
     
     var cellId: String {
         return {
@@ -397,27 +380,6 @@ private extension TransactionListViewModel {
         case grandfooter
         case message
     }
-
-    var height: CGFloat {
-        get {
-            switch self {
-            case .header:
-                return 60.0
-            case .subheader:
-                return 34.0
-            case .detail:
-                return 18.0
-            case .subfooter:
-                return 18.0
-            case .footer:
-                return 44.0
-            case .grandfooter:
-                return 60.0
-            case .message:
-                return 100.0
-            }
-        }
-    }
 }
 ```
 
@@ -431,18 +393,19 @@ The `TransactionListViewReadyPresenterOutput` is simple.
 protocol TransactionListPresenterOutput: TransactionListViewReadyPresenterOutput {}
 
 protocol TransactionListViewReadyPresenterOutput: class {
-    func showReport()
+    func showReport(rows: [TransactionListRowViewModel])
 }
 ```
 
-It simply tells the table to reload.
+It gives the rows to the adapter and tells the table to reload.
 
 ```swift
 extension TransactionListViewController: TransactionListPresenterOutput {}
 
 extension TransactionListViewController: TransactionListViewReadyPresenterOutput {
     
-    func showReport() {
+    func showReport(rows: [TransactionListRowViewModel]) {
+        adapter.rows = rows
         tableView.reloadData()
     }
 }
@@ -452,16 +415,11 @@ The reload makes the Adapter start pulling data from the Presenter.
 
 ### The Adapter
 
-The size of the Adapter is now as small as possible. It's only responsibility is to react to the tableView by delegating to the presenter. It is now truly an *adapter*. The responsibility of formatting the output was moved to the Presenter.  
+The size of the Adapter is now as small as possible. Its only responsibility is to supply formatted data to the tableView. It is now truly a datasource *adapter*. The responsibility of formatting the output was moved to the Presenter.  
 
 ```swift
 class TransactionListAdapter: NSObject {
-    
-    let presenter: TransactionListPresenter
-    
-    init(presenter: TransactionListPresenter) {
-        self.presenter = presenter
-    }
+    var rows = [TransactionListRowViewModel]()
 }
 
 extension TransactionListAdapter: UITableViewDataSource  {
