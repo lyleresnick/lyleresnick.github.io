@@ -1,0 +1,81 @@
+[
+    {
+        "title": "iOS Architect / Team Lead / Developer",
+        "company": "Lifetales",
+        "location": "Toronto",
+        "date": "Aug 2016 – present (Contract)",
+        "application": "Lifetales Story App"
+    },
+    {
+
+        "title": "iOS SME & Team Lead / Android Developer",
+        "company": "RBC",
+        "location": "Toronto",
+        "date": "May 2015 – Aug 2016 (Contract)",
+        "application": "RBC Banking & Wallet Apps"
+    },
+    {
+        "title": "Mobile Development Specialist",
+        "company": "City of Toronto",
+        "location": "Toronto",
+        "date": "Nov 2014–Apr 2015 (Contract)",
+        "application": "Mobile Strategy"
+    },
+    {
+        "title": "Senior iOS & Android Developer",
+        "company": "TD Insurance",
+        "location": "Toronto",
+        "date": "Aug–Nov 2014 (Contract)",
+        "application": "TDI Auto Incident App"
+    },
+    {
+        "title": "iOS & Java Play! Architect / Project Leader",
+        "company": "Aisle18",
+        "location": "Toronto",
+        "date": "Jul 2013 – Jun 2014",
+        "application": "Aisle18 Retail Experience App"
+    },
+    {
+        "title": "iOS  Architect / Team Lead / Android Developer",
+        "company": "Nexj (Broadstreet Mobile)",
+        "location": "Toronto",
+        "date": "Apr 2012 – Jun 2013",
+        "application": "Retirement Sensitivity Illustrator iPad App"
+    },
+    {
+        "title": "Mobile Developer, Java Architect / Team Lead",
+        "company": "Cellarpoint",
+        "location": "Toronto",
+        "date": "Apr 2006 – Apr 2012",
+        "application": "Wine Inventory Management System"
+    },
+    {
+        "title": "Architect / Team Lead",
+        "company": "Pearl Development Group",
+        "location": "Toronto",
+        "date": "Mar 2000 – Dec 2006",
+        "application": "Commercial Foreign Exchange System"
+    },
+    {
+        "title": "Architect / Team Lead / Business Analyst",
+        "company": "Thomas Cook / Travelex",
+        "location": "London, United Kingdom",
+        "date": "Apr 1996 – Mar 2003",
+        "application": "Commercial Foreign Exchange System"
+    },
+    {
+
+        "title": "Team Lead / Business Analyst / Mentor",
+        "company": "Nesbitt Burns/Bank of Montreal",
+        "location": "Toronto",
+        "date": "May 1997 - Nov 1997 (Contract)",
+        "application": "Securities Management System"
+    },
+    {
+        "title": "Senior Developer",
+        "company": "Canadian Bankers Association",
+        "location": "Toronto",
+        "date": "May 1995 – December 2000 (Contracts)",
+        "application": "Consumer Products Database"
+    }
+]
