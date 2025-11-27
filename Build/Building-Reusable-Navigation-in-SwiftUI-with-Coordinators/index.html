@@ -1,0 +1,381 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Managing navigation in SwiftUI is easy for simple flows but quickly becomes messy as apps grow. Routing decisions end up in the screen view files, view models leak navigation logic, and flows become hard to follow." />
+    <meta name="author" content="Lyle Resnick" />
+    <meta name="generator" content="Ignite v0.6.0" />
+    <title>Building Reusable Navigation in SwiftUI with Coordinators – Lyle Resnick</title>
+    <link href="/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="/css/prism-xcode-dark.css" rel="stylesheet" data-highlight-theme="xcode-dark" />
+    <link href="/css/prism-xcode-light.css" rel="stylesheet" data-highlight-theme="xcode-light" />
+    <link href="/css/prism-plugins.css" rel="stylesheet" />
+    <link href="/css/bootstrap-icons.min.css" rel="stylesheet" />
+    <link href="/css/ignite-core.min.css" rel="stylesheet" />
+    <link href="https://lyleresnick.com/Building-Reusable-Navigation-in-SwiftUI-with-Coordinators" rel="canonical" />
+    <script>(function() {
+    function getThemePreference() {
+        return localStorage.getItem('custom-theme') || 'auto';
+    }
+
+    function applyTheme(themeID) {
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const lightThemeID = document.documentElement.getAttribute('data-light-theme') || 'light';
+        const darkThemeID = document.documentElement.getAttribute('data-dark-theme') || 'dark';
+        const actualThemeID = themeID === 'auto' ? (prefersDark ? darkThemeID : lightThemeID) : themeID;
+
+        document.documentElement.setAttribute('data-bs-theme', actualThemeID);
+        document.documentElement.setAttribute('data-theme-state', themeID);
+    }
+
+    function applySyntaxTheme() {
+        const syntaxTheme = getComputedStyle(document.documentElement)
+            .getPropertyValue('--syntax-highlight-theme').trim().replace(/"/g, '');
+
+        if (!syntaxTheme) return;
+
+        document.querySelectorAll('link[data-highlight-theme]').forEach(link => {
+            link.setAttribute('disabled', 'disabled');
+        });
+
+        const themeLink = document.querySelector(`link[data-highlight-theme="${syntaxTheme}"]`);
+        if (themeLink) {
+            themeLink.removeAttribute('disabled');
+        }
+    }
+
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+        const currentTheme = getThemePreference();
+        if (currentTheme === 'auto') {
+            applyTheme('auto');
+            applySyntaxTheme();
+        }
+    });
+
+    const savedTheme = getThemePreference();
+    applyTheme(savedTheme);
+    applySyntaxTheme();
+})();
+</script>
+    <meta property="og:site_name" content="Hello World" />
+    <meta property="og:title" content="Building Reusable Navigation in SwiftUI with Coordinators" />
+    <meta name="twitter:title" content="Building Reusable Navigation in SwiftUI with Coordinators" />
+    <meta property="og:description" content="Managing navigation in SwiftUI is easy for simple flows but quickly becomes messy as apps grow. Routing decisions end up in the screen view files, view models leak navigation logic, and flows become hard to follow." />
+    <meta name="twitter:description" content="Managing navigation in SwiftUI is easy for simple flows but quickly becomes messy as apps grow. Routing decisions end up in the screen view files, view models leak navigation logic, and flows become hard to follow." />
+    <meta property="og:url" content="https://lyleresnick.com/Building-Reusable-Navigation-in-SwiftUI-with-Coordinators" />
+    <meta name="twitter:domain" content="lyleresnick.com" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:dnt" content="on" />
+  </head>
+  <body class="container">
+    <header>
+      <nav class="fixed-top navbar navbar-expand-md" style="background-color: rgb(44 202 189 / 100%)" data-bs-theme="dark">
+        <div class="container flex-wrap flex-lg-nowrap">
+          <div class="me-2 me-md-auto">
+            <a href="/" class="d-inline-flex align-items-center navbar-brand">Lyle Resnick</a>
+          </div>
+          <button type="button" class="navbar-toggler btn" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+          <div id="navbarCollapse" class="collapse navbar-collapse">
+            <ul class="navbar-nav mb-2 mb-md-0 col justify-content-end">
+              <li class="nav-item"><a href="/blog" class="nav-link text-nowrap">Blog</a></li>
+              <li class="nav-item"><a href="/resume" class="nav-link text-nowrap">Resume</a></li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+    </header>
+    <div style="height: 54px"></div>
+    <div style="display: flex; overflow: hidden; align-items: center; justify-content: center">
+      <div class="ig-main-content" style="width: 95.0%; align-self: center; justify-self: center">
+        <h1 class="mt-4" style="font-weight: 500; width: 90.0%">Building Reusable Navigation in SwiftUI with Coordinators</h1>
+        <p style="font-weight: 500; width: 90.0%">Oct 15, 2025</p>
+        <p style="font-weight: 500; width: 90.0%">2182 words; 9 minutes to read.</p>
+        <p style="width: 90.0%"></p>
+        <p>Managing navigation in SwiftUI is easy for simple flows but quickly becomes messy as apps grow. Routing decisions end up in the screen view files, view models leak navigation logic, and flows become hard to follow.</p>
+        <p>To solve this, we can use a coordinator pattern: a centralized system that orchestrates navigation for a flow while keeping screens and view models clean, reusable, and testable.</p>
+        <p>The Coordinator pattern presented here is sometimes known as the Router pattern.</p>
+        <hr />
+        <h2>Requirements of a Coordinator</h2>
+        <p>We would like a Coordinator to be Responsible for</p>
+        <ul>
+          <li>instantiation and presentation screens of a multi-screen flow</li>
+          <li>sequencing the presentation of screens according to business rules.</li>
+        </ul>
+        <p>and to have these qualities:</p>
+        <ul>
+          <li>business rule logic should be confined to the coordinator’s view model.</li>
+          <li>the first screen presented can be determined dynamically via a parameter.</li>
+          <li>screens used within a flow must be reusable in any other flow without change.</li>
+        </ul>
+        <ul>
+          <li>a coordinator must be easy to create and use by the developer.</li>
+        </ul>
+        <h2>Meeting the requirements</h2>
+        <h3>1. Move Navigation and Flow Logic from The View to the Coordinator</h3>
+        <p>In most SwiftUI codebases (as well as Flutter &amp; Android for that matter) navigation code is placed into the View.</p>
+        <p>This architecture implicitly couples the screen View code to both the implementation of the navigation system and to the flow in which the screen is presented. The flow is manifested in various places in the code of the screens. In some codebases, the viewModels are responsible for navigation, but this architecture still couples the Screen Module (the View and the ViewModel) to the navigation system and flow.</p>
+        <p>The way to decouple the navigation system and the flow from the screens is to give all of this responsibility to a third party object. Many people call this object a coordinator to imply that this object has responsibility for the coordination of the presentation of a group of screens. Some people, myself included, like to call it a Router, because it does the work of routing screens also referred to as Routes (routes also include parameters).</p>
+        <p>The View, and in turn the ViewModel, is given a reference to the Coordinator, as opposed to a being given a reference to a navigator or its implementation. The result is that the Coordinator is opaque to the Screen Module. The module does not even know the there is a navigator controlling the presentation.</p>
+        <h3>2. Centralize Instantiation and Presentation</h3>
+        <p>The coordinator’s main responsibility is to instantiate and present the screens of a multi-screen flow. Think of the coordinator as the parent of the screens. The screens are children of the coordinator.</p>
+        <p>Only the coordinator knows about child screens. Knowledge of screen’s siblings is not known directly by the screen, only the coordinator. This is the opposite of approaches where a View directly manipulates a reference to a navigator and its route or view, as in other types of navigation be it UIKit, SwiftUI, Flutter or Android.</p>
+        <p>Once a child screen has been instantiated, the coordinator waits for responses from the child.</p>
+        <h3>3. Encapsulate all Navigation Logic</h3>
+        <p>In addition to centralizing instantiation and presentation, the coordinator also centralizes all navigation decisions, including the usual pushing and popping, but also basing descisions on the business logic of the flow which may include state.</p>
+        <p>Instead of scattering logic across screen Views or ViewModels, the logic of the flow is contained within the scope of the coordinator, or more specifically, the CoordinatorViewModel.</p>
+        <p>This small scope makes it as easy as possible to understand and modify the flow in the future.</p>
+        <h3>4. Separate Responsibilities within the Coordinator</h3>
+        <p>A Coordinator should consist of two familiar parts: a View and a ViewModel. The View is called a CoordinatorView and the ViewModel is called a CoordinatorViewModel.</p>
+        <p>TODO: fix this: The names are usually more specifically prefixed</p>
+        <p>The View contains SwiftUI Navigation code and the ViewModel contains business logic which controls the what View should present.</p>
+        <p>The View knows <u>how</u> and <u>what</u> to push and pop; whereas the ViewModel knows <u>when</u> and <u>why</u> to push and pop as directed by requests from the coordinator’s children.</p>
+        <h3>5. Separate Responsibilities within the Child Screen Modules</h3>
+        <p>A View displays UI and responds to user interactions. The ViewModels handle business logic. Coordinators handle navigation and flow transitions.</p>
+        <p>The View does not decide which screen comes next and neither does the ViewModel — the ViewModel makes requests to the coordinator via a protocol specific to a Child Screen and the Coordinator makes the routing decision.</p>
+        <h3>6. Consistency Across a Flow</h3>
+        <p>Special-case behavior, like resetting state after a transaction, moving to a specific screen, or presentation of just-in-time onboarding screens happens centrally in the coordinator. This ensures uniform behavior and eliminates duplicated or contradictory logic across screens. In the simple case of navigation it’s just a push, pop or replace; but when some business rule must be followed, that logic is performed by the CoordinatorViewModel - not the child’s view model.</p>
+        <h3>7. Maintainability and Scalability</h3>
+        <p>Centralized navigation makes adding, removing, or reordering screens safe and straightforward. As the app grows, changes to the flow only require updates in one place.</p>
+        <h3>8. View Model-Driven Navigation</h3>
+        <p>Once a child screen has been acted on by the user, its final state must be communicated back the coordinator that instantiated it.</p>
+        <p>All navigation decisions must originate from the view model. Views react to commands like .push, .pop, or .replace, but never push or pop themselves. This keeps the flow predictable and makes testing simple: you can verify navigation decisions without presenting any UI.</p>
+        <h3>9. Protocol-Driven Screen Reuse</h3>
+        <p>Screens communicate via protocols rather than knowing about the coordinator directly.</p>
+        <ul>
+          <li>Each screen gets a lightweight protocol exposing only the methods it needs.</li>
+          <li>The child’s ViewModel retains a reference to the coordinator and the coordinator implements the protocol.</li>
+          <li>This decouples the screen from the flow, making it reusable and easier to maintain.</li>
+          <li>The same screen can be reused in multiple flows without modification.</li>
+        </ul>
+        <h3>10. Reusability</h3>
+        <p>TODO: place this: This small scope combined with the use of the reusable NavigationViewModel makes it as easy as possible to understand and modify the flow in the future.</p>
+        <hr />
+        <h2>Concrete Example: Login Flow</h2>
+        <p>Here is an example of a real-world login flow. It makes use of a reusable coordinator for its implementation which we will discuss later.</p>
+        <h3>Coordinator View</h3>
+        <pre><code class="language-swift">struct LoginFlowCoordinator: View {
+    @StateObject private var viewModel: LoginFlowCoordinatorViewModel
+
+    init(coordinator: LoginFlowCoordinatorCoordinator? = nil) {
+        viewModel = StateObject(wrappedValue: .init(coordinator: coordinator))
+    }
+
+    var body: some View {
+        NavigatingCoordinatorView(viewModel: viewModel) { route, coordinator in
+            switch route {
+            case .login: LoginScreen(coordinator: coordinator)
+            case .createAccount: 
+                CreateAccountScreen(coordinator: coordinator)
+            case let .emailVerification(email, requestId): 
+                EmailVerificationScreen(email: email, requestId: requestId, coordinator: coordinator)
+            case .getPassword: GetPasswordScreen(coordinator: coordinator)
+            case .welcome: WelcomeSplashScreen(coordinator: coordinator)
+            }
+        }
+    }
+}
+</code></pre>
+        <h4>Key points</h4>
+        <ul>
+          <li>The LoginFlowCoordinatorViewModel is a subclass of the CoordinatorViewModel as seen below.</li>
+          <li>The LoginFlowCoordinatorCoordinator is the parent coordinator of the LoginFlowCoordinator - every child screen has a coordinator unless it is the root coordinator</li>
+          <li>NavigatingCoordinatorView takes one parameter: a @ViewBuilder that can build the screens for each of the Routes in the LoginFlowCoordinatorViewModel</li>
+          <li>Each screen receives a protocol-based coordinator, allowing them to be reused in other flows without modification.</li>
+          <li>None of the Screens has knowledge of any other Screen</li>
+        </ul>
+        <h3>Coordinator View Model</h3>
+        <pre><code class="language-swift">class LoginFlowCoordinatorViewModel: NavigatingCoordinatorViewModel&lt;LoginFlowCoordinatorViewModel.Route&gt;,
+    LoginCoordinator,
+    CreateAccountCoordinator,
+    EmailVerificationCoordinator,
+    GetPasswordCoordinator,
+    WelcomeCoordinator {
+    enum Route: Hashable {
+        case login
+        case createAccount
+        case emailVerification(email: String, requestId: String)
+        case getPassword
+        case welcome
+    }
+
+    private weak var coordinator: LoginFlowCoordinatorCoordinator?
+
+    init(coordinator: LoginFlowCoordinatorCoordinator?) {
+        super.init(initialRoute: .login)
+        self.coordinator = coordinator
+    }
+      
+    // Login
+      
+    func createAccountRequested() { 
+      command = .push(.createAccount) 
+    }
+      
+    func loginCompleted() {
+        command = .replace(.welcome)
+    }
+
+    // CreateAccount
+  
+    func emailVerificationRequested(email: String, requestId: String) 
+    { 
+        command = .push(.emailVerification(email: email, requestId: requestId)) 
+    }
+      
+    // EmailVerification 
+  
+    func emailVerified() { 
+      command = .push(.confirmPassword) 
+    }
+      
+    // GetPassword
+  
+    func passwordCompleted() {
+      coordinator?.accountCreated() 
+    }
+      
+    // Welcome
+  
+    func welcomeCompleted() { 
+      coordinator?.loginCompleted() 
+    }
+  }
+</code></pre>
+        <h4>Key points</h4>
+        <ul>
+          <li>The initial screen is selected by the initialRoute enum in the view model, making it easy to start the flow at different points if needed.</li>
+          <li>The view model sub-class drives navigation by publishing commands operating on routes. The commands are dependent on the requests from the child ViewModels.</li>
+          <li>As mentioned, the LoginFlowCoordinatorCoordinator is the parent coordinator of the LoginFlowCoordinator</li>
+          <li>All navigation is driven by the view model, not the views. Views remain reusable and testable.</li>
+        </ul>
+        <h3>Why This Works</h3>
+        <ol>
+          <li>All navigation decisions are view model-driven — views simply react.</li>
+          <li>Screens are reusable across flows because they only depend on a protocol (e.g., WelcomeCoordinator) rather than a concrete flow.</li>
+          <li>The Route enum ensures type-safe navigation, reducing runtime errors.</li>
+          <li>Navigation logic is centralized and predictable, making debugging, testing, and maintenance straightforward.</li>
+        </ol>
+        <h2>Reusable Coordinator Abstraction</h2>
+        <h3>Coordinator View</h3>
+        <pre><code class="language-swift">struct NavigatingCoordinatorView&lt;Route: Hashable, CoordinatorViewModel: NavigatingCoordinatorViewModel&lt;Route&gt;, Content: View&gt;: View {
+    @ObservedObject var viewModel: CoordinatorViewModel
+    let destinationView: (Route, CoordinatorViewModel?) -&gt; Content
+
+    init(@ObservedObject viewModel: CoordinatorViewModel,
+         @ViewBuilder destinationView: @escaping (Route, CoordinatorViewModel?) -&gt; Content
+    ) {
+        self.viewModel = viewModel
+        self.destinationView = destinationView
+    }
+
+    @State private var navigationPath = NavigationPath()
+
+    var body: some View {
+        NavigationStack(path: $navigationPath) {
+            destinationView(viewModel.initialRoute, viewModel)
+                .navigationDestination(for: Route.self) { route in
+                    destinationView(route, viewModel)
+                }
+        }
+        .onReceive(viewModel.$command) { command in
+            switch command {
+            case let .push(screen, animated):
+                applyTransaction(animated: animated) { 
+                    navigationPath.append(screen) 
+                }
+            case let .replace(screen):
+                navigationPath.removeLast()
+                navigationPath.append(screen)
+            case let .pop(count, animated):
+                applyTransaction(animated: animated) { 
+                    navigationPath.removeLast(count) 
+                }
+            case .popToHome:
+                navigationPath.removeLast(navigationPath.count)
+            case .none:
+                break
+            }
+        }
+    }
+
+    private func applyTransaction(animated: Bool, _ changes: () -&gt; Void) {
+        var transaction = Transaction()
+        transaction.disablesAnimations = !animated
+        withTransaction(transaction) { changes() }
+    }
+}
+</code></pre>
+        <h4>Key Points</h4>
+        <ul>
+          <li>The NavigatingCoordinatorView interprets the commands received from the ViewModel.</li>
+          <li>The navigationPath is private to the view and is not exposed to the navigator’s children</li>
+        </ul>
+        <h4>View Model-Driven Setup</h4>
+        <ul>
+          <li>This pattern is <strong>intended to be used by the view models of the child screens</strong> that the coordinator instantiates.</li>
+          <li>Views themselves cannot hold references to objects (except via @StateObject) in a way that guarantees controlled lifecycle management.</li>
+          <li>Using the view model ensures that navigation is driven correctly and prevents misuse where a view might accidentally instantiate or control the coordinator directly.</li>
+        </ul>
+        <h4>Other notes</h4>
+        <p>Notice the navigationPath is private to the view and is not exposed to the navigator’s children. This is because the navigationPath is view State.</p>
+        <p>In many projects, I have seen the navigationPath exposed to and manipulated directly by the child screens. This paradigm makes it the responsibility of the children to know the details of navigation and create a hard dependency between the child screens and the navigator; making it extremely hard to reuse a screen in another flow or to add screens to an existing flow.</p>
+        <h3>Coordinator View Model</h3>
+        <pre><code class="language-swift">class NavigatingCoordinatorViewModel&lt;Route: Hashable&gt;: ObservableObject {
+    enum Command: Equatable {
+        case push(Route, animated: Bool = true)
+        case pop(Int = 1, animated: Bool = true)
+        case popToHome
+        case replace(Route)
+    }
+
+    @Published private(set) var initialRoute: Route
+    @Published var command: Command?
+
+    init(initialRoute: Route) {
+        self.initialRoute = initialRoute
+    }
+
+    func popToHome() { command = .popToHome }
+    func backRequested() { command = .pop() }
+}
+</code></pre>
+        <h4>Key points</h4>
+        <ul>
+          <li>This generic view model drives navigation by publishing commands.</li>
+          <li>Views listen for these commands and update the NavigationStack accordingly — keeping the UI reactive and declarative.</li>
+        </ul>
+        <p>####Other notes</p>
+        <ul>
+          <li>The initializer initialRoute parameter enum allows subclasses to configure the first screen in the flow. This allows subclasses to select which screen appears first in the flow, making it flexible for different use cases or entry points. The initializer of the coordinator view model takes a Route enum defined in the ViewModel’s subclass as the initialRoute.</li>
+          <li>The ViewModel exposes commands to the Coordinator view, ensuring all navigation decisions come from a centralized, predictable source rather than the views themselves.</li>
+        </ul>
+        <hr />
+        <h2>Conclusion</h2>
+        <p>By combining a generic coordinator view, a view model-driven command system, and protocol-based screen communication, we can build:</p>
+        <ul>
+          <li>Fully reusable screens</li>
+          <li>Predictable, testable flows</li>
+          <li>Clean separation of UI, business logic, and navigation This approach scales beautifully as SwiftUI apps grow and ensures our flows remain maintainable, even across multiple complex user journeys.</li>
+        </ul>
+        <p></p>
+      </div>
+    </div>
+    <div class="vstack">
+      <div style="height: 30px"></div>
+      <div class="mb-0 align-self-center hstack gap-3" style="width: 90.0%">
+        <p class="m-0 mb-0 align-self-center" style="color: rgb(44 202 189 / 100%)">Lyle Resnick</p>
+        <div class="ms-auto"></div>
+        <p class="mb-0 align-self-center" onmouseover="this.unhoveredStyle = this.style.cssText;
+this.style.textDecoration = 'underline'" onmouseout="this.style.cssText = this.unhoveredStyle;"><span>📧 </span><a href="mailto:lyle@cellarpoint.com" style="color: rgb(44 202 189 / 100%); text-decoration: none">Email me</a></p>
+        <div class="ms-auto"></div>
+        <p class="mb-0 align-self-center" onmouseover="this.unhoveredStyle = this.style.cssText;
+this.style.textDecoration = 'underline'" onmouseout="this.style.cssText = this.unhoveredStyle;"><img src="/images/github-mark.svg" alt="github mark" style="height: 14px" /><span> </span><a href="https://github.com/lyleresnick" style="margin: 0px; color: rgb(44 202 189 / 100%); text-decoration: none">Github</a></p>
+      </div>
+      <div style="height: 20px"></div>
+    </div>
+    <script src="/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/syntax-highlighting.js"></script>
+    <script src="/js/ignite-core.js"></script>
+  </body>
+</html>
