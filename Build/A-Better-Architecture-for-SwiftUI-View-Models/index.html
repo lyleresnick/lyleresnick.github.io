@@ -3,17 +3,17 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="Tags" />
+    <meta name="description" content="An Idea from Flutter" />
     <meta name="author" content="Lyle Resnick" />
     <meta name="generator" content="Ignite v0.6.0" />
-    <title>Tags – Lyle Resnick</title>
+    <title>A Better architecture for SwiftUI view models – Lyle Resnick</title>
     <link href="/css/bootstrap.min.css" rel="stylesheet" />
     <link href="/css/prism-xcode-dark.css" rel="stylesheet" data-highlight-theme="xcode-dark" />
     <link href="/css/prism-xcode-light.css" rel="stylesheet" data-highlight-theme="xcode-light" />
     <link href="/css/prism-plugins.css" rel="stylesheet" />
     <link href="/css/bootstrap-icons.min.css" rel="stylesheet" />
     <link href="/css/ignite-core.min.css" rel="stylesheet" />
-    <link href="https://lyleresnick.com/tags" rel="canonical" />
+    <link href="https://lyleresnick.com/A-Better-Architecture-for-SwiftUI-View-Models" rel="canonical" />
     <script>(function() {
     function getThemePreference() {
         return localStorage.getItem('custom-theme') || 'auto';
@@ -59,11 +59,11 @@
 })();
 </script>
     <meta property="og:site_name" content="Hello World" />
-    <meta property="og:title" content="Tags" />
-    <meta name="twitter:title" content="Tags" />
-    <meta property="og:description" content="Tags" />
-    <meta name="twitter:description" content="Tags" />
-    <meta property="og:url" content="https://lyleresnick.com/tags" />
+    <meta property="og:title" content="A Better architecture for SwiftUI view models" />
+    <meta name="twitter:title" content="A Better architecture for SwiftUI view models" />
+    <meta property="og:description" content="An Idea from Flutter" />
+    <meta name="twitter:description" content="An Idea from Flutter" />
+    <meta property="og:url" content="https://lyleresnick.com/A-Better-Architecture-for-SwiftUI-View-Models" />
     <meta name="twitter:domain" content="lyleresnick.com" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:dnt" content="on" />
@@ -88,16 +88,23 @@
     <div style="height: 54px"></div>
     <div style="display: flex; overflow: hidden; align-items: center; justify-content: center">
       <div class="ig-main-content" style="width: 95.0%; align-self: center; justify-self: center">
-        <div style="height: 30px"></div>
-        <h1>All Tags</h1>
-        <ul>
-          <p><a href="/A-Better-Architecture-for-SwiftUI-View-Models" style="color: rgb(44 202 189 / 100%)">A Better architecture for SwiftUI view models</a></p>
-          <p><a href="/Routing-in-VIPER-Architecture" style="color: rgb(44 202 189 / 100%)">Routing in VIPER Architecture</a></p>
-          <p><a href="/Solving-a-Complex-UITableView-Using-the-VIPER-Architecture" style="color: rgb(44 202 189 / 100%)">Solving a Complex UITableView Using the VIPER Architecture</a></p>
-          <p><a href="/A-Crash-Course-on-the-VIPER-Architecture" style="color: rgb(44 202 189 / 100%)">A Crash Course on the VIPER Architecture</a></p>
-          <p><a href="/Solving-a-Complex-UITableView-Even-More-Swiftly" style="color: rgb(44 202 189 / 100%)">Solving a Complex UITableView Even More Swiftly</a></p>
-          <p><a href="/Solving-a-Complex-UITableView-using-Swift" style="color: rgb(44 202 189 / 100%)">Solving a Complex UITableView using Swift</a></p>
-        </ul>
+        <h1 class="mt-4" style="font-weight: 500; width: 90.0%">A Better architecture for SwiftUI view models</h1>
+        <p style="font-weight: 500; width: 90.0%">Jan 2, 2026</p>
+        <p style="font-weight: 500; width: 90.0%">398 words; 2 minutes to read.</p>
+        <p style="width: 90.0%"></p>
+        <p><strong>An Idea from Flutter</strong></p>
+        <p>From experience with flutter blocs<br />each vm has a single read only protected (set) @Published property, say called <em>output</em>,<br />Output is an enum of panel related states like normal, error, loading, partN, none, etc<br />All other properties are protected</p>
+        <p><strong>Use an emitter wrapper function</strong></p>
+        <p>Use an normal emitter wrapper function to emit the normal state to the output</p>
+        <p>This function copies the private state to the normal formatted output,<br />To output temporary views like message , wait indicators, overlays, use optional or Boolean and set them as parameters to the formatted output - do not add them to the state enum<br />also can do the same for errors<br />(Better yet make the private state be the same enum type and use <em>copyWith</em> for changes)</p>
+        <p>In most cases the main enum state can contain the substates representing the state of Subsections<br />The main state determines the overall page state so the main presentation of interest must succeed or an overarching error is shown</p>
+        <p><strong>Optimizing for performance or reuse</strong></p>
+        <p>If there are performance requirements due to very large screen layouts or other requirements like reusable views that have dedicated sub vms<br />Sub view models can be used to represent subsections of the screen; each one implemented like a main vm having one output<br />Subviewmodels can be delivered as internal properties of the main view model<br />The main view model instantiates the sub view models</p>
+        <p>**Why this is better **</p>
+        <p>Using the enum gets rid of bugs caused by undefined state - is using null or having arrays or strings being set to empty really a good idea when you can just remove the uncertainty with an enum?</p>
+        <p>Handling temporary views is way simpler because the show or no show status for these views is, unless explicitly specified to be shown, always automatically reset to no show at each emit</p>
+        <p>Way easier to test since in the simplest case all data is in a single enum that changes over time<br />It is much simpler to make a protocol for mocking the vm that has one property and reuses the enum from the non-mocked vm</p>
+        <p></p>
       </div>
     </div>
     <div class="vstack">
