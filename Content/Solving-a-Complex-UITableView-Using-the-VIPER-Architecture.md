@@ -1,6 +1,7 @@
 ---
 layout: BlogPost
 date: 2017-09-03 12:00
+tags: VIPER,  Complex TableView
 ---
 
 # Solving a Complex UITableView Using the VIPER Architecture

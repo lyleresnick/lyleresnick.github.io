@@ -2,53 +2,55 @@ import Foundation
 import Ignite
 
 struct Blog: StaticPage {
+    @Environment(\.articles) var articles
     var title = "Blog"
     
-    func body(context: PublishingContext) -> [BlockElement] {
+    var body: some HTML {
         Text("Blog")
             .titleStyle()
         
-        Section {
-            for content in context.allContent
-                .sorted(by: {
-                    $0.date > $1.date
-                }) {
-                ContentPreview(for: content)
-                    .contentPreviewStyle(MyBlogPreview())
-                    .margin(.top, 20)
-            }
+        
+        Grid(articles.all
+            .sorted(by: {
+                $0.date > $1.date
+            })
+             , alignment: .top/*, spacing: .none*/) { article in
+            ArticlePreview(for: article)
+                .articlePreviewStyle(MyBlogPreview())
+                .width(6)
+                .margin(.top, 20)
         }
-        .columns(2)
-    
     }
-    
 }
 
-struct MyBlogPreview: ContentPreviewStyle {
-    func body(content: Content, context: PublishingContext) -> any BlockElement {
+struct MyBlogPreview: @MainActor ArticlePreviewStyle {
+    @MainActor
+    func body(content: Article) -> any HTML {
         Card(imageName: content.image) {
             Text(content.description)
                 .margin(.bottom, .none)
         } header: {
             Text {
                 Link(content)
-                .foregroundStyle(MyTheme.brandColor)
-                .textDecoration(.none)
-                .hoverEffect { x in
-                    x.textDecoration(.underline)
-                }
-
+                    .foregroundStyle(.brandColor)
+                    .textDecoration(.none)
             }
-            .font(.title2)
+            .hoverEffect { x in
+                x.textDecoration(.underline)
+            }
+            .font(.title4)
         } footer: {
-            let tagLinks = content.tagLinks(in: context)
+            let tagLinks = content.tagLinks()
 
-            if tagLinks.isEmpty == false {
-                Group {
-                    tagLinks
+            if let tagLinks {
+                Section {
+                    ForEach(tagLinks) { link in
+                        link
+                    }
                 }
-                .style("margin-top: -5px")
+                .margin(.top, -5)
             }
+
         }
     }
     

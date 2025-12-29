@@ -1,6 +1,7 @@
 ---
 layout: BlogPost
 date: 2017-06-29 12:00
+tags: Complex TableView
 ---
 
 # Solving a Complex UITableView Even More Swiftly

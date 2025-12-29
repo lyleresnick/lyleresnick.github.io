@@ -4,7 +4,7 @@ import Ignite
 struct Home: StaticPage {
     var title = "Home"
 
-    func body(context: PublishingContext) -> [BlockElement] {
+    var body: some HTML {
         Text("I'm Lyle Resnick")
             .titleStyle()
         
@@ -41,9 +41,9 @@ In web and desktop development, I have acted as development lead and developer o
 
 
 extension Text {
-    func titleStyle()  -> Self {
+    func titleStyle() -> some HTML {
         self
-            .font(.title1)
+            .font(.title2)
             .fontWeight(.light)
             .margin(.top, .large)
     }

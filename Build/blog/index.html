@@ -1,8 +1,191 @@
-<!doctype html><html lang="en" data-bs-theme="light"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="author" content="Lyle Resnick"><meta name="generator" content="Ignite v0.2.1"><title>Blog – Lyle Resnick</title><link href="/css/bootstrap.min.css" rel="stylesheet"><link href="/css/prism-default-dark.css" rel="stylesheet"><link href="/css/bootstrap-icons.min.css" rel="stylesheet"><link href="https://lyleresnick.com/blog" rel="canonical"><meta property="og:site_name" content="Hello World"><meta property="og:title" content="Blog"><meta property="twitter:title" content="Blog"><meta property="og:url" content="https://lyleresnick.com/blog"><meta name="twitter:domain" content="lyleresnick.com"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:dnt" content="on"></head><body><div class="col-sm-10 mx-auto"><header><nav class="fixed-top navbar navbar-expand-md" style="background-color: #2ccabd" data-bs-theme="dark"><div class="container-fluid col"><a href="/" class="navbar-brand">Lyle Resnick</a><button type="button" class="navbar-toggler btn" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button><div id="navbarCollapse" class="collapse navbar-collapse"><ul class="navbar-nav mb-2 mb-md-0 col justify-content-end"><li class="nav-item"><a href="/blog" class="nav-link active" aria-current="page">Blog</a></li><li class="nav-item"><a href="/resume" class="nav-link">Resume</a></li></ul></div></div></nav></header><div class="mx-auto" style="height: 54px"></div><h1 class="mt-4" style="font-weight: 300">Blog</h1><div class="row row-cols-1 row-cols-md-2"><div class="col"><div class="card" style="margin-top: 20px"><div class="card-header"><h2><a href="/Routing-in-VIPER-Architecture" style="color: #2ccabd; text-decoration: none" onmouseover="this.unhoveredStyle = this.style.cssText;
-this.style.textDecoration = 'underline'" onmouseout="this.style.cssText = this.unhoveredStyle;">Routing in VIPER Architecture</a></h2></div><div class="card-body"><p class="mb-0 card-text">The primary function of a Router is to manage the display of a group of scenes, implemented by ViewControllers, using a pattern such as stacking, direct access or serial access.</p></div><div></div></div></div><div class="col"><div class="card" style="margin-top: 20px"><div class="card-header"><h2><a href="/Solving-a-Complex-UITableView-Using-the-VIPER-Architecture" style="color: #2ccabd; text-decoration: none" onmouseover="this.unhoveredStyle = this.style.cssText;
-this.style.textDecoration = 'underline'" onmouseout="this.style.cssText = this.unhoveredStyle;">Solving a Complex UITableView Using the VIPER Architecture</a></h2></div><div class="card-body"><p class="mb-0 card-text">VIPER is an application architecture - a set of classes that work together to structure a solution.</p></div><div></div></div></div><div class="col"><div class="card" style="margin-top: 20px"><div class="card-header"><h2><a href="/A-Crash-Course-on-the-VIPER-Architecture" style="color: #2ccabd; text-decoration: none" onmouseover="this.unhoveredStyle = this.style.cssText;
-this.style.textDecoration = 'underline'" onmouseout="this.style.cssText = this.unhoveredStyle;">A Crash Course on the VIPER Architecture</a></h2></div><div class="card-body"><p class="mb-0 card-text">I’ve been exploring and using the VIPER architecture now for about 2 years. I think it is a really sensible solution for organizing and reducing the size of a Massive ViewController.</p></div><div></div></div></div><div class="col"><div class="card" style="margin-top: 20px"><div class="card-header"><h2><a href="/Solving-a-Complex-UITableView-Even-More-Swiftly" style="color: #2ccabd; text-decoration: none" onmouseover="this.unhoveredStyle = this.style.cssText;
-this.style.textDecoration = 'underline'" onmouseout="this.style.cssText = this.unhoveredStyle;">Solving a Complex UITableView Even More Swiftly</a></h2></div><div class="card-body"><p class="mb-0 card-text">In Solving a Complex UITableView using Swift, we reviewed a solution for solving a complex UITableView. In this article, we will improve the solution by refactoring the code in three ways:</p></div><div></div></div></div><div class="col"><div class="card" style="margin-top: 20px"><div class="card-header"><h2><a href="/Solving-a-Complex-UITableView-using-Swift" style="color: #2ccabd; text-decoration: none" onmouseover="this.unhoveredStyle = this.style.cssText;
-this.style.textDecoration = 'underline'" onmouseout="this.style.cssText = this.unhoveredStyle;">Solving a Complex UITableView using Swift</a></h2></div><div class="card-body"><p class="mb-0 card-text">In this article we will discuss a technique for solving a complex UITableView. By complex, I mean a tableView that will display many more row types than exist in the source data set - in this case seven.  At the same time, we will discuss a simple technique to reduce the size of the UIViewController that owns the tableView.</p></div><div></div></div></div></div><div class="mx-auto" style="height: 30px"></div><div class="row"><div class="col"><p style="margin: 0px; color: #2ccabd">Lyle Resnick</p></div><div class="col"><p class="text-center"><span>&#128231 </span><a href="mailto:lyle@cellarpoint.com" style="color: #2ccabd; text-decoration: none" onmouseover="this.unhoveredStyle = this.style.cssText;
-this.style.textDecoration = 'underline'" onmouseout="this.style.cssText = this.unhoveredStyle;">Email me</a></p></div><div class="col"><p class="text-end"><img src="/images/github-mark.svg"  class="mx-auto" style="height: 14px"alt="github mark"/><span> </span><a href="https://github.com/lyleresnick" style="margin: 0px; color: #2ccabd; text-decoration: none" onmouseover="this.unhoveredStyle = this.style.cssText;
-this.style.textDecoration = 'underline'" onmouseout="this.style.cssText = this.unhoveredStyle;">Github</a></p></div></div></div><script src="/js/bootstrap.bundle.min.js"></script><script src="/js/syntax-highlighting.js"></script></body></html>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="author" content="Lyle Resnick" />
+    <meta name="generator" content="Ignite v0.6.0" />
+    <title>Blog – Lyle Resnick</title>
+    <link href="/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="/css/prism-xcode-dark.css" rel="stylesheet" data-highlight-theme="xcode-dark" />
+    <link href="/css/prism-xcode-light.css" rel="stylesheet" data-highlight-theme="xcode-light" />
+    <link href="/css/prism-plugins.css" rel="stylesheet" />
+    <link href="/css/bootstrap-icons.min.css" rel="stylesheet" />
+    <link href="/css/ignite-core.min.css" rel="stylesheet" />
+    <link href="https://lyleresnick.com/blog" rel="canonical" />
+    <script>(function() {
+    function getThemePreference() {
+        return localStorage.getItem('custom-theme') || 'auto';
+    }
+
+    function applyTheme(themeID) {
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const lightThemeID = document.documentElement.getAttribute('data-light-theme') || 'light';
+        const darkThemeID = document.documentElement.getAttribute('data-dark-theme') || 'dark';
+        const actualThemeID = themeID === 'auto' ? (prefersDark ? darkThemeID : lightThemeID) : themeID;
+
+        document.documentElement.setAttribute('data-bs-theme', actualThemeID);
+        document.documentElement.setAttribute('data-theme-state', themeID);
+    }
+
+    function applySyntaxTheme() {
+        const syntaxTheme = getComputedStyle(document.documentElement)
+            .getPropertyValue('--syntax-highlight-theme').trim().replace(/"/g, '');
+
+        if (!syntaxTheme) return;
+
+        document.querySelectorAll('link[data-highlight-theme]').forEach(link => {
+            link.setAttribute('disabled', 'disabled');
+        });
+
+        const themeLink = document.querySelector(`link[data-highlight-theme="${syntaxTheme}"]`);
+        if (themeLink) {
+            themeLink.removeAttribute('disabled');
+        }
+    }
+
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+        const currentTheme = getThemePreference();
+        if (currentTheme === 'auto') {
+            applyTheme('auto');
+            applySyntaxTheme();
+        }
+    });
+
+    const savedTheme = getThemePreference();
+    applyTheme(savedTheme);
+    applySyntaxTheme();
+})();
+</script>
+    <meta property="og:site_name" content="Hello World" />
+    <meta property="og:title" content="Blog" />
+    <meta name="twitter:title" content="Blog" />
+    <meta property="og:url" content="https://lyleresnick.com/blog" />
+    <meta name="twitter:domain" content="lyleresnick.com" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:dnt" content="on" />
+  </head>
+  <body class="container">
+    <header>
+      <nav class="fixed-top navbar navbar-expand-md" style="background-color: rgb(44 202 189 / 100%)" data-bs-theme="dark">
+        <div class="container flex-wrap flex-lg-nowrap">
+          <div class="me-2 me-md-auto">
+            <a href="/" class="d-inline-flex align-items-center navbar-brand">Lyle Resnick</a>
+          </div>
+          <button type="button" class="navbar-toggler btn" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+          <div id="navbarCollapse" class="collapse navbar-collapse">
+            <ul class="navbar-nav mb-2 mb-md-0 col justify-content-end">
+              <li class="nav-item"><a href="/blog" class="nav-link active text-nowrap" aria-current="page">Blog</a></li>
+              <li class="nav-item"><a href="/resume" class="nav-link text-nowrap">Resume</a></li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+    </header>
+    <div style="height: 54px"></div>
+    <div style="display: flex; overflow: hidden; align-items: center; justify-content: center">
+      <div class="ig-main-content" style="width: 95.0%; align-self: center; justify-self: center">
+        <h2 class="mt-4" style="font-weight: 300">Blog</h2>
+        <div class="row justify-content-center">
+          <div class="col-md-6 align-self-start g-3">
+            <div class="card" style="margin-top: 20px">
+              <div class="card-header">
+                <h4 onmouseover="this.unhoveredStyle = this.style.cssText;
+this.style.textDecoration = 'underline'" onmouseout="this.style.cssText = this.unhoveredStyle;"><a href="/Routing-in-VIPER-Architecture" style="color: rgb(44 202 189 / 100%); text-decoration: none">Routing in VIPER Architecture</a></h4>
+              </div>
+              <div class="card-body">
+                <p class="mb-0 card-text">The primary function of a Router is to manage the display of a group of scenes, implemented by ViewControllers, using a pattern such as stacking, direct access or serial access.</p>
+              </div>
+              <div class="card-footer text-body-secondary">
+                <div style="margin-top: -5px">
+                  <a rel="tag" href="/tags/v-i-p-e-r"><span class="badge text-bg-primary rounded-pill">VIPER</span></a>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6 align-self-start g-3">
+            <div class="card" style="margin-top: 20px">
+              <div class="card-header">
+                <h4 onmouseover="this.unhoveredStyle = this.style.cssText;
+this.style.textDecoration = 'underline'" onmouseout="this.style.cssText = this.unhoveredStyle;"><a href="/Solving-a-Complex-UITableView-Using-the-VIPER-Architecture" style="color: rgb(44 202 189 / 100%); text-decoration: none">Solving a Complex UITableView Using the VIPER Architecture</a></h4>
+              </div>
+              <div class="card-body">
+                <p class="mb-0 card-text">VIPER is an application architecture - a set of classes that work together to structure a solution.</p>
+              </div>
+              <div class="card-footer text-body-secondary">
+                <div style="margin-top: -5px">
+                  <a rel="tag" href="/tags/v-i-p-e-r"><span class="badge text-bg-primary rounded-pill">VIPER</span></a>
+                  <a rel="tag" href="/tags/complex-table-view"><span class="badge text-bg-primary rounded-pill">Complex TableView</span></a>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6 align-self-start g-3">
+            <div class="card" style="margin-top: 20px">
+              <div class="card-header">
+                <h4 onmouseover="this.unhoveredStyle = this.style.cssText;
+this.style.textDecoration = 'underline'" onmouseout="this.style.cssText = this.unhoveredStyle;"><a href="/A-Crash-Course-on-the-VIPER-Architecture" style="color: rgb(44 202 189 / 100%); text-decoration: none">A Crash Course on the VIPER Architecture</a></h4>
+              </div>
+              <div class="card-body">
+                <p class="mb-0 card-text">I’ve been exploring and using the VIPER architecture now for about 2 years. I think it is a really sensible solution for organizing and reducing the size of a Massive ViewController.</p>
+              </div>
+              <div class="card-footer text-body-secondary">
+                <div style="margin-top: -5px">
+                  <a rel="tag" href="/tags/v-i-p-e-r"><span class="badge text-bg-primary rounded-pill">VIPER</span></a>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6 align-self-start g-3">
+            <div class="card" style="margin-top: 20px">
+              <div class="card-header">
+                <h4 onmouseover="this.unhoveredStyle = this.style.cssText;
+this.style.textDecoration = 'underline'" onmouseout="this.style.cssText = this.unhoveredStyle;"><a href="/Solving-a-Complex-UITableView-Even-More-Swiftly" style="color: rgb(44 202 189 / 100%); text-decoration: none">Solving a Complex UITableView Even More Swiftly</a></h4>
+              </div>
+              <div class="card-body">
+                <p class="mb-0 card-text">In Solving a Complex UITableView using Swift, we reviewed a solution for solving a complex UITableView. In this article, we will improve the solution by refactoring the code in three ways:</p>
+              </div>
+              <div class="card-footer text-body-secondary">
+                <div style="margin-top: -5px">
+                  <a rel="tag" href="/tags/complex-table-view"><span class="badge text-bg-primary rounded-pill">Complex TableView</span></a>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6 align-self-start g-3">
+            <div class="card" style="margin-top: 20px">
+              <div class="card-header">
+                <h4 onmouseover="this.unhoveredStyle = this.style.cssText;
+this.style.textDecoration = 'underline'" onmouseout="this.style.cssText = this.unhoveredStyle;"><a href="/Solving-a-Complex-UITableView-using-Swift" style="color: rgb(44 202 189 / 100%); text-decoration: none">Solving a Complex UITableView using Swift</a></h4>
+              </div>
+              <div class="card-body">
+                <p class="mb-0 card-text">In this article we will discuss a technique for solving a complex UITableView. By complex, I mean a tableView that will display many more row types than exist in the source data set - in this case seven. At the same time, we will discuss a simple technique to reduce the size of the UIViewController that owns the tableView.</p>
+              </div>
+              <div class="card-footer text-body-secondary">
+                <div style="margin-top: -5px">
+                  <a rel="tag" href="/tags/complex-table-view"><span class="badge text-bg-primary rounded-pill">Complex TableView</span></a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="vstack">
+      <div style="height: 30px"></div>
+      <div class="mb-0 align-self-center hstack gap-3" style="width: 90.0%">
+        <p class="m-0 mb-0 align-self-center" style="color: rgb(44 202 189 / 100%)">Lyle Resnick</p>
+        <div class="ms-auto"></div>
+        <p class="mb-0 align-self-center" onmouseover="this.unhoveredStyle = this.style.cssText;
+this.style.textDecoration = 'underline'" onmouseout="this.style.cssText = this.unhoveredStyle;"><span>📧 </span><a href="mailto:lyle@cellarpoint.com" style="color: rgb(44 202 189 / 100%); text-decoration: none">Email me</a></p>
+        <div class="ms-auto"></div>
+        <p class="mb-0 align-self-center" onmouseover="this.unhoveredStyle = this.style.cssText;
+this.style.textDecoration = 'underline'" onmouseout="this.style.cssText = this.unhoveredStyle;"><img src="/images/github-mark.svg" alt="github mark" style="height: 14px" /><span> </span><a href="https://github.com/lyleresnick" style="margin: 0px; color: rgb(44 202 189 / 100%); text-decoration: none">Github</a></p>
+      </div>
+      <div style="height: 20px"></div>
+    </div>
+    <script src="/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/syntax-highlighting.js"></script>
+    <script src="/js/ignite-core.js"></script>
+  </body>
+</html>

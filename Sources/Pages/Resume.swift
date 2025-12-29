@@ -10,13 +10,15 @@ struct Job: Decodable {
 }
 
 struct Resume: StaticPage {
+    @Environment(\.decode) var decode
+
     var title = "Resume"
 
-    func body(context: PublishingContext) -> [BlockElement] {
+    var body: some HTML {
         Text("My Resume")
             .titleStyle()
         
-        if let jobs = context.decode(resource: "cv.json", as: [Job].self) {
+        if let jobs = decode("cv.json", as: [Job].self) {
 //            Group {
                 for job in jobs {
                     Card {
