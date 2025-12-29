@@ -1,6 +1,7 @@
 ---
 layout: BlogPost
 date: 2018-09-19 12:00
+tags: VIPER
 ---
 
 # Routing in VIPER Architecture

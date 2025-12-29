@@ -1,4 +1,118 @@
-<!doctype html><html lang="en" data-bs-theme="light"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="In Solving a Complex UITableView using Swift, we reviewed a solution for solving a complex UITableView. In this article, we will improve the solution by refactoring the code in three ways:"><meta name="author" content="Lyle Resnick"><meta name="generator" content="Ignite v0.2.1"><title>Solving a Complex UITableView Even More Swiftly – Lyle Resnick</title><link href="/css/bootstrap.min.css" rel="stylesheet"><link href="/css/prism-default-dark.css" rel="stylesheet"><link href="/css/bootstrap-icons.min.css" rel="stylesheet"><link href="https://lyleresnick.com/Solving-a-Complex-UITableView-Even-More-Swiftly" rel="canonical"><meta property="og:site_name" content="Hello World"><meta property="og:title" content="Solving a Complex UITableView Even More Swiftly"><meta property="twitter:title" content="Solving a Complex UITableView Even More Swiftly"><meta property="og:description" content="Solving a Complex UITableView Even More Swiftly"><meta name="twitter:description" content="Solving a Complex UITableView Even More Swiftly"><meta property="og:url" content="https://lyleresnick.com/Solving-a-Complex-UITableView-Even-More-Swiftly"><meta name="twitter:domain" content="lyleresnick.com"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:dnt" content="on"></head><body><div class="col-sm-10 mx-auto"><header><nav class="fixed-top navbar navbar-expand-md" style="background-color: #2ccabd" data-bs-theme="dark"><div class="container-fluid col"><a href="/" class="navbar-brand">Lyle Resnick</a><button type="button" class="navbar-toggler btn" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button><div id="navbarCollapse" class="collapse navbar-collapse"><ul class="navbar-nav mb-2 mb-md-0 col justify-content-end"><li class="nav-item"><a href="/blog" class="nav-link">Blog</a></li><li class="nav-item"><a href="/resume" class="nav-link">Resume</a></li></ul></div></div></nav></header><div class="mx-auto" style="height: 54px"></div><div class="mx-auto" style="width: 90%"><h1 class="mt-4" style="font-weight: 500">Solving a Complex UITableView Even More Swiftly</h1><p style="font-weight: 500">Jun 29, 2017</p><p style="font-weight: 500">2310 words; 10 minutes to read.</p><h2>Introduction</h2><p>In <a href="/Solving-a-Complex-UITableView-using-Swift">Solving a Complex UITableView using Swift</a>, we reviewed a solution for solving a complex UITableView. In this article, we will improve the solution by refactoring the code in three ways:</p><ul><li>remove even more responsibilities from the ViewController and distribute them into new or existing classes</li><li>take advantage of a few key Swift features, namely failable enum initializers, enums with associated values, and extensions and</li><li>redistribute the code which converts the input and output data.</li></ul><p>The complete app which demonstrates the result of the refactoring can be found at <a href="https://github.com/lyleresnick/ReportTableDemo"><strong>ReportTableDemo</strong></a>. The original app which we will be refactoring can be found at <a href="https://github.com/lyleresnick/ReportTableAdapterDemo"><strong>ReportTableAdapterDemo</strong></a>.</p><h2>Responsibilities of the ViewController</h2><p>The main responsibility of a viewController is to configure the layout of its associated views and respond  to user interaction with those views. Pretty straightforward.</p><p>In reality, most view controllers end up being a monolithic repository containing all of the code that the view controller depends on. This includes concerns such as:</p><ul><li>data access, local or remote</li><li>data conversion, from source or to display</li><li>data transformation, such as grouping, summarizing or other more complex tasks</li></ul><p>As you may have heard before, this is kind of viewController is known as a <em>Massive ViewController</em>.</p><h2>Introducing the Transformer Class</h2><p>In the last article, the <a href="https://github.com/lyleresnick/ReportTableAdapterDemo/blob/master/ReportTableAdapterDemo/TransactionListViewController.swift"><code>TransactionListViewController</code></a> implemented a function named <code>transformFromTwoSources</code>. The implementation of this function has been moved to the class, <code>TransactionListTwoSourceTransformer</code>.</p><p>The viewController now looks like this:</p><pre><code class="language-swift">import UIKit
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="In Solving a Complex UITableView using Swift, we reviewed a solution for solving a complex UITableView. In this article, we will improve the solution by refactoring the code in three ways:" />
+    <meta name="author" content="Lyle Resnick" />
+    <meta name="generator" content="Ignite v0.6.0" />
+    <title>Solving a Complex UITableView Even More Swiftly – Lyle Resnick</title>
+    <link href="/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="/css/prism-xcode-dark.css" rel="stylesheet" data-highlight-theme="xcode-dark" />
+    <link href="/css/prism-xcode-light.css" rel="stylesheet" data-highlight-theme="xcode-light" />
+    <link href="/css/prism-plugins.css" rel="stylesheet" />
+    <link href="/css/bootstrap-icons.min.css" rel="stylesheet" />
+    <link href="/css/ignite-core.min.css" rel="stylesheet" />
+    <link href="https://lyleresnick.com/Solving-a-Complex-UITableView-Even-More-Swiftly" rel="canonical" />
+    <script>(function() {
+    function getThemePreference() {
+        return localStorage.getItem('custom-theme') || 'auto';
+    }
+
+    function applyTheme(themeID) {
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const lightThemeID = document.documentElement.getAttribute('data-light-theme') || 'light';
+        const darkThemeID = document.documentElement.getAttribute('data-dark-theme') || 'dark';
+        const actualThemeID = themeID === 'auto' ? (prefersDark ? darkThemeID : lightThemeID) : themeID;
+
+        document.documentElement.setAttribute('data-bs-theme', actualThemeID);
+        document.documentElement.setAttribute('data-theme-state', themeID);
+    }
+
+    function applySyntaxTheme() {
+        const syntaxTheme = getComputedStyle(document.documentElement)
+            .getPropertyValue('--syntax-highlight-theme').trim().replace(/"/g, '');
+
+        if (!syntaxTheme) return;
+
+        document.querySelectorAll('link[data-highlight-theme]').forEach(link => {
+            link.setAttribute('disabled', 'disabled');
+        });
+
+        const themeLink = document.querySelector(`link[data-highlight-theme="${syntaxTheme}"]`);
+        if (themeLink) {
+            themeLink.removeAttribute('disabled');
+        }
+    }
+
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+        const currentTheme = getThemePreference();
+        if (currentTheme === 'auto') {
+            applyTheme('auto');
+            applySyntaxTheme();
+        }
+    });
+
+    const savedTheme = getThemePreference();
+    applyTheme(savedTheme);
+    applySyntaxTheme();
+})();
+</script>
+    <meta property="og:site_name" content="Hello World" />
+    <meta property="og:title" content="Solving a Complex UITableView Even More Swiftly" />
+    <meta name="twitter:title" content="Solving a Complex UITableView Even More Swiftly" />
+    <meta property="og:description" content="In Solving a Complex UITableView using Swift, we reviewed a solution for solving a complex UITableView. In this article, we will improve the solution by refactoring the code in three ways:" />
+    <meta name="twitter:description" content="In Solving a Complex UITableView using Swift, we reviewed a solution for solving a complex UITableView. In this article, we will improve the solution by refactoring the code in three ways:" />
+    <meta property="og:url" content="https://lyleresnick.com/Solving-a-Complex-UITableView-Even-More-Swiftly" />
+    <meta name="twitter:domain" content="lyleresnick.com" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:dnt" content="on" />
+  </head>
+  <body class="container">
+    <header>
+      <nav class="fixed-top navbar navbar-expand-md" style="background-color: rgb(44 202 189 / 100%)" data-bs-theme="dark">
+        <div class="container flex-wrap flex-lg-nowrap">
+          <div class="me-2 me-md-auto">
+            <a href="/" class="d-inline-flex align-items-center navbar-brand">Lyle Resnick</a>
+          </div>
+          <button type="button" class="navbar-toggler btn" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+          <div id="navbarCollapse" class="collapse navbar-collapse">
+            <ul class="navbar-nav mb-2 mb-md-0 col justify-content-end">
+              <li class="nav-item"><a href="/blog" class="nav-link text-nowrap">Blog</a></li>
+              <li class="nav-item"><a href="/resume" class="nav-link text-nowrap">Resume</a></li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+    </header>
+    <div style="height: 54px"></div>
+    <div style="display: flex; overflow: hidden; align-items: center; justify-content: center">
+      <div class="ig-main-content" style="width: 95.0%; align-self: center; justify-self: center">
+        <h1 class="mt-4" style="font-weight: 500; width: 90.0%">Solving a Complex UITableView Even More Swiftly</h1>
+        <p style="font-weight: 500; width: 90.0%">Jun 29, 2017</p>
+        <p style="font-weight: 500; width: 90.0%">2310 words; 10 minutes to read.</p>
+        <p style="width: 90.0%"></p>
+        <h2>Introduction</h2>
+        <p>In <a href="/Solving-a-Complex-UITableView-using-Swift">Solving a Complex UITableView using Swift</a>, we reviewed a solution for solving a complex UITableView. In this article, we will improve the solution by refactoring the code in three ways:</p>
+        <ul>
+          <li>remove even more responsibilities from the ViewController and distribute them into new or existing classes</li>
+          <li>take advantage of a few key Swift features, namely failable enum initializers, enums with associated values, and extensions and</li>
+          <li>redistribute the code which converts the input and output data.</li>
+        </ul>
+        <p>The complete app which demonstrates the result of the refactoring can be found at <a href="https://github.com/lyleresnick/ReportTableDemo"><strong>ReportTableDemo</strong></a>. The original app which we will be refactoring can be found at <a href="https://github.com/lyleresnick/ReportTableAdapterDemo"><strong>ReportTableAdapterDemo</strong></a>.</p>
+        <h2>Responsibilities of the ViewController</h2>
+        <p>The main responsibility of a viewController is to configure the layout of its associated views and respond to user interaction with those views. Pretty straightforward.</p>
+        <p>In reality, most view controllers end up being a monolithic repository containing all of the code that the view controller depends on. This includes concerns such as:</p>
+        <ul>
+          <li>data access, local or remote</li>
+          <li>data conversion, from source or to display</li>
+          <li>data transformation, such as grouping, summarizing or other more complex tasks</li>
+        </ul>
+        <p>As you may have heard before, this is kind of viewController is known as a <em>Massive ViewController</em>.</p>
+        <h2>Introducing the Transformer Class</h2>
+        <p>In the last article, the <a href="https://github.com/lyleresnick/ReportTableAdapterDemo/blob/master/ReportTableAdapterDemo/TransactionListViewController.swift"><code>TransactionListViewController</code></a> implemented a function named <code>transformFromTwoSources</code>. The implementation of this function has been moved to the class, <code>TransactionListTwoSourceTransformer</code>.</p>
+        <p>The viewController now looks like this:</p>
+        <pre><code class="language-swift">import UIKit
 
 class TransactionListViewController: UIViewController {
     
@@ -19,12 +133,20 @@ class TransactionListViewController: UIViewController {
         transformer.transform( output: adapter )
     }
 }
-</code></pre><p>You may have noticed that the ViewController just got really small! It is now responsible only for its views and those are set up by Interface Builder. Actually, that is not completely correct - it knows where the data for the Transformer is coming from - that is actually a responsibility which we will talk about in a future post.</p><p>We will look at the <code>TransactionListTwoSourceTransformer</code>, but first, lets take a look at the <code>TransactionModel</code> and <code>TransactionGroup</code> classes.</p><h2>The Models</h2><p>The <code>TransactionGroup</code> enum demonstrates an idiom for representing data whose values are part of a set. An <code>enum</code> can be based on an integer or string type. Every enum based on a raw type automatically generates an <code>init?(rawValue:)</code> initializer to convert a raw value to an internal value.</p><p>The enum rawValue initializer is great a way to check for the validity of externally stored data that actually represents an exclusive set of values such as a set of application states, configuration values, segue identifiers, or any other constant in a set. In this case, we are decoding a transaction type: Authorized or Posted.</p><p>The initializer is <em>failable</em>, so invalid data can be detected early simply by converting it using the initializer. This removes the need to convert data at a later stage of processing, where one would prefer not to be dealing  with exceptions.</p><p>As a bonus, when <code>switch</code> cases are an enumerated type, the Swift compiler will check that the cases are exhaustive. When a new case is added in the future, the code will not compile if the new case is not added to the <code>switch</code>.</p><pre><code class="language-swift">enum TransactionGroup: String {
+</code></pre>
+        <p>You may have noticed that the ViewController just got really small! It is now responsible only for its views and those are set up by Interface Builder. Actually, that is not completely correct - it knows where the data for the Transformer is coming from - that is actually a responsibility which we will talk about in a future post.</p>
+        <p>We will look at the <code>TransactionListTwoSourceTransformer</code>, but first, lets take a look at the <code>TransactionModel</code> and <code>TransactionGroup</code> classes.</p>
+        <h2>The Models</h2>
+        <p>The <code>TransactionGroup</code> enum demonstrates an idiom for representing data whose values are part of a set. An <code>enum</code> can be based on an integer or string type. Every enum based on a raw type automatically generates an <code>init?(rawValue:)</code> initializer to convert a raw value to an internal value.</p>
+        <p>The enum rawValue initializer is great a way to check for the validity of externally stored data that actually represents an exclusive set of values such as a set of application states, configuration values, segue identifiers, or any other constant in a set. In this case, we are decoding a transaction type: Authorized or Posted.</p>
+        <p>The initializer is <em>failable</em>, so invalid data can be detected early simply by converting it using the initializer. This removes the need to convert data at a later stage of processing, where one would prefer not to be dealing with exceptions.</p>
+        <p>As a bonus, when <code>switch</code> cases are an enumerated type, the Swift compiler will check that the cases are exhaustive. When a new case is added in the future, the code will not compile if the new case is not added to the <code>switch</code>.</p>
+        <pre><code class="language-swift">enum TransactionGroup: String {
     
     case authorized = "A"
     case posted = "P"
 
-    func toString() -> String {
+    func toString() -&gt; String {
         switch self {
         case .authorized:
             return "Authorized"
@@ -33,7 +155,18 @@ class TransactionListViewController: UIViewController {
         }
     }
 }
-</code></pre><p>In the original <a href="https://github.com/lyleresnick/ReportTableAdapterDemo/blob/master/ReportTableAdapterDemo/TransactionModel.swift"><code>TransactionModel</code></a>, each data value was stored as a string. Unless a value can be processed as a string, it must be converted to its primitive form. Primitive forms, such as dates, numbers,  URLs, or  enums can be processed naturally.</p><p>In the new <code>TransactionModel</code>, the data is stored in its primitive form. In the previous version, the data was converted in the transformer function.  The conversion function has been moved to the <code>TransactionModel</code> . It is now responsible for all conversions required to change the external representation to the new internal representation.</p><p>The <code>TransactionModel.init</code> processes all of the input strings to primitive types. It converts:</p><ul><li>a group string to a group value</li><li>a date string to a date value</li><li>a debit indicator and an amount string to double values</li></ul><p>Here a conversion error results in fatal error, but alternatively, you might make the init failable or you can get more specific by throwing an error.</p><p>It is not hard to imagine that a  <code>convenience init</code> for this class could be created to take a JSON dictionary as an argument and pass the parsed elements to this <code>init</code>.</p><pre><code class="language-swift">struct TransactionModel {
+</code></pre>
+        <p>In the original <a href="https://github.com/lyleresnick/ReportTableAdapterDemo/blob/master/ReportTableAdapterDemo/TransactionModel.swift"><code>TransactionModel</code></a>, each data value was stored as a string. Unless a value can be processed as a string, it must be converted to its primitive form. Primitive forms, such as dates, numbers, URLs, or enums can be processed naturally.</p>
+        <p>In the new <code>TransactionModel</code>, the data is stored in its primitive form. In the previous version, the data was converted in the transformer function. The conversion function has been moved to the <code>TransactionModel</code> . It is now responsible for all conversions required to change the external representation to the new internal representation.</p>
+        <p>The <code>TransactionModel.init</code> processes all of the input strings to primitive types. It converts:</p>
+        <ul>
+          <li>a group string to a group value</li>
+          <li>a date string to a date value</li>
+          <li>a debit indicator and an amount string to double values</li>
+        </ul>
+        <p>Here a conversion error results in fatal error, but alternatively, you might make the init failable or you can get more specific by throwing an error.</p>
+        <p>It is not hard to imagine that a <code>convenience init</code> for this class could be created to take a JSON dictionary as an argument and pass the parsed elements to this <code>init</code>.</p>
+        <pre><code class="language-swift">struct TransactionModel {
     
     var group: TransactionGroup
     var date: Date
@@ -75,7 +208,19 @@ class TransactionListViewController: UIViewController {
         self.amount = amount
     }
 }
-</code></pre><h2>The Transformer</h2><p>Previously, the data transformation was implemented as a method of the viewController. Here it is implemented as a separate <em>method object</em>.</p><p>Besides encapsulating the code responsible for the transformation, <code>TransactionListTwoSourcesTransformer</code> has a few other significant changes:</p><ul><li>instead of being accessed directly, the data is passed into the class at initialization. This makes it easier to set up tests for the transformer.</li><li>the group types have been encapsulated by the <code>TransactionGroup</code> class.</li><li>responsibility of converting input data to internal format has been moved to the <code>TransactionModel</code> class.</li><li>responsibility of converting data to output format has been moved to the <code>TransactionListAdapter</code>.</li><li>the iterator on the array of transactions has been replaced with an <code>IndexingIterator</code>.</li></ul><p>These changes leave the <code>TransactionListTwoSourceTransformer</code> with one responsibility: convert the primitive data input to primitive output by recognizing the date groupings and exceptions, as well as calculating a total and grand total. This is pretty simple. In a future post we will discuss how the structure of this code was designed.</p><pre><code class="language-swift">class TransactionListTwoSourceTransformer {
+</code></pre>
+        <h2>The Transformer</h2>
+        <p>Previously, the data transformation was implemented as a method of the viewController. Here it is implemented as a separate <em>method object</em>.</p>
+        <p>Besides encapsulating the code responsible for the transformation, <code>TransactionListTwoSourcesTransformer</code> has a few other significant changes:</p>
+        <ul>
+          <li>instead of being accessed directly, the data is passed into the class at initialization. This makes it easier to set up tests for the transformer.</li>
+          <li>the group types have been encapsulated by the <code>TransactionGroup</code> class.</li>
+          <li>responsibility of converting input data to internal format has been moved to the <code>TransactionModel</code> class.</li>
+          <li>responsibility of converting data to output format has been moved to the <code>TransactionListAdapter</code>.</li>
+          <li>the iterator on the array of transactions has been replaced with an <code>IndexingIterator</code>.</li>
+        </ul>
+        <p>These changes leave the <code>TransactionListTwoSourceTransformer</code> with one responsibility: convert the primitive data input to primitive output by recognizing the date groupings and exceptions, as well as calculating a total and grand total. This is pretty simple. In a future post we will discuss how the structure of this code was designed.</p>
+        <pre><code class="language-swift">class TransactionListTwoSourceTransformer {
 
     private let authorizedTransactions: [TransactionModel]?
     private let postedTransactions: [TransactionModel]?
@@ -93,7 +238,7 @@ class TransactionListViewController: UIViewController {
         output.appendGrandFooter(grandTotal: grandTotal)
     }
 
-    private func transform(transactions: [TransactionModel]?, group: TransactionGroup, output: TransactionListTransformerOutput ) -> Double {
+    private func transform(transactions: [TransactionModel]?, group: TransactionGroup, output: TransactionListTransformerOutput ) -&gt; Double {
         
         var total = 0.0
         output.appendHeader(group: group)
@@ -130,7 +275,10 @@ class TransactionListViewController: UIViewController {
         return total
     }
 }
-</code></pre><h2>The Adapter</h2><p>The Adapter implements a significant change from the <a href="https://github.com/lyleresnick/ReportTableAdapterDemo/blob/master/ReportTableAdapterDemo/TransactionListAdapter.swift">previous version</a>. Previously, the Adapter’s Rows were implemented using structs - they are now implemented as enums.</p><pre><code class="language-swift">enum TransactionListRow {
+</code></pre>
+        <h2>The Adapter</h2>
+        <p>The Adapter implements a significant change from the <a href="https://github.com/lyleresnick/ReportTableAdapterDemo/blob/master/ReportTableAdapterDemo/TransactionListAdapter.swift">previous version</a>. Previously, the Adapter’s Rows were implemented using structs - they are now implemented as enums.</p>
+        <pre><code class="language-swift">enum TransactionListRow {
 
     case header( title: String )
     case subheader( title: String, odd: Bool )
@@ -140,13 +288,19 @@ class TransactionListViewController: UIViewController {
     case grandfooter(total: String )
     case message( message: String )
 }
-</code></pre><p>Notice that the enum form is much more compact than a struct. Enums also preserve the comparable property that we previously wanted from the structs.</p><p>A nice feature is that the enum <em>namespaces</em> the cases. When structs are used for this kind of solution, the structs tend to have really long names, since there is no namespace to keep them unique within a scene.</p><p>You may be wondering where the <code>cellId</code> and <code>height</code> information have gone. Since both are constants related to a given row type, they have been implemented as a read only variables of the <code>TransactionListRow</code>.</p><p>Normally you would see the variables implemented within the enum. Here they have been moved to a private extension in the Adapter file, because the adapter is the only class that needs the information.</p><p>Notice that, here, <code>cellId</code> returns a <code>String</code>. In the previous version, it returned a <code>CellId</code>. The implementation of <code>cellId</code> is now completely private. It returns a closure which selects a <code>CellId</code> which is then converted to a string.</p><pre><code class="language-swift">// in file TransactionListAdapter:
+</code></pre>
+        <p>Notice that the enum form is much more compact than a struct. Enums also preserve the comparable property that we previously wanted from the structs.</p>
+        <p>A nice feature is that the enum <em>namespaces</em> the cases. When structs are used for this kind of solution, the structs tend to have really long names, since there is no namespace to keep them unique within a scene.</p>
+        <p>You may be wondering where the <code>cellId</code> and <code>height</code> information have gone. Since both are constants related to a given row type, they have been implemented as a read only variables of the <code>TransactionListRow</code>.</p>
+        <p>Normally you would see the variables implemented within the enum. Here they have been moved to a private extension in the Adapter file, because the adapter is the only class that needs the information.</p>
+        <p>Notice that, here, <code>cellId</code> returns a <code>String</code>. In the previous version, it returned a <code>CellId</code>. The implementation of <code>cellId</code> is now completely private. It returns a closure which selects a <code>CellId</code> which is then converted to a string.</p>
+        <pre><code class="language-swift">// in file TransactionListAdapter:
 
 private extension TransactionListRow {
 
     var cellId: String {
         return {
-            () -> CellId in
+            () -&gt; CellId in
             switch self {
             case .header:
                 return .header
@@ -198,7 +352,9 @@ private extension TransactionListRow {
         }
     }
 }
-</code></pre><p>Besides changing the structs to enums, the other changes made to the adapter are fairly insignificant. Except for the conversion of the <code>cellId</code>, the <code>UITableViewDataSource</code> implementation has not changed at all.</p><pre><code class="language-swift">class TransactionListAdapter: NSObject {
+</code></pre>
+        <p>Besides changing the structs to enums, the other changes made to the adapter are fairly insignificant. Except for the conversion of the <code>cellId</code>, the <code>UITableViewDataSource</code> implementation has not changed at all.</p>
+        <pre><code class="language-swift">class TransactionListAdapter: NSObject {
     
     fileprivate var rowList = [TransactionListRow]()
     fileprivate var odd = false
@@ -206,10 +362,10 @@ private extension TransactionListRow {
 
 extension TransactionListAdapter: UITableViewDataSource {
     
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -&gt; Int {
         return rowList.count
     }
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -&gt; UITableViewCell {
         
         let row = rowList[ indexPath.row ]
         let cell = tableView.dequeueReusableCell(withIdentifier: row.cellId, for: indexPath)
@@ -220,16 +376,20 @@ extension TransactionListAdapter: UITableViewDataSource {
 
 extension TransactionListAdapter: UITableViewDelegate {
     
-    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -&gt; CGFloat {
         return rowList[ indexPath.row ].height
     }
 }
-</code></pre><p>The method extension on <code>Double</code> formalizes the conversion to string. It could have been implemented as a method, but it makes it easier to read and code.</p><pre><code class="language-swift">private extension Double {
+</code></pre>
+        <p>The method extension on <code>Double</code> formalizes the conversion to string. It could have been implemented as a method, but it makes it easier to read and code.</p>
+        <pre><code class="language-swift">private extension Double {
     var asString: String {
         return String(format: "%0.2f", self)
     }
 }
-</code></pre><p>The <code>append</code> methods still do the final conversion of the data to a form which is convenient to display.</p><pre><code class="language-swift">
+</code></pre>
+        <p>The <code>append</code> methods still do the final conversion of the data to a form which is convenient to display.</p>
+        <pre><code class="language-swift">
 // MARK: - TransactionTransformerOutput
 
 extension TransactionListAdapter: TransactionListTransformerOutput {
@@ -286,6 +446,31 @@ extension TransactionListAdapter: TransactionListTransformerOutput {
         rowList.append(.message(message: "Transactions are not currently available." ));
     }
 }
-</code></pre><p>The Adapter is no longer responsible for converting input data, such as the inboundDate, to primitive types, since that responsibility has been moved to the TransactionModel initializer.</p><h2>Summary</h2><p>In this demonstration of a Complex UITableView, the size of the ViewController was reduced to its bare minimum. It  contains only the code needed to call the Transformer. The Transformer is easy to test because the data is passed as a parameter at instantiation.</p><p>Each item of input data was validated and converted from a <code>String</code> to its primitive type at instantiation of the TransactionModel. This was done so that the data was ready to be used in calculations. When the Transformer completes a calculation, the result is converted by the Adapter, into a form which is easiest to display in a view. The viewable data was finally placed in ViewModels implemented as enums.</p><p>The adapter has changed little from the previous version, even though the implementation of the rows has been changed from <code>struct</code> to <code>enum</code>.</p><p>In a future post, we will refactor this version to use a VIPER architecture.</p></div><div class="mx-auto" style="height: 30px"></div><div class="row"><div class="col"><p style="margin: 0px; color: #2ccabd">Lyle Resnick</p></div><div class="col"><p class="text-center"><span>&#128231 </span><a href="mailto:lyle@cellarpoint.com" style="color: #2ccabd; text-decoration: none" onmouseover="this.unhoveredStyle = this.style.cssText;
-this.style.textDecoration = 'underline'" onmouseout="this.style.cssText = this.unhoveredStyle;">Email me</a></p></div><div class="col"><p class="text-end"><img src="/images/github-mark.svg"  class="mx-auto" style="height: 14px"alt="github mark"/><span> </span><a href="https://github.com/lyleresnick" style="margin: 0px; color: #2ccabd; text-decoration: none" onmouseover="this.unhoveredStyle = this.style.cssText;
-this.style.textDecoration = 'underline'" onmouseout="this.style.cssText = this.unhoveredStyle;">Github</a></p></div></div></div><script src="/js/bootstrap.bundle.min.js"></script><script src="/js/syntax-highlighting.js"></script></body></html>
+</code></pre>
+        <p>The Adapter is no longer responsible for converting input data, such as the inboundDate, to primitive types, since that responsibility has been moved to the TransactionModel initializer.</p>
+        <h2>Summary</h2>
+        <p>In this demonstration of a Complex UITableView, the size of the ViewController was reduced to its bare minimum. It contains only the code needed to call the Transformer. The Transformer is easy to test because the data is passed as a parameter at instantiation.</p>
+        <p>Each item of input data was validated and converted from a <code>String</code> to its primitive type at instantiation of the TransactionModel. This was done so that the data was ready to be used in calculations. When the Transformer completes a calculation, the result is converted by the Adapter, into a form which is easiest to display in a view. The viewable data was finally placed in ViewModels implemented as enums.</p>
+        <p>The adapter has changed little from the previous version, even though the implementation of the rows has been changed from <code>struct</code> to <code>enum</code>.</p>
+        <p>In a future post, we will refactor this version to use a VIPER architecture.</p>
+        <p></p>
+      </div>
+    </div>
+    <div class="vstack">
+      <div style="height: 30px"></div>
+      <div class="mb-0 align-self-center hstack gap-3" style="width: 90.0%">
+        <p class="m-0 mb-0 align-self-center" style="color: rgb(44 202 189 / 100%)">Lyle Resnick</p>
+        <div class="ms-auto"></div>
+        <p class="mb-0 align-self-center" onmouseover="this.unhoveredStyle = this.style.cssText;
+this.style.textDecoration = 'underline'" onmouseout="this.style.cssText = this.unhoveredStyle;"><span>📧 </span><a href="mailto:lyle@cellarpoint.com" style="color: rgb(44 202 189 / 100%); text-decoration: none">Email me</a></p>
+        <div class="ms-auto"></div>
+        <p class="mb-0 align-self-center" onmouseover="this.unhoveredStyle = this.style.cssText;
+this.style.textDecoration = 'underline'" onmouseout="this.style.cssText = this.unhoveredStyle;"><img src="/images/github-mark.svg" alt="github mark" style="height: 14px" /><span> </span><a href="https://github.com/lyleresnick" style="margin: 0px; color: rgb(44 202 189 / 100%); text-decoration: none">Github</a></p>
+      </div>
+      <div style="height: 20px"></div>
+    </div>
+    <script src="/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/syntax-highlighting.js"></script>
+    <script src="/js/ignite-core.js"></script>
+  </body>
+</html>

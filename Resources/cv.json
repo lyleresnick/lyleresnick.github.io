@@ -1,9 +1,79 @@
 [
     {
+        "title": "iOS Team Lead",
+        "company": "RockWallet",
+        "location": "Delaware",
+        "date": "Jun 2025 - present",
+        "application": "RockWallet Crypto App"
+    },
+    {
+        "title": "iOS/Flutter Architect",
+        "company": "AIR MILES Reward Program",
+        "location": "Toronto",
+        "date": "Aug 2023 - Jun 2025",
+        "application": "QuickConsent, QuickContract, QuickAuth Apps"
+    },
+    {
+        "title": "CTO Lead Flutter/Node Developer",
+        "company": "Verified Technologies, Inc.",
+        "location": "Chicago",
+        "date": "Apr 2021 - Aug 2023",
+        "application": "QuickConsent, QuickContract, QuickAuth Apps"
+    },
+    {
+        "title": "Senior iOS Developer",
+        "company": "FIGUR8, Inc.",
+        "location": "Chicago",
+        "date": "Jun 2022 - Mar 2023",
+        "application": "Musculoskeletal (MSK) Assessment App"
+    },
+    {
+        "title": "Flutter SME",
+        "company": "Fusemachines",
+        "location": "New York",
+        "date": "Mar 2021 - Mar 2022",
+        "application": "myClassroom App"
+    },
+    {
+        "title": "Senior Flutter Developer",
+        "company": "projekt202",
+        "location": "Chicago",
+        "date": "Dec 2020 - Apr 2021",
+        "application": "QuickConsent App"
+    },
+    {
+        "title": "Senior Flutter Developer",
+        "company": "House of Commons",
+        "location": "Ottawa",
+        "date": "Jun 2020 - Mar 2021",
+        "application": "Member Recall & Other Apps"
+    },
+    {
+        "title": "Senior iOS Developer",
+        "company": "Hudson's Bay Company",
+        "location": "Toronto",
+        "date": "Nov 2019 - Apr 2020",
+        "application": "HBC Retail App"
+    },
+    {
+        "title": "Senior iOS Developer",
+        "company": "Loblaw Digital",
+        "location": "Toronto",
+        "date": "Jun 2018 - Jul 2019",
+        "application": "PC Loyalty App"
+    },
+    {
+        "title": "iOS & Android Architect / Team Lead",
+        "company": "Clearbridge Mobile",
+        "location": "Toronto",
+        "date": "Dec 2017 – Jun 2018",
+        "application": "Various Apps"
+    },
+    {
         "title": "iOS Architect / Team Lead / Developer",
         "company": "Lifetales",
         "location": "Toronto",
-        "date": "Aug 2016 – present (Contract)",
+        "date": "Aug 2016 – Nov 2017",
         "application": "Lifetales Story App"
     },
     {
@@ -57,7 +127,7 @@
         "application": "Commercial Foreign Exchange System"
     },
     {
-        "title": "Architect / Team Lead / Business Analyst",
+        "title": "Architect / Team Lead",
         "company": "Thomas Cook / Travelex",
         "location": "London, United Kingdom",
         "date": "Apr 1996 – Mar 2003",

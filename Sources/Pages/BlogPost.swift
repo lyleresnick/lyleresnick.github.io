@@ -8,22 +8,22 @@ var formatter = {
     return formatter
 } ()
 
-struct BlogPost: ContentPage {
-    func body(content: Content, context: PublishingContext) -> [any BlockElement] {
+struct BlogPost: ArticlePage {
+    var body: some HTML {
         Group {
-            Text(content.title)
+            Text(article.title)
                 .font(.title1)
                 .fontWeight(.medium)
                 .margin(.top, .large)
-            if let date = content.metadata["date"] as? Date {
+            if let date = article.metadata["date"] as? Date {
                 Text(formatter.string(from: date))
                     .fontWeight(.medium)
             }
-            Text("\(content.estimatedWordCount) words; \(content.estimatedReadingMinutes) minutes to read.")
+            Text("\(article.estimatedWordCount) words; \(article.estimatedReadingMinutes) minutes to read.")
                 .fontWeight(.medium)
 
-            content.body
+            Text(article.text)
         }
-        .frame(width: "90%")
+        .frame(width: .percent(Percentage(90)))
     }
 }

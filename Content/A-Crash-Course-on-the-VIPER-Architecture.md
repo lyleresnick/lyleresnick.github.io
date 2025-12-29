@@ -1,6 +1,7 @@
 ---
 layout: BlogPost
 date: 2017-08-29 12:00
+tags: VIPER
 ---
 
 # A Crash Course on the VIPER Architecture
@@ -39,7 +40,7 @@ To understand VIPER you need to understand a bit about the the Clean Architectur
 
 ### Uncle Bob's Diagram
 
-![Bob Martin's Clean Architecture](http://blog.cleancoder.com/uncle-bob/images/2012-08-13-the-clean-architecture/CleanArchitecture.jpg)
+![Bob Martin's Clean Architecture](https://blog.cleancoder.com/uncle-bob/images/2012-08-13-the-clean-architecture/CleanArchitecture.jpg)
 
 As Uncle Bob's diagram shows, a Clean System is separated into layers:
 
